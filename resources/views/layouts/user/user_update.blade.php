@@ -36,6 +36,26 @@
                         @enderror
                     </div>
 
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="p-4 border rounded-lg shadow-lg">
+                            <div class="py-2 text-lg font-semibold text-center bg-gray-200 rounded-t-lg">
+                                {{ __('Permisos') }}
+                            </div>
+                            <div class="p-2 overflow-y-auto max-h-64">
+                                <ul>
+                                    @foreach ($permissions as $permission)
+                                        <li class="flex items-center mb-2">
+                                            <input id="permission-{{ $permission->id }}" type="checkbox" name="permissions[]" value="{{ $permission->id }}"
+                                                {{ $user->permissions->contains('name', $permission->name) ? 'checked' : '' }}
+                                                class="mr-2" />
+                                            <label for="permission-{{ $permission->id }}">{{ $permission->name }}</label>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex gap-3">
                         <a href="{{ route('user-index') }}" class="px-4 py-2 bg-gray-200 rounded">Cancelar</a>
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Guardar</button>
