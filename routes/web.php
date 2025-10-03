@@ -2,13 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
-Route::view('dashboard', 'dashboard')
+Route::view('dashboard', 'layouts.dashboard.dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::view('profile', 'profile')
+Route::view('profile', 'layouts.profile.profile')
     ->middleware(['auth'])
     ->name('profile');
 
