@@ -14,16 +14,29 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@ucsc.cl',
-            'password' => bcrypt('password'),
-        ])->assignRole('Administrador');
+        $admin = User::create([
+            'run' => '12345678-9',
+            'nombre' => 'Admin',
+            'correo' => 'admin@ucsc.cl',
+            'contrasena' => bcrypt('password'),
+            'id_depto' => 'CIC_admin', // Departamento de Administración
+        ]);
 
-        User::create([
-            'name' => 'Worker',
-            'email' => 'worker@ucsc.cl',
-            'password' => bcrypt('password'),
-        ])->assignRole('Usuario');
+        $worker = User::create([
+            'run' => '98765432-1',
+            'nombre' => 'Worker',
+            'correo' => 'worker@ucsc.cl',
+            'contrasena' => bcrypt('password'),
+            'id_depto' => 'CIC_info', // Departamento de Informática
+        ]);
+
+        // Asignar roles después de crear los usuarios
+        try {
+            $admin->assignRole('Administrador');
+            $worker->assignRole('Usuario');
+        } catch (\Exception $e) {
+            // Si hay error con los roles, continuar sin ellos
+            \Log::warning('Error asignando roles: ' . $e->getMessage());
+        }
     }
 }

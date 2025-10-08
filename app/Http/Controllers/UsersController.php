@@ -23,16 +23,18 @@ class UsersController extends Controller
     {
         try {
             Log::info('UsersController@store iniciado', [
-                'payload' => $request->except(['password']),
+                'payload' => $request->except(['contrasena']),
             ]);
 
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'run' => ['required', 'string', 'max:255', 'unique:users,run'],
+                'nombre' => ['required', 'string', 'max:255'],
+                'correo' => ['required', 'email', 'max:255', 'unique:users,correo'],
+                'contrasena' => ['required', 'string', 'min:8', 'confirmed'],
+                'id_depto' => ['required', 'string', 'exists:departamentos,id_depto'],
             ]);
 
-            $validated['password'] = Hash::make($validated['password']);
+            $validated['contrasena'] = Hash::make($validated['contrasena']);
 
             $user = User::create($validated);
 
@@ -42,7 +44,7 @@ class UsersController extends Controller
             }
             
             Log::info('Sincronizando permisos por IDs', [
-                'user_id' => $user->id,
+                'user_run' => $user->run,
                 'permission_ids' => $selectedPermissionIds,
             ]);
 
@@ -54,7 +56,7 @@ class UsersController extends Controller
             app(PermissionRegistrar::class)->forgetCachedPermissions();
 
             Log::info('UsersController@store finalizado OK', [
-                'user_id' => $user->id,
+                'user_run' => $user->run,
             ]);
 
             return redirect()->route('users')->with('status', 'Usuario creado correctamente.');
@@ -78,18 +80,22 @@ class UsersController extends Controller
     {
         try {
             Log::info('UsersController@update iniciado', [
-                'user_id' => $user->id,
-                'payload' => $request->except(['password']),
+                'user_run' => $user->run,
+                'payload' => $request->except(['contrasena']),
             ]);
 
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
-                'password' => ['nullable', 'string', 'min:8'],
+                'run' => ['required', 'string', 'max:255', 'unique:users,run,' . $user->run],
+                'nombre' => ['required', 'string', 'max:255'],
+                'correo' => ['required', 'email', 'max:255', 'unique:users,correo,' . $user->run],
+                'contrasena' => ['nullable', 'string', 'min:8'],
+                'id_depto' => ['required', 'string', 'exists:departamentos,id_depto'],
             ]);
 
-            if (empty($validated['password'])) {
-                unset($validated['password']);
+            if (empty($validated['contrasena'])) {
+                unset($validated['contrasena']);
+            } else {
+                $validated['contrasena'] = Hash::make($validated['contrasena']);
             }
 
             $user->update($validated);
@@ -99,7 +105,7 @@ class UsersController extends Controller
                 $selectedPermissionIds = [];
             }
             Log::info('Sincronizando permisos por IDs', [
-                'user_id' => $user->id,
+                'user_run' => $user->run,
                 'permission_ids' => $selectedPermissionIds,
             ]);
 
@@ -111,13 +117,13 @@ class UsersController extends Controller
             app(PermissionRegistrar::class)->forgetCachedPermissions();
 
             Log::info('UsersController@update finalizado OK', [
-                'user_id' => $user->id,
+                'user_run' => $user->run,
             ]);
 
             return redirect()->route('user-index')->with('status', 'Usuario actualizado correctamente.');
         } catch (\Throwable $e) {
             Log::error('Error en UsersController@update', [
-                'user_id' => $user->id ?? null,
+                'user_run' => $user->run ?? null,
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
