@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('solicituds', function (Blueprint $table) {
-            $table->id();
+            $table->string('id_solicitud')->primary();
+            $table->date('fecha_solicitud');
+            $table->string('estado_solicitud');
+            $table->text('observaciones')->nullable();
+            $table->string('id_usuario');
+
+            $table->foreign('id_usuario')->references('run')->on('users')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

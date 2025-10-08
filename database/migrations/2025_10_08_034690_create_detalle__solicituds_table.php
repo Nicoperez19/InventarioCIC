@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detalle__solicituds', function (Blueprint $table) {
-            $table->id();
+            $table->string('id_detalle_solicitud')->primary();
+            $table->string('id_solicitud');
+            $table->string('id_producto');
+            $table->integer('cantidad_solicitud');
+
+            $table->foreign('id_solicitud')->references('id_solicitud')->on('solicituds')->onDelete('cascade');
+            $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

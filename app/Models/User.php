@@ -132,4 +132,22 @@ class User extends Authenticatable
     {
         return $this->contrasena;
     }
+
+    /**
+     * Find a user by their email address.
+     * Override para usar el campo 'correo' en lugar de 'email'
+     */
+    public static function findByEmail($email)
+    {
+        return static::where('correo', $email)->first();
+    }
+
+    /**
+     * Find a user by their email address.
+     * Override para usar el campo 'correo' en lugar de 'email'
+     */
+    public static function findByEmailOrFail($email)
+    {
+        return static::where('correo', $email)->firstOrFail();
+    }
 }

@@ -12,7 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventarios', function (Blueprint $table) {
-            $table->id();
+            $table->string('id_inventario')->primary();
+            $table->string('id_producto');
+            $table->date('fecha_inventario');
+            $table->integer('cantidad_inventario');
+
+            $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
+
             $table->timestamps();
         });
     }
