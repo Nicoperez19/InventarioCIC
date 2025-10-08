@@ -14,11 +14,13 @@ Route::view('profile', 'layouts.profile.profile')
     ->middleware(['auth'])
     ->name('profile');
 
-Route::view('user-index', 'layouts.user.user_index')
+Route::view('users', 'layouts.user.user_index')
     ->middleware(['auth'])
-    ->name('user-index');
+    ->name('users');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/users/create', [\App\Http\Controllers\UsersController::class, 'create'])->name('users.create');
+    Route::post('/users', [\App\Http\Controllers\UsersController::class, 'store'])->name('users.store');
     Route::get('/users/{user}/edit', [\App\Http\Controllers\UsersController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [\App\Http\Controllers\UsersController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [\App\Http\Controllers\UsersController::class, 'destroy'])->name('users.destroy');
@@ -30,6 +32,8 @@ require __DIR__.'/auth.php';
 Route::middleware('auth')->group(function () {
     // Roles
     Route::get('/roles', [\App\Http\Controllers\RoleController::class, 'index'])->name('roles.index');
+    Route::get('/roles/create', [\App\Http\Controllers\RoleController::class, 'create'])->name('roles.create');
+    Route::post('/roles', [\App\Http\Controllers\RoleController::class, 'store'])->name('roles.store');
     Route::get('/roles/{role}/edit', [\App\Http\Controllers\RoleController::class, 'edit'])->name('roles.edit');
     Route::put('/roles/{role}', [\App\Http\Controllers\RoleController::class, 'update'])->name('roles.update');
     Route::delete('/roles/{role}', [\App\Http\Controllers\RoleController::class, 'destroy'])->name('roles.destroy');
