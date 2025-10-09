@@ -20,10 +20,8 @@ return new class extends Migration
             $table->text('observaciones')->nullable();
 
             $table->string('id_unidad');
-            $table->string('id_tipo_producto');
 
             $table->foreign('id_unidad')->references('id_unidad')->on('unidads')->onDelete('restrict');
-            $table->foreign('id_tipo_producto')->references('id_tipo_producto')->on('tipo__productos')->onDelete('restrict');
 
             $table->timestamps();
         });
