@@ -14,16 +14,28 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/" wire:navigate>
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <body class="font-sans antialiased">
+        <!-- Fondo sólido dark-teal -->
+        <div class="min-h-screen bg-dark-teal flex items-center justify-center p-4">
+            <!-- Contenedor principal -->
+            <div class="w-full max-w-md">
+                <!-- Título -->
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-light-gray mb-2">GestionCIC</h1>
+                    <p class="text-light-gray/80">Sistema de Gestión de Inventario</p>
+                </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+                <!-- Card de login -->
+                <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-strong p-8 border border-white/20">
+                    {{ $slot }}
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-6">
+                    <p class="text-light-gray/60 text-sm">
+                        © {{ date('Y') }} GestionCIC. Todos los derechos reservados.
+                    </p>
+                </div>
             </div>
         </div>
     </body>
