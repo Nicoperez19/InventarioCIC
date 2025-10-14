@@ -15,9 +15,6 @@ class Departamento extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    /**
-     * Relación con Users
-     */
     public function users()
     {
         return $this->hasMany(User::class, 'id_depto', 'id_depto');

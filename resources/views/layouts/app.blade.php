@@ -14,6 +14,7 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 
 <body class="font-sans antialiased" x-data="{ isSidebarOpen: true }">
@@ -21,22 +22,11 @@
         <!-- Sidebar -->
         <livewire:layout.sidebar />
         
-        <!-- Overlay para difuminado cuando sidebar está abierto -->
-        <div class="fixed inset-0 bg-black bg-opacity-20 transition-opacity duration-300 ease-in-out z-40"
-             :class="{ 'opacity-100': isSidebarOpen, 'opacity-0 pointer-events-none': !isSidebarOpen }"
-             x-show="isSidebarOpen"
-             x-on:click="isSidebarOpen = false"
-             x-transition:enter="transition-opacity duration-300 ease-in-out"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition-opacity duration-300 ease-in-out"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0">
-        </div>
+        <!-- Overlay eliminado para evitar oscurecimiento -->
         
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col transition-all duration-300 ease-in-out" 
-             :class="{ 'ml-64 brightness-75': isSidebarOpen, 'ml-0 brightness-100': !isSidebarOpen }">
+             :class="{ 'ml-64': isSidebarOpen, 'ml-0': !isSidebarOpen }">
             
             <!-- Navigation -->
             <livewire:layout.navigation />
@@ -56,6 +46,7 @@
             </main>
         </div>
     </div>
+    @livewireScripts
 </body>
 
 </html>
