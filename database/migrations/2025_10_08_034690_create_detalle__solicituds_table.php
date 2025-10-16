@@ -16,11 +16,19 @@ return new class extends Migration
             $table->string('id_solicitud');
             $table->string('id_producto');
             $table->integer('cantidad_solicitud');
+            $table->timestamps();
 
+            // Foreign keys
             $table->foreign('id_solicitud')->references('id_solicitud')->on('solicituds')->onDelete('cascade');
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
-
-            $table->timestamps();
+            
+            // Índices para optimización
+            $table->index(['id_solicitud', 'id_producto']);
+            $table->index('id_producto');
+            $table->index('created_at');
+            
+            // Índice único para evitar duplicados
+            $table->unique(['id_solicitud', 'id_producto']);
         });
     }
 

@@ -12,33 +12,56 @@
                     @csrf
 
                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">RUN</label>
+                        <input type="text" name="run" value="{{ old('run') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('run')
+                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                        <input type="text" name="name" value="{{ old('name') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('name')
+                        <input type="text" name="nombre" value="{{ old('nombre') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('nombre')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" value="{{ old('email') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('email')
+                        <input type="email" name="correo" value="{{ old('correo') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('correo')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-                        <input type="password" name="password" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('password')
+                        <input type="password" name="contrasena" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('contrasena')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
-                        <input type="password" name="password_confirmation" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('password_confirmation')
+                        <input type="password" name="contrasena_confirmation" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('contrasena_confirmation')
+                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Departamento</label>
+                        <select name="id_depto" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                            <option value="">Seleccione...</option>
+                            @foreach ($departamentos as $depto)
+                                <option value="{{ $depto->id_depto }}" {{ old('id_depto') === $depto->id_depto ? 'selected' : '' }}>
+                                    {{ $depto->nombre_depto }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('id_depto')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>

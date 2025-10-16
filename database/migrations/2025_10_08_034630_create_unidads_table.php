@@ -14,7 +14,12 @@ return new class extends Migration
         Schema::create('unidads', function (Blueprint $table) {
             $table->string('id_unidad')->primary();
             $table->string('nombre_unidad');
+            $table->softDeletes(); // Agregar soft deletes
             $table->timestamps();
+            
+            // Índices para optimización
+            $table->index(['nombre_unidad', 'deleted_at']);
+            $table->index('created_at');
         });
     }
 

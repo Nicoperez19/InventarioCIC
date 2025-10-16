@@ -14,7 +14,7 @@
 
     switch ($variant) {
         case 'navbar':
-            $variantClasses = 'bg-dark-teal text-white hover:bg-dark-teal focus:ring-red-600';
+            $variantClasses = 'bg-dark-teal text-white hover:text-gray-200 focus:ring-red-600';
             break;
         case 'login':
             $variantClasses = 'bg-gray-100 text-black hover:bg-steel-blue-600 focus:ring-light-cloud dark:bg-dark-eval-0 dark:hover:bg-dark-eval-0 dark:hover:text-gray-100 dark:text-white';
@@ -74,11 +74,11 @@
 @endphp
 @if ($href)
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>
-    {{ $slot }}
+        {{ $slot }}
         @if ($iconOnly)
             <span class="sr-only">{{ $srText ?? '' }}</span>
         @endif
-                </a>
+                    </a>
 @else
     <button {{ $attributes->merge(['type' => 'submit', 'class' => $classes]) }}>
         {{ $slot }}

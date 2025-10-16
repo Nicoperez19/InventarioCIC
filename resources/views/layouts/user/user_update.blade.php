@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Editar usuario #{{ $user->id }}
+            Editar usuario #{{ $user->run }}
         </h2>
     </x-slot>
 
@@ -14,24 +14,38 @@
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                        <input type="text" name="name" value="{{ old('name', $user->name) }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('name')
+                        <input type="text" name="nombre" value="{{ old('nombre', $user->nombre) }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('nombre')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" value="{{ old('email', $user->email) }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('email')
+                        <input type="email" name="correo" value="{{ old('correo', $user->correo) }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('correo')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700">Contraseña (opcional)</label>
-                        <input type="password" name="password" class="mt-1 block w-full border-gray-300 rounded-md" placeholder="Dejar en blanco para no cambiar">
-                        @error('password')
+                        <input type="password" name="contrasena" class="mt-1 block w-full border-gray-300 rounded-md" placeholder="Dejar en blanco para no cambiar">
+                        @error('contrasena')
+                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700">Departamento</label>
+                        <select name="id_depto" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                            @foreach ($departamentos as $depto)
+                                <option value="{{ $depto->id_depto }}" {{ old('id_depto', $user->id_depto) === $depto->id_depto ? 'selected' : '' }}>
+                                    {{ $depto->nombre_depto }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('id_depto')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>

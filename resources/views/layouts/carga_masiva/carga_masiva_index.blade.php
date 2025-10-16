@@ -1,13 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
             {{ __('Carga Masiva de Datos') }}
         </h2>
     </x-slot>
 
     <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="p-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 @if (session('status'))
                     <div class="mb-4 text-sm text-green-600">{{ session('status') }}</div>
                 @endif
@@ -17,20 +17,19 @@
                     @csrf
                     <div>
                         <x-input-label for="archivo" :value="__('Archivo Excel')" />
-                        <div class="mt-1 relative">
+                        <div class="relative mt-1">
                             <input id="archivo" name="archivo" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".xlsx,.xls,.csv" required />
-                            <div class="flex items-center justify-between w-full px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-center justify-between w-full px-4 py-3 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
                                 <span class="text-sm text-gray-500" id="file-name">Seleccionar archivo...</span>
-                                <span class="text-sm text-teal-600 font-medium">Elegir archivo</span>
+                                <span class="text-sm font-medium text-teal-600">Elegir archivo</span>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Formatos soportados: .xlsx, .xls, .csv</p>
+                        <p class="mt-1 text-sm text-gray-500">Formatos soportados: .xlsx, .xls, .csv</p>
                     </div>
 
 
                     <div class="flex items-center gap-3">
-                        <x-primary-button>{{ __('Cargar Archivo') }}</x-primary-button>
-                        <a href="#" class="text-sm text-gray-600 underline">{{ __('Descargar Plantilla') }}</a>
+                        <x-button>{{ __('Cargar Archivo') }}</x-button>
                     </div>
                 </form>
             </div>

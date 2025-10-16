@@ -13,17 +13,27 @@ return new class extends Migration
     {
         Schema::create('movimientos', function (Blueprint $table) {
             $table->string('id_movimiento')->primary();
-            $table->enum('tipo_movimiento', ['entrada', 'salida']);
+            $table->enum('tipo_movimiento', ['entrada', 'salida', 'ajuste', 'inventario']);
             $table->integer('cantidad');
-            $table->dateTime('fecha_movimiento');
+            $table->datetime('fecha_movimiento');
             $table->text('observaciones')->nullable();
             $table->string('id_producto');
             $table->string('id_usuario');
+            $table->timestamps();
 
+            // Foreign keys
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
             $table->foreign('id_usuario')->references('run')->on('users')->onDelete('cascade');
-
-            $table->timestamps();
+            
+            // Índices para optimización
+            $table->index(['id_producto', 'fecha_movimiento']);
+            $table->index(['id_usuario', 'fecha_movimiento']);
+            $table->index(['tipo_movimiento', 'fecha_movimiento']);
+            $table->index('fecha_movimiento');
+            $table->index('created_at');
+            
+            // Índice compuesto para consultas de movimientos por producto y fecha
+            $table->index(['id_producto', 'tipo_movimiento', 'fecha_movimiento']);
         });
     }
 

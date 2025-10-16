@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -30,13 +31,10 @@ class UserSeeder extends Seeder
             'id_depto' => 'CIC_info', // Departamento de Informática
         ]);
 
-        // Asignar roles después de crear los usuarios
-        try {
-            $admin->assignRole('Administrador');
-            $worker->assignRole('Usuario');
-        } catch (\Exception $e) {
-            // Si hay error con los roles, continuar sin ellos
-            \Log::warning('Error asignando roles: ' . $e->getMessage());
-        }
+        // Asignar roles después de crear los usuarios (roles generados en RoleSeeder)
+        $adminRole = Role::firstOrCreate(['name' => 'Administrador']);
+        $userRole = Role::firstOrCreate(['name' => 'Usuario']);
+        $admin->assignRole($adminRole);
+        $worker->assignRole($userRole);
     }
 }
