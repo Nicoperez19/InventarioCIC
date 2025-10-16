@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,15 +26,15 @@ class AppServiceProvider extends ServiceProvider
     {
         // Configurar longitud de string por defecto para MySQL
         Schema::defaultStringLength(191);
-        
+
         // Habilitar lazy loading estricto en desarrollo
         if (app()->environment('local')) {
             Model::preventLazyLoading();
         }
-        
+
         // Configurar paginación
         Paginator::useBootstrapFive();
-        
+
         // Configurar timezone
         date_default_timezone_set('America/Santiago');
     }

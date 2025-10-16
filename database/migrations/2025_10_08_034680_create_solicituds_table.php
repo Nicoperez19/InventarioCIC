@@ -22,13 +22,13 @@ return new class extends Migration
 
             // Foreign key
             $table->foreign('id_usuario')->references('run')->on('users')->onDelete('cascade');
-            
+
             // Índices para optimización
             $table->index(['estado_solicitud', 'deleted_at']);
             $table->index(['id_usuario', 'estado_solicitud']);
             $table->index(['fecha_solicitud', 'estado_solicitud']);
             $table->index('created_at');
-            
+
             // Índice compuesto para consultas frecuentes
             $table->index(['estado_solicitud', 'fecha_solicitud', 'deleted_at']);
         });

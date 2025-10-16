@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Tables;
 
-use Livewire\Component;
 use App\Models\User;
+use Livewire\Component;
 
 class UsersTable extends Component
 {

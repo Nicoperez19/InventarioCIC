@@ -52,7 +52,7 @@ class StoreSolicitudRequest extends FormRequest
             foreach ($this->input('productos', []) as $index => $producto) {
                 if (isset($producto['id_producto']) && isset($producto['cantidad'])) {
                     $productoModel = \App\Models\Producto::find($producto['id_producto']);
-                    if ($productoModel && !$productoModel->canReduceStock($producto['cantidad'])) {
+                    if ($productoModel && ! $productoModel->canReduceStock($producto['cantidad'])) {
                         $validator->errors()->add(
                             "productos.{$index}.cantidad",
                             "No hay suficiente stock para el producto: {$productoModel->nombre_producto}"

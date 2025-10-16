@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Solicitud;
 use App\Models\Detalle_Solicitud;
 use App\Models\Producto;
+use App\Models\Solicitud;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -29,8 +29,8 @@ class RequestService
                 // Crear detalles de solicitud
                 foreach ($data['productos'] as $productoData) {
                     $producto = Producto::find($productoData['id_producto']);
-                    
-                    if (!$producto->canReduceStock($productoData['cantidad'])) {
+
+                    if (! $producto->canReduceStock($productoData['cantidad'])) {
                         throw new \Exception("No hay suficiente stock para el producto: {$producto->nombre_producto}");
                     }
 
@@ -45,7 +45,7 @@ class RequestService
                 Log::info('Solicitud creada', [
                     'solicitud_id' => $solicitud->id_solicitud,
                     'usuario_id' => $userId,
-                    'productos_count' => count($data['productos'])
+                    'productos_count' => count($data['productos']),
                 ]);
 
                 return $solicitud;
@@ -53,8 +53,9 @@ class RequestService
         } catch (\Exception $e) {
             Log::error('Error creando solicitud', [
                 'usuario_id' => $userId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -66,13 +67,13 @@ class RequestService
     {
         try {
             return DB::transaction(function () use ($solicitud) {
-                if (!$solicitud->canBeApproved()) {
+                if (! $solicitud->canBeApproved()) {
                     throw new \Exception('La solicitud no puede ser aprobada en su estado actual');
                 }
 
                 // Verificar stock disponible
                 foreach ($solicitud->detalleSolicitudes as $detalle) {
-                    if (!$detalle->canBeFulfilled()) {
+                    if (! $detalle->canBeFulfilled()) {
                         throw new \Exception("No hay suficiente stock para el producto: {$detalle->producto->nombre_producto}");
                     }
                 }
@@ -87,7 +88,7 @@ class RequestService
 
                 Log::info('Solicitud aprobada', [
                     'solicitud_id' => $solicitud->id_solicitud,
-                    'usuario_id' => auth()->id()
+                    'usuario_id' => auth()->id(),
                 ]);
 
                 return true;
@@ -95,8 +96,9 @@ class RequestService
         } catch (\Exception $e) {
             Log::error('Error aprobando solicitud', [
                 'solicitud_id' => $solicitud->id_solicitud,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -107,7 +109,7 @@ class RequestService
     public function rejectRequest(Solicitud $solicitud): bool
     {
         try {
-            if (!$solicitud->canBeRejected()) {
+            if (! $solicitud->canBeRejected()) {
                 throw new \Exception('La solicitud no puede ser rechazada en su estado actual');
             }
 
@@ -115,15 +117,16 @@ class RequestService
 
             Log::info('Solicitud rechazada', [
                 'solicitud_id' => $solicitud->id_solicitud,
-                'usuario_id' => auth()->id()
+                'usuario_id' => auth()->id(),
             ]);
 
             return true;
         } catch (\Exception $e) {
             Log::error('Error rechazando solicitud', [
                 'solicitud_id' => $solicitud->id_solicitud,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -134,7 +137,7 @@ class RequestService
     public function deliverRequest(Solicitud $solicitud): bool
     {
         try {
-            if (!$solicitud->canBeDelivered()) {
+            if (! $solicitud->canBeDelivered()) {
                 throw new \Exception('La solicitud no puede ser entregada en su estado actual');
             }
 
@@ -142,15 +145,16 @@ class RequestService
 
             Log::info('Solicitud entregada', [
                 'solicitud_id' => $solicitud->id_solicitud,
-                'usuario_id' => auth()->id()
+                'usuario_id' => auth()->id(),
             ]);
 
             return true;
         } catch (\Exception $e) {
             Log::error('Error entregando solicitud', [
                 'solicitud_id' => $solicitud->id_solicitud,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

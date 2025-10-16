@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDepartamentoRequest;
+use App\Http\Requests\UpdateDepartamentoRequest;
 use App\Models\Departamento;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DepartamentoController extends Controller
@@ -14,14 +15,12 @@ class DepartamentoController extends Controller
         return view('layouts.departamento.departamento_create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreDepartamentoRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'id_depto' => ['required', 'string', 'max:255', 'unique:departamentos,id_depto'],
-            'nombre_depto' => ['required', 'string', 'max:255'],
-        ]);
+        $validated = $request->validated();
 
         Departamento::create($validated);
+
         return redirect()->route('departamentos')->with('status', 'Departamento creado correctamente.');
     }
 
@@ -30,17 +29,18 @@ class DepartamentoController extends Controller
         return view('layouts.departamento.departamento_update', compact('departamento'));
     }
 
-    public function update(Request $request, Departamento $departamento): RedirectResponse
+    public function update(UpdateDepartamentoRequest $request, Departamento $departamento): RedirectResponse
     {
-        $validated = $request->validate(['nombre_depto' => ['required', 'string', 'max:255']]);
+        $validated = $request->validated();
         $departamento->update($validated);
+
         return redirect()->route('departamentos')->with('status', 'Departamento actualizado correctamente.');
     }
 
     public function destroy(Departamento $departamento): RedirectResponse
     {
         $departamento->delete();
+
         return redirect()->route('departamentos')->with('status', 'Departamento eliminado correctamente.');
     }
 }
-

@@ -13,7 +13,7 @@
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">RUN</label>
-                        <input type="text" name="run" value="{{ old('run') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        <input id="run-input" type="text" name="run" value="{{ old('run') }}" class="mt-1 block w-full border-gray-300 rounded-md" required inputmode="numeric" autocomplete="off" placeholder="12345678-9">
                         @error('run')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
@@ -96,3 +96,39 @@
     </div>
 </x-app-layout>
 
+<script>
+    (function () {
+        const input = document.getElementById('run-input');
+        if (!input) return;
+
+        const formatRun = (raw) => {
+            // Mantener solo dígitos y posible 'K'/'k' como dígito verificador
+            const cleaned = raw.replace(/[^0-9kK]/g, '');
+            if (cleaned.length === 0) return '';
+
+            // DV es el último carácter si hay al menos 2
+            if (cleaned.length === 1) return cleaned;
+            const body = cleaned.slice(0, -1);
+            const dv = cleaned.slice(-1).toUpperCase();
+            return body + '-' + dv;
+        };
+
+        let lastValue = input.value;
+        const applyFormat = () => {
+            const start = input.selectionStart;
+            const before = input.value;
+            const formatted = formatRun(before);
+            input.value = formatted;
+            // Intento simple de preservar el caret
+            const delta = formatted.length - before.length;
+            const newPos = Math.max(0, (start ?? formatted.length) + delta);
+            input.setSelectionRange(newPos, newPos);
+            lastValue = formatted;
+        };
+
+        input.addEventListener('input', applyFormat);
+        input.addEventListener('blur', applyFormat);
+        // Formatear si viene con valor previo
+        if (input.value) applyFormat();
+    })();
+</script>

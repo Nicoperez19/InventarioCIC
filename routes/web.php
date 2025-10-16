@@ -1,17 +1,15 @@
 <?php
 
+use App\Http\Controllers\CargaMasivaController;
+use App\Http\Controllers\DepartamentoController;
+use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SolicitudController;
+use App\Http\Controllers\UnidadController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    UsersController,
-    DepartamentoController,
-    UnidadController,
-    ProductoController,
-    InventarioController,
-    SolicitudController,
-    CargaMasivaController,
-    RoleController,
-    PermissionController
-};
 
 // Ruta principal
 Route::get('/', function () {
@@ -26,12 +24,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::view('dashboard', 'layouts.dashboard.dashboard')->name('dashboard');
     Route::view('profile', 'layouts.profile.profile')->name('profile');
-    
+
     // Logout
     Route::post('logout', function () {
         auth()->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
+
         return redirect()->route('login');
     })->name('logout');
 });

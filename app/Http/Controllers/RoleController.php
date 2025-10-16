@@ -2,30 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\UpdateRoleRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
     public function create(): View
     {
         $permissions = Permission::orderBy('name')->get();
+
         return view('layouts.rol.rol_create', compact('permissions'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreRoleRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:roles,name'],
-        ]);
+        $validated = $request->validated();
 
         $role = Role::create($validated);
 
         $selectedPermissionIds = $request->input('permissions', []);
-        if (!is_array($selectedPermissionIds)) {
+        if (! is_array($selectedPermissionIds)) {
             $selectedPermissionIds = [];
         }
 
@@ -38,6 +38,7 @@ class RoleController extends Controller
     public function index(): View
     {
         $roles = Role::orderBy('name')->get();
+
         return view('layouts.rol.rol_index', compact('roles'));
     }
 
@@ -46,11 +47,9 @@ class RoleController extends Controller
         return view('layouts.rol.rol_update', compact('role'));
     }
 
-    public function update(Request $request, Role $role): RedirectResponse
+    public function update(UpdateRoleRequest $request, Role $role): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:roles,name,' . $role->id],
-        ]);
+        $validated = $request->validated();
 
         $role->update($validated);
 
@@ -60,8 +59,7 @@ class RoleController extends Controller
     public function destroy(Role $role): RedirectResponse
     {
         $role->delete();
+
         return redirect()->back()->with('status', 'Rol eliminado correctamente.');
     }
 }
-
-

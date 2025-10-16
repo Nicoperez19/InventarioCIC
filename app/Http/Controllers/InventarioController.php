@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreInventarioRequest;
+use App\Http\Requests\UpdateInventarioRequest;
 use App\Models\Inventario;
 use App\Models\Producto;
-use App\Models\Movimientos;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -20,78 +20,70 @@ class InventarioController extends Controller
     public function index(): View
     {
         $this->authorizeAction('view-inventory');
-        
+
         $inventarios = Inventario::withProducto()
             ->orderByFecha()
             ->paginate(20);
-            
+
         $productos = Producto::with('unidad')
             ->orderBy('nombre_producto')
             ->get();
-        
+
         return view('layouts.inventario.inventario_index', compact('inventarios', 'productos'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreInventarioRequest $request): RedirectResponse
     {
         $this->authorizeAction('create-inventory');
-        
+
         try {
             $this->logAction('Creando registro de inventario', [
-                'producto_id' => $request->id_producto
+                'producto_id' => $request->id_producto,
             ]);
 
-            $validated = $request->validate([
-                'id_inventario' => ['required', 'string', 'max:255', 'unique:inventarios,id_inventario'],
-                'id_producto' => ['required', 'string', 'exists:productos,id_producto'],
-                'fecha_inventario' => ['required', 'date'],
-                'cantidad_inventario' => ['required', 'integer', 'min:0'],
-            ]);
+            $validated = $request->validated();
 
             return $this->executeInTransaction(function () use ($validated) {
                 $inventario = Inventario::create($validated);
-                
+
                 $this->logAction('Registro de inventario creado', [
                     'inventario_id' => $inventario->id_inventario,
-                    'producto_id' => $inventario->id_producto
+                    'producto_id' => $inventario->id_producto,
                 ]);
-                
+
                 return redirect()->back()->with('status', 'Registro de inventario creado exitosamente.');
             });
 
         } catch (\Throwable $e) {
             return $this->handleException($e, 'InventarioController@store', [
-                'producto_id' => $request->id_producto
+                'producto_id' => $request->id_producto,
             ]);
         }
     }
 
-    public function update(Request $request, Inventario $inventario): RedirectResponse
+    public function update(UpdateInventarioRequest $request, Inventario $inventario): RedirectResponse
     {
         $this->authorize('update', $inventario);
-        
+
         try {
             $this->logAction('Actualizando inventario', [
                 'inventario_id' => $inventario->id_inventario,
-                'producto_id' => $inventario->id_producto
+                'producto_id' => $inventario->id_producto,
             ]);
 
-            $validated = $request->validate([
-                'cantidad_inventario' => ['required', 'integer', 'min:0'],
-                'fecha_inventario' => ['required', 'date'],
-            ]);
+            $validated = $request->validated();
 
             $inventario->update($validated);
-            
+
             $this->logAction('Inventario actualizado exitosamente', [
-                'inventario_id' => $inventario->id_inventario
+                'inventario_id' => $inventario->id_inventario,
             ]);
-            
+
             return redirect()->back()->with('status', 'Inventario actualizado exitosamente.');
-            
+
         } catch (\Throwable $e) {
             return $this->handleException($e, 'InventarioController@update', [
-                'inventario_id' => $inventario->id_inventario
+                'inventario_id' => $inventario->id_inventario,
             ]);
         }
     }
@@ -99,24 +91,24 @@ class InventarioController extends Controller
     public function destroy(Inventario $inventario): RedirectResponse
     {
         $this->authorizeAction('delete-inventory');
-        
+
         try {
             $this->logAction('Eliminando inventario', [
                 'inventario_id' => $inventario->id_inventario,
-                'producto_id' => $inventario->id_producto
+                'producto_id' => $inventario->id_producto,
             ]);
-            
+
             $inventario->delete();
-            
+
             $this->logAction('Inventario eliminado exitosamente', [
-                'inventario_id' => $inventario->id_inventario
+                'inventario_id' => $inventario->id_inventario,
             ]);
-            
+
             return redirect()->back()->with('status', 'Inventario eliminado exitosamente.');
-            
+
         } catch (\Throwable $e) {
             return $this->handleException($e, 'InventarioController@destroy', [
-                'inventario_id' => $inventario->id_inventario
+                'inventario_id' => $inventario->id_inventario,
             ]);
         }
     }
@@ -127,31 +119,31 @@ class InventarioController extends Controller
     public function apply(Inventario $inventario): RedirectResponse
     {
         $this->authorizeAction('apply-inventory');
-        
+
         try {
             $this->logAction('Aplicando inventario al stock', [
                 'inventario_id' => $inventario->id_inventario,
-                'producto_id' => $inventario->id_producto
+                'producto_id' => $inventario->id_producto,
             ]);
 
             return $this->executeInTransaction(function () use ($inventario) {
                 if ($inventario->applyToProduct()) {
                     $this->logAction('Inventario aplicado exitosamente', [
                         'inventario_id' => $inventario->id_inventario,
-                        'diferencia' => $inventario->diferencia_stock
+                        'diferencia' => $inventario->diferencia_stock,
                     ]);
-                    
+
                     return redirect()->back()->with('status', 'Inventario aplicado al stock correctamente.');
                 } else {
                     return redirect()->back()->withErrors([
-                        'error' => 'No se pudo aplicar el inventario al stock.'
+                        'error' => 'No se pudo aplicar el inventario al stock.',
                     ]);
                 }
             });
 
         } catch (\Throwable $e) {
             return $this->handleException($e, 'InventarioController@apply', [
-                'inventario_id' => $inventario->id_inventario
+                'inventario_id' => $inventario->id_inventario,
             ]);
         }
     }
@@ -162,9 +154,9 @@ class InventarioController extends Controller
     public function discrepancies(): View
     {
         $this->authorizeAction('view-inventory-discrepancies');
-        
+
         $discrepancies = Inventario::getWithDiscrepancy();
-        
+
         return view('layouts.inventario.discrepancies', compact('discrepancies'));
     }
 
@@ -174,7 +166,7 @@ class InventarioController extends Controller
     public function applyAllDiscrepancies(): RedirectResponse
     {
         $this->authorizeAction('apply-all-inventory');
-        
+
         try {
             $this->logAction('Aplicando todas las discrepancias de inventario');
 
@@ -193,7 +185,7 @@ class InventarioController extends Controller
 
                 $this->logAction('Discrepancias aplicadas', [
                     'aplicadas' => $applied,
-                    'fallidas' => $failed
+                    'fallidas' => $failed,
                 ]);
 
                 $message = "Se aplicaron {$applied} discrepancias correctamente.";

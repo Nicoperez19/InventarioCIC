@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nombre_depto');
             $table->softDeletes(); // Agregar soft deletes
             $table->timestamps();
-            
+
             // Índices para optimización
             $table->index(['nombre_depto', 'deleted_at']);
             $table->index('created_at');

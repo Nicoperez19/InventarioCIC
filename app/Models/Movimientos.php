@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Movimientos extends Model
 {
@@ -21,7 +21,9 @@ class Movimientos extends Model
     ];
 
     protected $primaryKey = 'id_movimiento';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected function casts(): array
@@ -36,8 +38,11 @@ class Movimientos extends Model
 
     // Constantes para tipos de movimiento
     public const TIPO_ENTRADA = 'entrada';
+
     public const TIPO_SALIDA = 'salida';
+
     public const TIPO_AJUSTE = 'ajuste';
+
     public const TIPO_INVENTARIO = 'inventario';
 
     // Relaciones
@@ -74,7 +79,7 @@ class Movimientos extends Model
 
     public function getTipoColorAttribute(): string
     {
-        return match($this->tipo_movimiento) {
+        return match ($this->tipo_movimiento) {
             self::TIPO_ENTRADA => 'green',
             self::TIPO_SALIDA => 'red',
             self::TIPO_AJUSTE => 'blue',
@@ -85,7 +90,7 @@ class Movimientos extends Model
 
     public function getTipoIconAttribute(): string
     {
-        return match($this->tipo_movimiento) {
+        return match ($this->tipo_movimiento) {
             self::TIPO_ENTRADA => 'arrow-up',
             self::TIPO_SALIDA => 'arrow-down',
             self::TIPO_AJUSTE => 'adjustments',

@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -23,7 +24,7 @@ return new class extends Migration {
 
             // Foreign key con mejor manejo
             $table->foreign('id_depto')->references('id_depto')->on('departamentos')->onDelete('restrict');
-            
+
             // Índices para optimización
             $table->index(['correo', 'deleted_at']);
             $table->index(['id_depto', 'deleted_at']);
@@ -34,7 +35,7 @@ return new class extends Migration {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
-            
+
             // Índice para optimización
             $table->index('created_at');
         });
@@ -46,7 +47,7 @@ return new class extends Migration {
             $table->text('user_agent')->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
-            
+
             // Índices adicionales para optimización
             $table->index(['user_id', 'last_activity']);
         });

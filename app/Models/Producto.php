@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Producto extends Model
 {
@@ -22,7 +23,9 @@ class Producto extends Model
     ];
 
     protected $primaryKey = 'id_producto';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected function casts(): array
@@ -57,6 +60,12 @@ class Producto extends Model
         return $this->hasMany(Detalle_Solicitud::class, 'id_producto', 'id_producto');
     }
 
+    public function departamentos(): BelongsToMany
+    {
+        return $this->belongsToMany(Departamento::class, 'departamento_producto', 'id_producto', 'id_depto')
+            ->withTimestamps();
+    }
+
     // Métodos de negocio
     public function isLowStock(): bool
     {
@@ -70,12 +79,13 @@ class Producto extends Model
         } elseif ($this->isLowStock()) {
             return 'bajo';
         }
+
         return 'normal';
     }
 
     public function getStockStatusColorAttribute(): string
     {
-        return match($this->stock_status) {
+        return match ($this->stock_status) {
             'agotado' => 'red',
             'bajo' => 'yellow',
             'normal' => 'green',
@@ -90,17 +100,19 @@ class Producto extends Model
 
     public function reduceStock(int $quantity): bool
     {
-        if (!$this->canReduceStock($quantity)) {
+        if (! $this->canReduceStock($quantity)) {
             return false;
         }
 
         $this->stock_actual -= $quantity;
+
         return $this->save();
     }
 
     public function addStock(int $quantity): bool
     {
         $this->stock_actual += $quantity;
+
         return $this->save();
     }
 

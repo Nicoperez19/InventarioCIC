@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Producto;
 use App\Models\Inventario;
 use App\Models\Movimientos;
+use App\Models\Producto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -13,12 +13,12 @@ class InventoryService
     /**
      * Ajustar stock de un producto
      */
-    public function adjustStock(Producto $producto, int $cantidad, string $tipo, string $observaciones = null): bool
+    public function adjustStock(Producto $producto, int $cantidad, string $tipo, ?string $observaciones = null): bool
     {
         try {
             return DB::transaction(function () use ($producto, $cantidad, $tipo, $observaciones) {
                 // Validar que se puede reducir stock si es salida
-                if ($tipo === Movimientos::TIPO_SALIDA && !$producto->canReduceStock($cantidad)) {
+                if ($tipo === Movimientos::TIPO_SALIDA && ! $producto->canReduceStock($cantidad)) {
                     throw new \Exception('No hay suficiente stock disponible');
                 }
 
@@ -44,7 +44,7 @@ class InventoryService
                     'producto_id' => $producto->id_producto,
                     'tipo' => $tipo,
                     'cantidad' => $cantidad,
-                    'usuario_id' => auth()->id()
+                    'usuario_id' => auth()->id(),
                 ]);
 
                 return true;
@@ -52,8 +52,9 @@ class InventoryService
         } catch (\Exception $e) {
             Log::error('Error ajustando stock', [
                 'producto_id' => $producto->id_producto,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -65,14 +66,14 @@ class InventoryService
     {
         try {
             return DB::transaction(function () use ($inventario) {
-                if (!$inventario->hasDiscrepancy()) {
+                if (! $inventario->hasDiscrepancy()) {
                     return true; // No hay nada que aplicar
                 }
 
                 $producto = $inventario->producto;
                 $stockAnterior = $producto->stock_actual;
                 $producto->stock_actual = $inventario->cantidad_inventario;
-                
+
                 if ($producto->save()) {
                     // Registrar movimiento de ajuste
                     Movimientos::createMovimiento([
@@ -90,7 +91,7 @@ class InventoryService
                         'producto_id' => $inventario->id_producto,
                         'stock_anterior' => $stockAnterior,
                         'stock_nuevo' => $producto->stock_actual,
-                        'diferencia' => $inventario->diferencia_stock
+                        'diferencia' => $inventario->diferencia_stock,
                     ]);
 
                     return true;
@@ -101,8 +102,9 @@ class InventoryService
         } catch (\Exception $e) {
             Log::error('Error aplicando inventario', [
                 'inventario_id' => $inventario->id_inventario,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -140,7 +142,7 @@ class InventoryService
     /**
      * Generar reporte de movimientos
      */
-    public function generateMovementsReport(string $fechaInicio, string $fechaFin, string $tipoMovimiento = null): \Illuminate\Database\Eloquent\Collection
+    public function generateMovementsReport(string $fechaInicio, string $fechaFin, ?string $tipoMovimiento = null): \Illuminate\Database\Eloquent\Collection
     {
         $query = Movimientos::withRelations()
             ->byFechaRange($fechaInicio, $fechaFin);

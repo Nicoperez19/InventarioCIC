@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Unidad extends Model
 {
@@ -17,7 +17,9 @@ class Unidad extends Model
     ];
 
     protected $primaryKey = 'id_unidad';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected function casts(): array
@@ -53,7 +55,7 @@ class Unidad extends Model
 
     public function canBeDeleted(): bool
     {
-        return !$this->hasActiveProducts();
+        return ! $this->hasActiveProducts();
     }
 
     public function getTotalStockAttribute(): int
@@ -103,7 +105,7 @@ class Unidad extends Model
             },
             'productos as out_of_stock_products' => function ($q) {
                 $q->where('stock_actual', '<=', 0);
-            }
+            },
         ]);
     }
 

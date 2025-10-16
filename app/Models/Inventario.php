@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Inventario extends Model
 {
@@ -18,7 +18,9 @@ class Inventario extends Model
     ];
 
     protected $primaryKey = 'id_inventario';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected function casts(): array
@@ -65,12 +67,13 @@ class Inventario extends Model
         } elseif ($this->diferencia_stock < 0) {
             return 'substock';
         }
+
         return 'correcto';
     }
 
     public function getDiscrepancyColorAttribute(): string
     {
-        return match($this->discrepancy_type) {
+        return match ($this->discrepancy_type) {
             'sobrestock' => 'green',
             'substock' => 'red',
             'correcto' => 'blue',
@@ -80,13 +83,13 @@ class Inventario extends Model
 
     public function applyToProduct(): bool
     {
-        if (!$this->hasDiscrepancy()) {
+        if (! $this->hasDiscrepancy()) {
             return true;
         }
 
         $producto = $this->producto;
         $producto->stock_actual = $this->cantidad_inventario;
-        
+
         if ($producto->save()) {
             // Registrar movimiento de ajuste
             Movimientos::createMovimiento([
@@ -98,7 +101,7 @@ class Inventario extends Model
                 'id_producto' => $this->id_producto,
                 'id_usuario' => auth()->id(),
             ]);
-            
+
             return true;
         }
 

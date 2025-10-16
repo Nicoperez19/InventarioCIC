@@ -20,12 +20,12 @@ return new class extends Migration
 
             // Foreign key
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
-            
+
             // Índices para optimización
             $table->index(['id_producto', 'fecha_inventario']);
             $table->index('fecha_inventario');
             $table->index('created_at');
-            
+
             // Índice único para evitar inventarios duplicados del mismo producto en la misma fecha
             $table->unique(['id_producto', 'fecha_inventario']);
         });

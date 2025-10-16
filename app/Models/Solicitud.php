@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Solicitud extends Model
 {
@@ -21,7 +21,9 @@ class Solicitud extends Model
     ];
 
     protected $primaryKey = 'id_solicitud';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected function casts(): array
@@ -36,8 +38,11 @@ class Solicitud extends Model
 
     // Constantes para estados
     public const ESTADO_PENDIENTE = 'pendiente';
+
     public const ESTADO_APROBADA = 'aprobada';
+
     public const ESTADO_RECHAZADA = 'rechazada';
+
     public const ESTADO_ENTREGADA = 'entregada';
 
     // Relaciones
@@ -89,31 +94,34 @@ class Solicitud extends Model
 
     public function approve(): bool
     {
-        if (!$this->canBeApproved()) {
+        if (! $this->canBeApproved()) {
             return false;
         }
 
         $this->estado_solicitud = self::ESTADO_APROBADA;
+
         return $this->save();
     }
 
     public function reject(): bool
     {
-        if (!$this->canBeRejected()) {
+        if (! $this->canBeRejected()) {
             return false;
         }
 
         $this->estado_solicitud = self::ESTADO_RECHAZADA;
+
         return $this->save();
     }
 
     public function deliver(): bool
     {
-        if (!$this->canBeDelivered()) {
+        if (! $this->canBeDelivered()) {
             return false;
         }
 
         $this->estado_solicitud = self::ESTADO_ENTREGADA;
+
         return $this->save();
     }
 
@@ -124,7 +132,7 @@ class Solicitud extends Model
 
     public function getEstadoColorAttribute(): string
     {
-        return match($this->estado_solicitud) {
+        return match ($this->estado_solicitud) {
             self::ESTADO_PENDIENTE => 'yellow',
             self::ESTADO_APROBADA => 'blue',
             self::ESTADO_RECHAZADA => 'red',

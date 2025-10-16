@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateProductoRequest extends FormRequest
 {
@@ -21,7 +20,7 @@ class UpdateProductoRequest extends FormRequest
     public function rules(): array
     {
         $producto = $this->route('producto');
-        
+
         return [
             'nombre_producto' => ['required', 'string', 'max:255'],
             'stock_minimo' => ['required', 'integer', 'min:0'],

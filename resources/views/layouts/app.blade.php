@@ -18,7 +18,7 @@
 </head>
 
 <body class="font-sans antialiased" x-data="{ isSidebarOpen: true }">
-    <div class="min-h-screen bg-gray-100 flex">
+    <div class="h-screen bg-gray-100 flex overflow-hidden">
         <!-- Sidebar -->
         <livewire:layout.sidebar />
         
@@ -29,19 +29,20 @@
              :class="{ 'ml-64': isSidebarOpen, 'ml-0': !isSidebarOpen }">
             
             <!-- Navigation -->
-            <livewire:layout.navigation />
+            <div class="sticky top-0 z-40 bg-white shadow">
+                <livewire:layout.navigation />
+            </div>
 
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header>
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
+            <!-- Page Content (incluye header dentro del área scrolleable) -->
+            <main class="flex-1 overflow-y-auto">
+                @if (isset($header))
+                    <header>
+                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endif
 
-            <!-- Page Content -->
-            <main class="flex-1">
                 {{ $slot }}
             </main>
         </div>

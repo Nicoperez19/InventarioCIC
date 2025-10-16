@@ -23,13 +23,13 @@ return new class extends Migration
 
             // Foreign key
             $table->foreign('id_unidad')->references('id_unidad')->on('unidads')->onDelete('restrict');
-            
+
             // Índices para optimización
             $table->index(['nombre_producto', 'deleted_at']);
             $table->index(['id_unidad', 'deleted_at']);
             $table->index(['stock_actual', 'stock_minimo']); // Para consultas de stock bajo
             $table->index('created_at');
-            
+
             // Índice compuesto para consultas de stock
             $table->index(['stock_actual', 'stock_minimo', 'deleted_at']);
         });

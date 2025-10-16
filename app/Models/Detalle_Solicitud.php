@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Detalle_Solicitud extends Model
 {
@@ -18,7 +18,9 @@ class Detalle_Solicitud extends Model
     ];
 
     protected $primaryKey = 'id_detalle_solicitud';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected function casts(): array
@@ -49,7 +51,7 @@ class Detalle_Solicitud extends Model
 
     public function fulfill(): bool
     {
-        if (!$this->canBeFulfilled()) {
+        if (! $this->canBeFulfilled()) {
             return false;
         }
 

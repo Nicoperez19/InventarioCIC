@@ -24,14 +24,14 @@ return new class extends Migration
             // Foreign keys
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
             $table->foreign('id_usuario')->references('run')->on('users')->onDelete('cascade');
-            
+
             // Índices para optimización
             $table->index(['id_producto', 'fecha_movimiento']);
             $table->index(['id_usuario', 'fecha_movimiento']);
             $table->index(['tipo_movimiento', 'fecha_movimiento']);
             $table->index('fecha_movimiento');
             $table->index('created_at');
-            
+
             // Índice compuesto para consultas de movimientos por producto y fecha
             $table->index(['id_producto', 'tipo_movimiento', 'fecha_movimiento']);
         });

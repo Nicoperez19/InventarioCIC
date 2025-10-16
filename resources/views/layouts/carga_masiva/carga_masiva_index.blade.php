@@ -18,18 +18,21 @@
                     <div>
                         <x-input-label for="archivo" :value="__('Archivo Excel')" />
                         <div class="relative mt-1">
-                            <input id="archivo" name="archivo" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".xlsx,.xls,.csv" required />
+                            <input id="archivo" name="file" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".xlsx,.xls,.csv" required />
                             <div class="flex items-center justify-between w-full px-4 py-3 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
                                 <span class="text-sm text-gray-500" id="file-name">Seleccionar archivo...</span>
                                 <span class="text-sm font-medium text-teal-600">Elegir archivo</span>
                             </div>
                         </div>
                         <p class="mt-1 text-sm text-gray-500">Formatos soportados: .xlsx, .xls, .csv</p>
+                        @error('file')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
 
 
                     <div class="flex items-center gap-3">
-                        <x-button>{{ __('Cargar Archivo') }}</x-button>
+                        <x-button type="submit">{{ __('Cargar Archivo') }}</x-button>
                     </div>
                 </form>
             </div>

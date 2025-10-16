@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 abstract class Controller extends BaseController
 {
     use AuthorizesRequests;
+
     /**
      * Manejo centralizado de errores
      */
@@ -20,11 +19,11 @@ abstract class Controller extends BaseController
     {
         Log::error("Error en {$action}", array_merge($context, [
             'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ]));
 
         return back()->withErrors([
-            'error' => 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.'
+            'error' => 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.',
         ])->withInput();
     }
 
@@ -51,7 +50,7 @@ abstract class Controller extends BaseController
     {
         Log::info($action, array_merge($data, [
             'user_id' => auth()->id(),
-            'timestamp' => now()
+            'timestamp' => now(),
         ]));
     }
 }

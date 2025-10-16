@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUnidadRequest;
+use App\Http\Requests\UpdateUnidadRequest;
 use App\Models\Unidad;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class UnidadController extends Controller
@@ -14,14 +15,12 @@ class UnidadController extends Controller
         return view('layouts.unidad.unidad_create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreUnidadRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'id_unidad' => ['required', 'string', 'max:255', 'unique:unidads,id_unidad'],
-            'nombre_unidad' => ['required', 'string', 'max:255'],
-        ]);
+        $validated = $request->validated();
 
         Unidad::create($validated);
+
         return redirect()->route('unidades')->with('status', 'Unidad creada correctamente.');
     }
 
@@ -30,17 +29,18 @@ class UnidadController extends Controller
         return view('layouts.unidad.unidad_update', compact('unidad'));
     }
 
-    public function update(Request $request, Unidad $unidad): RedirectResponse
+    public function update(UpdateUnidadRequest $request, Unidad $unidad): RedirectResponse
     {
-        $validated = $request->validate(['nombre_unidad' => ['required', 'string', 'max:255']]);
+        $validated = $request->validated();
         $unidad->update($validated);
+
         return redirect()->route('unidades')->with('status', 'Unidad actualizada correctamente.');
     }
 
     public function destroy(Unidad $unidad): RedirectResponse
     {
         $unidad->delete();
+
         return redirect()->route('unidades')->with('status', 'Unidad eliminada correctamente.');
     }
 }
-

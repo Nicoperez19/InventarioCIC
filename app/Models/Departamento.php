@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Departamento extends Model
 {
@@ -17,7 +18,9 @@ class Departamento extends Model
     ];
 
     protected $primaryKey = 'id_depto';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected function casts(): array
@@ -33,6 +36,12 @@ class Departamento extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'id_depto', 'id_depto');
+    }
+
+    public function productos(): BelongsToMany
+    {
+        return $this->belongsToMany(Producto::class, 'departamento_producto', 'id_depto', 'id_producto')
+            ->withTimestamps();
     }
 
     // Métodos de negocio
@@ -53,7 +62,7 @@ class Departamento extends Model
 
     public function canBeDeleted(): bool
     {
-        return !$this->hasActiveUsers();
+        return ! $this->hasActiveUsers();
     }
 
     // Scopes
