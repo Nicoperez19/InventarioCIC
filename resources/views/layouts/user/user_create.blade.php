@@ -12,33 +12,56 @@
                     @csrf
 
                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">RUN</label>
+                        <input id="run-input" type="text" name="run" value="{{ old('run') }}" class="mt-1 block w-full border-gray-300 rounded-md" required inputmode="numeric" autocomplete="off" placeholder="12345678-9">
+                        @error('run')
+                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                        <input type="text" name="name" value="{{ old('name') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('name')
+                        <input type="text" name="nombre" value="{{ old('nombre') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('nombre')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" value="{{ old('email') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('email')
+                        <input type="email" name="correo" value="{{ old('correo') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('correo')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-                        <input type="password" name="password" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('password')
+                        <input type="password" name="contrasena" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('contrasena')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
-                        <input type="password" name="password_confirmation" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('password_confirmation')
+                        <input type="password" name="contrasena_confirmation" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                        @error('contrasena_confirmation')
+                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Departamento</label>
+                        <select name="id_depto" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                            <option value="">Seleccione...</option>
+                            @foreach ($departamentos as $depto)
+                                <option value="{{ $depto->id_depto }}" {{ old('id_depto') === $depto->id_depto ? 'selected' : '' }}>
+                                    {{ $depto->nombre_depto }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('id_depto')
                             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
                         @enderror
                     </div>
@@ -73,3 +96,39 @@
     </div>
 </x-app-layout>
 
+<script>
+    (function () {
+        const input = document.getElementById('run-input');
+        if (!input) return;
+
+        const formatRun = (raw) => {
+            // Mantener solo dígitos y posible 'K'/'k' como dígito verificador
+            const cleaned = raw.replace(/[^0-9kK]/g, '');
+            if (cleaned.length === 0) return '';
+
+            // DV es el último carácter si hay al menos 2
+            if (cleaned.length === 1) return cleaned;
+            const body = cleaned.slice(0, -1);
+            const dv = cleaned.slice(-1).toUpperCase();
+            return body + '-' + dv;
+        };
+
+        let lastValue = input.value;
+        const applyFormat = () => {
+            const start = input.selectionStart;
+            const before = input.value;
+            const formatted = formatRun(before);
+            input.value = formatted;
+            // Intento simple de preservar el caret
+            const delta = formatted.length - before.length;
+            const newPos = Math.max(0, (start ?? formatted.length) + delta);
+            input.setSelectionRange(newPos, newPos);
+            lastValue = formatted;
+        };
+
+        input.addEventListener('input', applyFormat);
+        input.addEventListener('blur', applyFormat);
+        // Formatear si viene con valor previo
+        if (input.value) applyFormat();
+    })();
+</script>

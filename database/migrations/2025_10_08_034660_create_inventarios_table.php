@@ -16,10 +16,18 @@ return new class extends Migration
             $table->string('id_producto');
             $table->date('fecha_inventario');
             $table->integer('cantidad_inventario');
+            $table->timestamps();
 
+            // Foreign key
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
 
-            $table->timestamps();
+            // Índices para optimización
+            $table->index(['id_producto', 'fecha_inventario']);
+            $table->index('fecha_inventario');
+            $table->index('created_at');
+
+            // Índice único para evitar inventarios duplicados del mismo producto en la misma fecha
+            $table->unique(['id_producto', 'fecha_inventario']);
         });
     }
 

@@ -13,17 +13,25 @@ return new class extends Migration
     {
         Schema::create('productos', function (Blueprint $table) {
             $table->string('id_producto')->primary();
-            $table->string('codigo_producto')->unique();
             $table->string('nombre_producto');
             $table->integer('stock_minimo')->default(0);
             $table->integer('stock_actual')->default(0);
             $table->text('observaciones')->nullable();
-
             $table->string('id_unidad');
+            $table->softDeletes(); // Agregar soft deletes
+            $table->timestamps();
 
+            // Foreign key
             $table->foreign('id_unidad')->references('id_unidad')->on('unidads')->onDelete('restrict');
 
-            $table->timestamps();
+            // Índices para optimización
+            $table->index(['nombre_producto', 'deleted_at']);
+            $table->index(['id_unidad', 'deleted_at']);
+            $table->index(['stock_actual', 'stock_minimo']); // Para consultas de stock bajo
+            $table->index('created_at');
+
+            // Índice compuesto para consultas de stock
+            $table->index(['stock_actual', 'stock_minimo', 'deleted_at']);
         });
     }
 

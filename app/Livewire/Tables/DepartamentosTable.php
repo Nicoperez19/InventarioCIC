@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Tables;
 
-use Livewire\Component;
 use App\Models\Departamento;
+use Livewire\Component;
 
 class DepartamentosTable extends Component
 {
@@ -14,5 +14,3 @@ class DepartamentosTable extends Component
         ]);
     }
 }
-
-

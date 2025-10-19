@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Tables;
 
-use Livewire\Component;
 use App\Models\Unidad;
+use Livewire\Component;
 
 class UnidadesTable extends Component
 {
@@ -14,5 +14,3 @@ class UnidadesTable extends Component
         ]);
     }
 }
-
-

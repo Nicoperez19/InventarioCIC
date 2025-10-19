@@ -14,8 +14,3 @@ class RolesTable extends Component
         ]);
     }
 }
-
-
-
-
-

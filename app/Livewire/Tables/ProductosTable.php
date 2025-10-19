@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Tables;
 
-use Livewire\Component;
 use App\Models\Producto;
+use Livewire\Component;
 
 class ProductosTable extends Component
 {
@@ -14,5 +14,3 @@ class ProductosTable extends Component
         ]);
     }
 }
-
-
