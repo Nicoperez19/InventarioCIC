@@ -22,7 +22,6 @@ class UnidadController extends Controller
         ]);
 
         Unidad::create($validated);
-
         return redirect()->route('unidades')->with('status', 'Unidad creada correctamente.');
     }
 
@@ -33,12 +32,8 @@ class UnidadController extends Controller
 
     public function update(Request $request, Unidad $unidad): RedirectResponse
     {
-        $validated = $request->validate([
-            'nombre_unidad' => ['required', 'string', 'max:255'],
-        ]);
-
+        $validated = $request->validate(['nombre_unidad' => ['required', 'string', 'max:255']]);
         $unidad->update($validated);
-
         return redirect()->route('unidades')->with('status', 'Unidad actualizada correctamente.');
     }
 

@@ -10,13 +10,11 @@
 ])
 @php
 
-    $baseClasses = 'inline-flex items-center transition-colors font-medium select-none disabled:opacity-50 
-                disabled:cursor-not-allowed focus:outline-none focus:ring focus:ring-offset-2 focus:ring-offset-white 
-                dark:focus:ring-offset-dark-eval-2';
+    $baseClasses = '';
 
     switch ($variant) {
-        case 'primary':
-            $variantClasses = 'bg-light-cloud-blue text-white hover:bg-red-600 focus:ring-red-600';
+        case 'navbar':
+            $variantClasses = 'bg-dark-teal text-white hover:bg-dark-teal focus:ring-red-600';
             break;
         case 'login':
             $variantClasses = 'bg-gray-100 text-black hover:bg-steel-blue-600 focus:ring-light-cloud dark:bg-dark-eval-0 dark:hover:bg-dark-eval-0 dark:hover:text-gray-100 dark:text-white';

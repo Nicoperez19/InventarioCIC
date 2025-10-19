@@ -12,8 +12,7 @@ class ProductoController extends Controller
 {
     public function create(): View
     {
-        $unidades = Unidad::orderBy('nombre_unidad')->get();
-        return view('layouts.producto.producto_create', compact('unidades'));
+        return view('layouts.producto.producto_create', ['unidades' => Unidad::orderBy('nombre_unidad')->get()]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -29,14 +28,12 @@ class ProductoController extends Controller
         ]);
 
         Producto::create($validated);
-
         return redirect()->route('productos')->with('status', 'Producto creado correctamente.');
     }
 
     public function edit(Producto $producto): View
     {
-        $unidades = Unidad::orderBy('nombre_unidad')->get();
-        return view('layouts.producto.producto_update', compact('producto', 'unidades'));
+        return view('layouts.producto.producto_update', ['producto' => $producto, 'unidades' => Unidad::orderBy('nombre_unidad')->get()]);
     }
 
     public function update(Request $request, Producto $producto): RedirectResponse
@@ -51,7 +48,6 @@ class ProductoController extends Controller
         ]);
 
         $producto->update($validated);
-
         return redirect()->route('productos')->with('status', 'Producto actualizado correctamente.');
     }
 

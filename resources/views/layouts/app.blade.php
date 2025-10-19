@@ -14,21 +14,26 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-light-gray">
+<body class="font-sans antialiased" x-data="{ isSidebarOpen: true }">
+    <div class="min-h-screen bg-gray-100 flex">
         <!-- Sidebar -->
-        <x-sidebar />
+        <livewire:layout.sidebar />
+        
+        <!-- Overlay eliminado para evitar oscurecimiento -->
         
         <!-- Main Content Area -->
-        <div>
-            <!-- Top Navigation -->
+        <div class="flex-1 flex flex-col transition-all duration-300 ease-in-out" 
+             :class="{ 'ml-64': isSidebarOpen, 'ml-0': !isSidebarOpen }">
+            
+            <!-- Navigation -->
             <livewire:layout.navigation />
 
             <!-- Page Heading -->
             @if (isset($header))
-                <header class="bg-white shadow-sm border-b border-neutral-200">
+                <header>
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -36,11 +41,12 @@
             @endif
 
             <!-- Page Content -->
-            <main class="p-6">
+            <main class="flex-1">
                 {{ $slot }}
             </main>
         </div>
     </div>
+    @livewireScripts
 </body>
 
 </html>

@@ -9,33 +9,24 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public LoginForm $form;
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function login(): void
     {
         $this->validate();
-
         $this->form->authenticate();
-
         Session::regenerate();
-
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        redirect()->intended(route('dashboard'));
     }
 }; ?>
 
 <div>
-    <!-- Título del formulario -->
     <div class="text-center mb-8">
         <h2 class="text-2xl font-bold text-dark-black mb-2">Iniciar Sesión</h2>
-        <p class="text-neutral-500">Ingresa tus credenciales para acceder</p>
+        <p class="text-neutral-500">Ingresa tus credenciales para acceder al sistema</p>
     </div>
 
-    <!-- Session Status -->
     <x-auth-session-status class="mb-6" :status="session('status')" />
 
     <form wire:submit="login" class="space-y-6">
-        <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Correo Electrónico')" class="text-dark-black font-medium" />
             <div class="mt-2 relative">
@@ -52,7 +43,6 @@ new #[Layout('layouts.guest')] class extends Component
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
         <div>
             <x-input-label for="password" :value="__('Contraseña')" class="text-dark-black font-medium" />
             <div class="mt-2 relative">
@@ -69,7 +59,6 @@ new #[Layout('layouts.guest')] class extends Component
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me & Forgot Password -->
         <div class="flex items-center justify-between">
             <label for="remember" class="flex items-center">
                 <input wire:model="form.remember" id="remember" type="checkbox" 
@@ -85,7 +74,6 @@ new #[Layout('layouts.guest')] class extends Component
             @endif
         </div>
 
-        <!-- Submit Button -->
         <div>
             <button type="submit" 
                 class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-dark-teal hover:bg-navy-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-cyan transition-all duration-200 transform hover:scale-[1.02]">

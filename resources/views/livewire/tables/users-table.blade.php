@@ -13,13 +13,13 @@
         <tbody class="bg-white divide-y divide-gray-200">
             @forelse($users as $user)
                 <tr>
-                    <td class="px-4 py-2">{{ $user->id }}</td>
-                    <td class="px-4 py-2">{{ $user->name }}</td>
-                    <td class="px-4 py-2">{{ $user->email }}</td>
+                    <td class="px-4 py-2">{{ $user->run }}</td>
+                    <td class="px-4 py-2">{{ $user->nombre }}</td>
+                    <td class="px-4 py-2">{{ $user->correo }}</td>
                     <td class="px-4 py-2">{{ optional($user->created_at)->format('Y-m-d H:i') }}</td>
                     <td class="px-4 py-2">
-                        <a href="{{ route('users.edit', $user->id) }}" class="text-blue-500 mr-3">Editar</a>
-                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
+                        <a href="{{ route('users.edit', $user->run) }}" class="text-blue-500 mr-3">Editar</a>
+                        <form action="{{ route('users.destroy', $user->run) }}" method="POST" class="inline" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-500">Eliminar</button>

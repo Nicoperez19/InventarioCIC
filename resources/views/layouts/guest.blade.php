@@ -13,9 +13,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
     </head>
     <body class="font-sans antialiased">
-        <!-- Fondo sólido dark-teal -->
         <div class="min-h-screen bg-dark-teal flex items-center justify-center p-4">
             <!-- Contenedor principal -->
             <div class="w-full max-w-md">
@@ -38,5 +38,6 @@
                 </div>
             </div>
         </div>
+        @livewireScripts
     </body>
 </html>

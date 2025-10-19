@@ -22,7 +22,6 @@ class DepartamentoController extends Controller
         ]);
 
         Departamento::create($validated);
-
         return redirect()->route('departamentos')->with('status', 'Departamento creado correctamente.');
     }
 
@@ -33,12 +32,8 @@ class DepartamentoController extends Controller
 
     public function update(Request $request, Departamento $departamento): RedirectResponse
     {
-        $validated = $request->validate([
-            'nombre_depto' => ['required', 'string', 'max:255'],
-        ]);
-
+        $validated = $request->validate(['nombre_depto' => ['required', 'string', 'max:255']]);
         $departamento->update($validated);
-
         return redirect()->route('departamentos')->with('status', 'Departamento actualizado correctamente.');
     }
 
