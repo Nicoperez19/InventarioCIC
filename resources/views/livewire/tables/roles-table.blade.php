@@ -9,7 +9,7 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
             @forelse($roles as $role)
-                <tr>
+                <tr class="hover:bg-light-cyan/10 transition-colors duration-150">
                     <td class="px-4 py-2">{{ $role->id }}</td>
                     <td class="px-4 py-2">{{ $role->name }}</td>
                     <td class="px-4 py-2">

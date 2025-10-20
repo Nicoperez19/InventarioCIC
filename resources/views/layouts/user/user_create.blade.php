@@ -1,94 +1,136 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Agregar nuevo usuario
-        </h2>
+        <div class="flex items-center space-x-4">
+            <div class="flex-shrink-0">
+                <div class="w-10 h-10 bg-dark-teal rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                    {{ __('Agregar nuevo usuario') }}
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">Crea un nuevo usuario en el sistema</p>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('users.store') }}">
+    <div class="py-8">
+        <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <form method="POST" action="{{ route('users.store') }}" class="p-6 space-y-6">
                     @csrf
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">RUN</label>
-                        <input id="run-input" type="text" name="run" value="{{ old('run') }}" class="mt-1 block w-full border-gray-300 rounded-md" required inputmode="numeric" autocomplete="off" placeholder="12345678-9">
-                        @error('run')
-                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                        <input type="text" name="nombre" value="{{ old('nombre') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('nombre')
-                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="correo" value="{{ old('correo') }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('correo')
-                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-                        <input type="password" name="contrasena" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('contrasena')
-                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
-                        <input type="password" name="contrasena_confirmation" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                        @error('contrasena_confirmation')
-                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Departamento</label>
-                        <select name="id_depto" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                            <option value="">Seleccione...</option>
-                            @foreach ($departamentos as $depto)
-                                <option value="{{ $depto->id_depto }}" {{ old('id_depto') === $depto->id_depto ? 'selected' : '' }}>
-                                    {{ $depto->nombre_depto }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('id_depto')
-                            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="p-4 border rounded-lg shadow-lg">
-                            <div class="py-2 text-lg font-semibold text-center bg-gray-200 rounded-t-lg">
-                                {{ __('Permisos') }}
+                    <!-- Información básica -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Información básica</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">RUN</label>
+                                <input id="run-input" type="text" name="run" value="{{ old('run') }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required inputmode="numeric" autocomplete="off" placeholder="12345678-9">
+                                @error('run')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
-                            <div class="p-2 overflow-y-auto max-h-64">
-                                <ul>
-                                    @foreach ($permissions as $permission)
-                                        <li class="flex items-center mb-2">
-                                            <input id="permission-{{ $permission->id }}" type="checkbox" name="permissions[]" value="{{ $permission->id }}"
-                                                {{ in_array($permission->id, old('permissions', [])) ? 'checked' : '' }}
-                                                class="mr-2" />
-                                            <label for="permission-{{ $permission->id }}">{{ $permission->name }}</label>
-                                        </li>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
+                                <input type="text" name="nombre" value="{{ old('nombre') }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required>
+                                @error('nombre')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" name="correo" value="{{ old('correo') }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required>
+                                @error('correo')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Departamento</label>
+                                <select name="id_depto" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                        required>
+                                    <option value="">Seleccione un departamento...</option>
+                                    @foreach ($departamentos as $depto)
+                                        <option value="{{ $depto->id_depto }}" {{ old('id_depto') === $depto->id_depto ? 'selected' : '' }}>
+                                            {{ $depto->nombre_depto }}
+                                        </option>
                                     @endforeach
-                                </ul>
+                                </select>
+                                @error('id_depto')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex gap-3">
-                        <a href="{{ route('users') }}" class="px-4 py-2 bg-gray-200 rounded">Cancelar</a>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Crear Usuario</button>
+                    <!-- Contraseña -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Contraseña</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                                <input type="password" name="contrasena" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required>
+                                @error('contrasena')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar contraseña</label>
+                                <input type="password" name="contrasena_confirmation" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required>
+                                @error('contrasena_confirmation')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Permisos -->
+                    <div class="pb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Permisos del usuario</h3>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-64 overflow-y-auto">
+                                @foreach ($permissions as $permission)
+                                    <div class="flex items-center">
+                                        <input id="permission-{{ $permission->id }}" type="checkbox" name="permissions[]" value="{{ $permission->id }}"
+                                               {{ in_array($permission->id, old('permissions', [])) ? 'checked' : '' }}
+                                               class="h-4 w-4 text-dark-teal focus:ring-dark-teal border-gray-300 rounded">
+                                        <label for="permission-{{ $permission->id }}" class="ml-2 text-sm text-gray-700">
+                                            {{ $permission->name }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+                        <a href="{{ route('users') }}" 
+                           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal">
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                class="px-4 py-2 text-sm font-medium text-white bg-dark-teal border border-transparent rounded-md shadow-sm hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal">
+                            Crear Usuario
+                        </button>
                     </div>
                 </form>
             </div>

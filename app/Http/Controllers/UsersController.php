@@ -6,18 +6,20 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Departamento;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\PermissionRegistrar;
 
 class UsersController extends Controller
 {
-    public function __construct()
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
     {
         $this->middleware('auth');
         $this->middleware('can:manage-users')->except(['edit', 'update']);
+        $this->userService = $userService;
     }
 
     public function create(): View
@@ -38,17 +40,13 @@ class UsersController extends Controller
             $this->logAction('Creando usuario', ['run' => $request->run]);
 
             $validated = $request->validated();
+            $validated['permissions'] = $request->input('permissions', []);
 
-            return $this->executeInTransaction(function () use ($validated, $request) {
-                $validated['contrasena'] = Hash::make($validated['contrasena']);
-                $user = User::create($validated);
+            $user = $this->userService->createUser($validated);
 
-                $this->syncUserPermissions($user, $request->input('permissions', []));
+            $this->logAction('Usuario creado exitosamente', ['user_run' => $user->run]);
 
-                $this->logAction('Usuario creado exitosamente', ['user_run' => $user->run]);
-
-                return redirect()->route('users')->with('status', 'Usuario creado exitosamente.');
-            });
+            return redirect()->route('users')->with('status', 'Usuario creado exitosamente.');
 
         } catch (\Throwable $e) {
             return $this->handleException($e, 'UsersController@store', ['run' => $request->run]);
@@ -74,21 +72,13 @@ class UsersController extends Controller
             $this->logAction('Actualizando usuario', ['user_run' => $user->run]);
 
             $validated = $request->validated();
+            $validated['permissions'] = $request->input('permissions', []);
 
-            return $this->executeInTransaction(function () use ($validated, $request, $user) {
-                if (empty($validated['contrasena'])) {
-                    unset($validated['contrasena']);
-                } else {
-                    $validated['contrasena'] = Hash::make($validated['contrasena']);
-                }
+            $this->userService->updateUser($user, $validated);
 
-                $user->update($validated);
-                $this->syncUserPermissions($user, $request->input('permissions', []));
+            $this->logAction('Usuario actualizado exitosamente', ['user_run' => $user->run]);
 
-                $this->logAction('Usuario actualizado exitosamente', ['user_run' => $user->run]);
-
-                return redirect()->route('users')->with('status', 'Usuario actualizado exitosamente.');
-            });
+            return redirect()->route('users')->with('status', 'Usuario actualizado exitosamente.');
 
         } catch (\Throwable $e) {
             return $this->handleException($e, 'UsersController@update', ['user_run' => $user->run]);
@@ -102,31 +92,17 @@ class UsersController extends Controller
         try {
             $this->logAction('Eliminando usuario', ['user_run' => $user->run]);
 
-            $user->delete();
+            $success = $this->userService->deleteUser($user);
 
-            $this->logAction('Usuario eliminado exitosamente', ['user_run' => $user->run]);
-
-            return redirect()->back()->with('status', 'Usuario eliminado exitosamente.');
+            if ($success) {
+                $this->logAction('Usuario eliminado exitosamente', ['user_run' => $user->run]);
+                return redirect()->back()->with('status', 'Usuario eliminado exitosamente.');
+            } else {
+                return redirect()->back()->with('error', 'Error al eliminar el usuario.');
+            }
 
         } catch (\Throwable $e) {
             return $this->handleException($e, 'UsersController@destroy', ['user_run' => $user->run]);
         }
-    }
-
-    /**
-     * Sincronizar permisos del usuario
-     */
-    private function syncUserPermissions(User $user, array $permissionIds): void
-    {
-        if (empty($permissionIds)) {
-            $user->syncPermissions([]);
-
-            return;
-        }
-
-        $permissionNames = Permission::whereIn('id', $permissionIds)->pluck('name')->toArray();
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-        $user->syncPermissions($permissionNames);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

@@ -118,6 +118,16 @@ class User extends Authenticatable
         return static::where('run', $run)->first();
     }
 
+    public static function getActiveUsers()
+    {
+        return static::whereNull('deleted_at')->with('departamento');
+    }
+
+    public static function getUsersByDepartment(string $departmentId)
+    {
+        return static::where('id_depto', $departmentId)->with('departamento');
+    }
+
     // Métodos de negocio
     public function isActive(): bool
     {
@@ -137,5 +147,87 @@ class User extends Authenticatable
     public function canManageUsers(): bool
     {
         return $this->hasPermissionTo('manage-users') || $this->hasRole('admin');
+    }
+
+    public function canManageDepartments(): bool
+    {
+        return $this->hasPermissionTo('manage-departments') || $this->hasRole('admin');
+    }
+
+    public function canManageProducts(): bool
+    {
+        return $this->hasPermissionTo('manage-products') || $this->hasRole('admin');
+    }
+
+    public function canManageRequests(): bool
+    {
+        return $this->hasPermissionTo('manage-requests') || $this->hasRole('admin');
+    }
+
+    // Métodos de validación
+    public function hasValidRun(): bool
+    {
+        // Validación básica de RUN chileno
+        $run = str_replace(['.', '-'], '', $this->run);
+        return preg_match('/^[0-9]{7,8}[0-9kK]$/', $run);
+    }
+
+    public function hasValidEmail(): bool
+    {
+        return filter_var($this->correo, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    // Métodos de relación
+    public function getDepartmentNameAttribute(): string
+    {
+        return $this->departamento->nombre_depto ?? 'Sin departamento';
+    }
+
+    public function getPermissionsListAttribute(): array
+    {
+        return $this->permissions->pluck('name')->toArray();
+    }
+
+    public function getRolesListAttribute(): array
+    {
+        return $this->roles->pluck('name')->toArray();
+    }
+
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->whereNull('deleted_at');
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->whereNotNull('deleted_at');
+    }
+
+    public function scopeByDepartment($query, string $departmentId)
+    {
+        return $query->where('id_depto', $departmentId);
+    }
+
+    public function scopeWithPermissions($query)
+    {
+        return $query->with('permissions');
+    }
+
+    public function scopeWithRoles($query)
+    {
+        return $query->with('roles');
+    }
+
+    public function scopeOrderByName($query, string $direction = 'asc')
+    {
+        return $query->orderBy('nombre', $direction);
+    }
+
+    public function scopeOrderByDepartment($query, string $direction = 'asc')
+    {
+        return $query->join('departamentos', 'users.id_depto', '=', 'departamentos.id_depto')
+                    ->orderBy('departamentos.nombre_depto', $direction)
+                    ->select('users.*');
     }
 }

@@ -1,61 +1,130 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Editar producto
-        </h2>
+        <div class="flex items-center space-x-4">
+            <div class="flex-shrink-0">
+                <div class="w-10 h-10 bg-dark-teal rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                    {{ __('Editar producto') }} - {{ $producto->id_producto }}
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">Modifica la información del producto {{ $producto->nombre_producto }}</p>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('productos.update', $producto->id_producto) }}">
+    <div class="py-8">
+        <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <form method="POST" action="{{ route('productos.update', $producto->id_producto) }}" class="p-6 space-y-6">
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">ID</label>
-                            <input type="text" value="{{ $producto->id_producto }}" class="mt-1 block w-full border-gray-300 rounded-md bg-gray-100" disabled>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Código</label>
-                            <input type="text" name="codigo_producto" value="{{ old('codigo_producto', $producto->codigo_producto) }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                            @error('codigo_producto')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                            <input type="text" name="nombre_producto" value="{{ old('nombre_producto', $producto->nombre_producto) }}" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                            @error('nombre_producto')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Stock mínimo</label>
-                            <input type="number" name="stock_minimo" value="{{ old('stock_minimo', $producto->stock_minimo) }}" class="mt-1 block w-full border-gray-300 rounded-md" required min="0">
-                            @error('stock_minimo')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Stock actual</label>
-                            <input type="number" name="stock_actual" value="{{ old('stock_actual', $producto->stock_actual) }}" class="mt-1 block w-full border-gray-300 rounded-md" required min="0">
-                            @error('stock_actual')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Observaciones</label>
-                            <textarea name="observaciones" class="mt-1 block w-full border-gray-300 rounded-md" rows="3">{{ old('observaciones', $producto->observaciones) }}</textarea>
-                            @error('observaciones')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Unidad</label>
-                            <select name="id_unidad" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                                @foreach($unidades as $u)
-                                    <option value="{{ $u->id_unidad }}" @selected(old('id_unidad', $producto->id_unidad)===$u->id_unidad)>{{ $u->nombre_unidad }}</option>
-                                @endforeach
-                            </select>
-                            @error('id_unidad')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
+                    <!-- Información básica -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Información básica</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ID del Producto</label>
+                                <input type="text" value="{{ $producto->id_producto }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500" 
+                                       disabled>
+                                <p class="text-xs text-gray-500 mt-1">El ID del producto no se puede modificar</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Código del Producto</label>
+                                <input type="text" name="codigo_producto" value="{{ old('codigo_producto', $producto->codigo_producto) }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required placeholder="Ej: COD001">
+                                @error('codigo_producto')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Producto</label>
+                                <input type="text" name="nombre_producto" value="{{ old('nombre_producto', $producto->nombre_producto) }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required placeholder="Ej: Laptop Dell Inspiron 15">
+                                @error('nombre_producto')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                     </div>
 
-                    <div class="flex gap-3 mt-6">
-                        <a href="{{ route('productos') }}" class="px-4 py-2 bg-gray-200 rounded">Cancelar</a>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Actualizar Producto</button>
+                    <!-- Información de inventario -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Información de inventario</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Stock Mínimo</label>
+                                <input type="number" name="stock_minimo" value="{{ old('stock_minimo', $producto->stock_minimo) }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required min="0" placeholder="0">
+                                @error('stock_minimo')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Stock Actual</label>
+                                <input type="number" name="stock_actual" value="{{ old('stock_actual', $producto->stock_actual) }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                       required min="0" placeholder="0">
+                                @error('stock_actual')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Unidad de Medida</label>
+                                <select name="id_unidad" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                        required>
+                                    @foreach($unidades as $u)
+                                        <option value="{{ $u->id_unidad }}" {{ old('id_unidad', $producto->id_unidad) === $u->id_unidad ? 'selected' : '' }}>
+                                            {{ $u->nombre_unidad }} ({{ $u->id_unidad }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('id_unidad')
+                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="pb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Observaciones</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones del Producto</label>
+                            <textarea name="observaciones" 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
+                                      rows="3" 
+                                      placeholder="Información adicional sobre el producto...">{{ old('observaciones', $producto->observaciones) }}</textarea>
+                            @error('observaciones')
+                                <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+                        <a href="{{ route('productos') }}" 
+                           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal">
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                class="px-4 py-2 text-sm font-medium text-white bg-dark-teal border border-transparent rounded-md shadow-sm hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal">
+                            Guardar Cambios
+                        </button>
                     </div>
                 </form>
             </div>

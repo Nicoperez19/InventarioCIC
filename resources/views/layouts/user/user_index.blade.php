@@ -1,23 +1,35 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Gestión de usuarios') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-dark-teal rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                        {{ __('Gestión de usuarios') }}
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">Administra y organiza los usuarios del sistema</p>
+                </div>
+            </div>
+            <a href="{{ route('users.create') }}" 
+               class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-dark-teal rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal transition-colors duration-150 shadow-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Agregar Usuario
+            </a>
+        </div>
     </x-slot>
 
-
-
-    <div class="py-12">
+    <div class="py-8">
         <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
-            <div class="flex items-center justify-end mb-6">
-                <x-button href="{{ route('users.create') }}"  variant="add" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                    Agregar Usuario
-                </x-button>
-            </div>
             <div class="p-4 bg-white shadow sm:p-8 sm:rounded-lg">
-                <div class="max-w-xl">
-                    <livewire:tables.users-table />
-                </div>
+                <livewire:tables.users-table />
             </div>
         </div>
     </div>

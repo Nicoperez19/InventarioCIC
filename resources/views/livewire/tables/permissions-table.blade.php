@@ -9,7 +9,7 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
             @forelse($permissions as $permission)
-                <tr>
+                <tr class="hover:bg-light-cyan/10 transition-colors duration-150">
                     <td class="px-4 py-2">{{ $permission->id }}</td>
                     <td class="px-4 py-2">{{ $permission->name }}</td>
                     <td class="px-4 py-2">
