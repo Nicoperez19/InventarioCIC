@@ -45,47 +45,10 @@ class Inventario extends Model
         return $this->cantidad_inventario - $this->producto->stock_actual;
     }
 
-    public function hasDiscrepancy(): bool
-    {
-        return $this->diferencia_stock !== 0;
-    }
-
-    public function isOverstock(): bool
-    {
-        return $this->diferencia_stock > 0;
-    }
-
-    public function isUnderstock(): bool
-    {
-        return $this->diferencia_stock < 0;
-    }
-
-    public function getDiscrepancyTypeAttribute(): string
-    {
-        if ($this->diferencia_stock > 0) {
-            return 'sobrestock';
-        } elseif ($this->diferencia_stock < 0) {
-            return 'substock';
-        }
-
-        return 'correcto';
-    }
-
-    public function getDiscrepancyColorAttribute(): string
-    {
-        return match ($this->discrepancy_type) {
-            'sobrestock' => 'green',
-            'substock' => 'red',
-            'correcto' => 'blue',
-            default => 'gray'
-        };
-    }
 
     public function applyToProduct(): bool
     {
-        if (! $this->hasDiscrepancy()) {
-            return true;
-        }
+        // Aplicar inventario al producto
 
         $producto = $this->producto;
         $producto->stock_actual = $this->cantidad_inventario;
@@ -124,15 +87,6 @@ class Inventario extends Model
         return $query->whereBetween('fecha_inventario', [$fechaInicio, $fechaFin]);
     }
 
-    public function scopeWithDiscrepancy($query)
-    {
-        return $query->whereRaw('cantidad_inventario != (SELECT stock_actual FROM productos WHERE productos.id_producto = inventarios.id_producto)');
-    }
-
-    public function scopeWithoutDiscrepancy($query)
-    {
-        return $query->whereRaw('cantidad_inventario = (SELECT stock_actual FROM productos WHERE productos.id_producto = inventarios.id_producto)');
-    }
 
     public function scopeWithProducto($query)
     {
@@ -150,10 +104,6 @@ class Inventario extends Model
         return static::byProducto($productoId)->withProducto()->orderByFecha()->get();
     }
 
-    public static function getWithDiscrepancy()
-    {
-        return static::withDiscrepancy()->withProducto()->orderByFecha()->get();
-    }
 
     public static function getByFechaRange(string $fechaInicio, string $fechaFin)
     {

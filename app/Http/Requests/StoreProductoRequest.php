@@ -21,6 +21,7 @@ class StoreProductoRequest extends FormRequest
     {
         return [
             'id_producto' => ['required', 'string', 'max:255', 'unique:productos,id_producto'],
+            'codigo_barra' => ['nullable', 'string', 'max:50', 'unique:productos,codigo_barra'],
             'nombre_producto' => ['required', 'string', 'max:255'],
             'stock_minimo' => ['required', 'integer', 'min:0'],
             'stock_actual' => ['required', 'integer', 'min:0'],
@@ -37,6 +38,7 @@ class StoreProductoRequest extends FormRequest
         return [
             'id_producto.required' => 'El ID del producto es obligatorio.',
             'id_producto.unique' => 'El ID del producto ya existe.',
+            'codigo_barra.unique' => 'El código de barras ya existe.',
             'nombre_producto.required' => 'El nombre del producto es obligatorio.',
             'stock_minimo.required' => 'El stock mínimo es obligatorio.',
             'stock_minimo.min' => 'El stock mínimo debe ser mayor o igual a 0.',

@@ -66,9 +66,7 @@ class InventoryService
     {
         try {
             return DB::transaction(function () use ($inventario) {
-                if (! $inventario->hasDiscrepancy()) {
-                    return true; // No hay nada que aplicar
-                }
+                // Aplicar inventario
 
                 $producto = $inventario->producto;
                 $stockAnterior = $producto->stock_actual;

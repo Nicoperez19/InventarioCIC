@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('observaciones')->nullable();
             $table->string('id_unidad');
             $table->softDeletes(); // Agregar soft deletes
+            $table->string('codigo_barra', 50)->nullable();
             $table->timestamps();
 
             // Foreign key

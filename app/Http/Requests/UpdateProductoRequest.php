@@ -22,6 +22,7 @@ class UpdateProductoRequest extends FormRequest
         $producto = $this->route('producto');
 
         return [
+            'codigo_barra' => ['nullable', 'string', 'max:50', 'unique:productos,codigo_barra,' . $producto->id_producto . ',id_producto'],
             'nombre_producto' => ['required', 'string', 'max:255'],
             'stock_minimo' => ['required', 'integer', 'min:0'],
             'stock_actual' => ['required', 'integer', 'min:0'],
@@ -36,6 +37,7 @@ class UpdateProductoRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'codigo_barra.unique' => 'El código de barras ya existe.',
             'nombre_producto.required' => 'El nombre del producto es obligatorio.',
             'stock_minimo.required' => 'El stock mínimo es obligatorio.',
             'stock_minimo.min' => 'El stock mínimo debe ser mayor o igual a 0.',

@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProductoRequest;
 use App\Models\Movimientos;
 use App\Models\Producto;
 use App\Models\Unidad;
+use App\Services\BarcodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -38,7 +39,26 @@ class ProductoController extends Controller
             $validated = $request->validated();
 
             return $this->executeInTransaction(function () use ($validated) {
+                // Generar código de barras si no se proporciona uno
+                if (empty($validated['codigo_barra'])) {
+                    $barcodeService = new BarcodeService();
+                    $validated['codigo_barra'] = $barcodeService->generateUniqueBarcode($validated['id_unidad']);
+                }
+
                 $producto = Producto::create($validated);
+
+                // Generar imagen del código de barras
+                if ($producto->codigo_barra) {
+                    try {
+                        $barcodeService = new BarcodeService();
+                        $barcodeService->generateBarcodeImage($producto->codigo_barra);
+                    } catch (\Throwable $e) {
+                        \Log::warning('Error generando código de barras para producto', [
+                            'producto_id' => $producto->id_producto,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
 
                 // Registrar movimiento inicial si hay stock
                 if ($producto->stock_actual > 0) {

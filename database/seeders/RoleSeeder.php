@@ -31,7 +31,6 @@ class RoleSeeder extends Seeder
             // Inventory / Products
             'manage-inventory', 'create-products', 'edit-products', 'delete-products', 'view-products',
             'view-inventory', 'create-inventory', 'edit-inventory', 'delete-inventory', 'apply-inventory',
-            'view-inventory-discrepancies', 'apply-all-inventory',
             // Requests
             'view-requests', 'create-requests', 'approve-requests', 'reject-requests', 'deliver-requests',
             'view-pending-requests',

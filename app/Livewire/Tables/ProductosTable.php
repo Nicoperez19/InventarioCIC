@@ -10,7 +10,7 @@ class ProductosTable extends Component
     public function render()
     {
         return view('livewire.tables.productos-table', [
-            'productos' => Producto::all(),
+            'productos' => Producto::with('unidad')->get(),
         ]);
     }
 }

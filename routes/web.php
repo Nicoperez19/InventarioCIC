@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\CargaMasivaController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\InventarioController;
@@ -83,8 +84,6 @@ Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
     Route::put('/inventario/{inventario}', [InventarioController::class, 'update'])->name('inventario.update');
     Route::delete('/inventario/{inventario}', [InventarioController::class, 'destroy'])->name('inventario.destroy');
     Route::post('/inventario/{inventario}/apply', [InventarioController::class, 'apply'])->name('inventario.apply');
-    Route::get('/inventario/discrepancies', [InventarioController::class, 'discrepancies'])->name('inventario.discrepancies');
-    Route::post('/inventario/apply-all-discrepancies', [InventarioController::class, 'applyAllDiscrepancies'])->name('inventario.apply-all-discrepancies');
 });
 
 // Rutas de solicitudes
@@ -105,6 +104,16 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
     Route::get('/carga-masiva', [CargaMasivaController::class, 'index'])->name('carga-masiva.index');
     Route::post('/carga-masiva', [CargaMasivaController::class, 'upload'])->name('carga-masiva.upload');
+});
+
+// Rutas de códigos de barras
+Route::middleware(['auth'])->group(function () {
+    Route::get('/barcode/{producto}', [BarcodeController::class, 'show'])->name('barcode.show');
+    Route::get('/barcode/{producto}/generate', [BarcodeController::class, 'generate'])->name('barcode.generate');
+    Route::get('/barcode/{producto}/small', [BarcodeController::class, 'generateSmall'])->name('barcode.small');
+    Route::get('/barcode/{producto}/svg', [BarcodeController::class, 'generateSvg'])->name('barcode.svg');
+    Route::post('/barcode/{producto}/regenerate', [BarcodeController::class, 'regenerate'])->name('barcode.regenerate');
+    Route::post('/barcode/validate', [BarcodeController::class, 'validate'])->name('barcode.validate');
 });
 
 // Rutas de roles y permisos
