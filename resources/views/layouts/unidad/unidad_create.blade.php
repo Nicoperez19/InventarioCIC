@@ -19,44 +19,78 @@
 
     <div class="py-8">
         <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <form method="POST" action="{{ route('unidades.store') }}" class="p-6 space-y-6">
+            <div class="p-4 bg-white shadow sm:p-8 sm:rounded-lg">
+                <form method="POST" action="{{ route('unidades.store') }}">
                     @csrf
 
-                    <!-- Información básica -->
-                    <div class="border-b border-gray-200 pb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Información básica</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">ID de Unidad</label>
-                                <input type="text" name="id_unidad" value="{{ old('id_unidad') }}" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
-                                       required placeholder="Ej: KG, L, M">
-                                @error('id_unidad')
-                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 text-light-cyan mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            Datos de la Unidad
+                        </h3>
+                        <p class="text-sm text-gray-500 mt-1">Define el identificador y nombre de la unidad de medida</p>
+                    </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre de la Unidad</label>
-                                <input type="text" name="nombre_unidad" value="{{ old('nombre_unidad') }}" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
-                                       required placeholder="Ej: Kilogramo, Litro, Metro">
-                                @error('nombre_unidad')
-                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <svg class="w-4 h-4 text-gray-500 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                </svg>
+                                ID de Unidad
+                            </label>
+                            <input type="text" name="id_unidad" value="{{ old('id_unidad') }}" 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-light-cyan focus:border-light-cyan transition-colors" 
+                                   required placeholder="Ej: KG, L, M">
+                            <p class="mt-1.5 text-xs text-gray-500">Código corto para identificar la unidad</p>
+                            @error('id_unidad')
+                                <div class="flex items-center mt-2 text-sm text-red-600">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <svg class="w-4 h-4 text-gray-500 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                                Nombre de la Unidad
+                            </label>
+                            <input type="text" name="nombre_unidad" value="{{ old('nombre_unidad') }}" 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-light-cyan focus:border-light-cyan transition-colors" 
+                                   required placeholder="Ej: Kilogramo, Litro, Metro">
+                            <p class="mt-1.5 text-xs text-gray-500">Nombre descriptivo completo</p>
+                            @error('nombre_unidad')
+                                <div class="flex items-center mt-2 text-sm text-red-600">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
                     </div>
 
                     <!-- Botones de acción -->
-                    <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <div class="flex items-center justify-end pt-8 mt-8 border-t border-gray-200 space-x-3">
                         <a href="{{ route('unidades') }}" 
-                           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal">
+                           class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-cyan transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
                             Cancelar
                         </a>
                         <button type="submit" 
-                                class="px-4 py-2 text-sm font-medium text-white bg-dark-teal border border-transparent rounded-md shadow-sm hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal">
+                                class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-light-cyan border border-transparent rounded-lg shadow-sm hover:bg-dark-teal focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-cyan transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
                             Crear Unidad
                         </button>
                     </div>

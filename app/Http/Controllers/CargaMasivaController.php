@@ -121,11 +121,11 @@ class CargaMasivaController extends Controller
             // nada que cerrar si fue XLSX; CSV ya fue cerrado arriba
         }
 
-        $status = "Carga completada: {$created} creados, {$updated} actualizados.";
+        $status = "Carga completada: {$created} productos creados, {$updated} actualizados.";
         if (! empty($errors)) {
-            $status .= ' Algunos registros tuvieron problemas.';
+            $status .= ' Se encontraron '.count($errors).' errores durante el proceso.';
 
-            return back()->with('status', $status)->withErrors(['detalle' => implode("\n", $errors)]);
+            return back()->with('status', $status)->with('errors_details', $errors);
         }
 
         return back()->with('status', $status);
@@ -209,9 +209,6 @@ class CargaMasivaController extends Controller
             return;
         }
 
-        $prefix = $this->extractPrefixFromDept($departamento->id_depto);
-        // Generar SIEMPRE el id por departamento (ignorar celda de ID si viene)
-        $idProducto = $this->generateNextProductId($prefix);
         $prefix = $this->extractPrefixFromDept($departamento->id_depto);
         // Generar SIEMPRE el id por departamento (ignorar celda de ID si viene)
         $idProducto = $this->generateNextProductId($prefix);
