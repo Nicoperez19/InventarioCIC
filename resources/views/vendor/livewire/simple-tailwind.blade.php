@@ -1,6 +1,6 @@
 <div>
-    @if ($paginator->hasPages())
-        <nav role="navigation" aria-label="Navegación de paginación" class="flex items-center justify-between">
+    <nav role="navigation" aria-label="Navegación de paginación" class="flex items-center justify-between">
+        @if ($paginator->hasPages())
             <div class="flex justify-between flex-1">
                 @if ($paginator->onFirstPage())
                     <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 cursor-default leading-5 rounded-md">
@@ -22,6 +22,23 @@
                     </span>
                 @endif
             </div>
-        </nav>
-    @endif
+        @else
+            {{-- Información simple cuando solo hay una página --}}
+            <div class="flex-1 flex items-center justify-center">
+                <p class="text-sm text-gray-700 leading-5">
+                    Mostrando
+                    @if ($paginator->firstItem())
+                        <span class="font-medium">{{ $paginator->firstItem() }}</span>
+                        a
+                        <span class="font-medium">{{ $paginator->lastItem() }}</span>
+                    @else
+                        <span class="font-medium">{{ $paginator->count() }}</span>
+                    @endif
+                    de
+                    <span class="font-medium">{{ $paginator->total() }}</span>
+                    resultados
+                </p>
+            </div>
+        @endif
+    </nav>
 </div>

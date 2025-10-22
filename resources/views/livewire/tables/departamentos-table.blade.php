@@ -33,7 +33,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-neutral-200">
                 @forelse($departamentos as $departamento)
-                    <tr class="hover:bg-light-cyan/10 transition-colors duration-150">
+                    <tr wire:key="departamento-{{ $departamento->id_depto }}" class="hover:bg-light-cyan/10 transition-colors duration-150">
                         <td class="w-1/12 px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-500">
                                 {{ $departamento->id_depto }}
@@ -87,6 +87,9 @@
             </tbody>
         </table>
     </div>
+    
+    <!-- Paginación -->
+    <div class="px-4 py-3 bg-gray-50 border-t border-neutral-200">
+        {{ $departamentos->links() }}
+    </div>
 </div>
-
-
