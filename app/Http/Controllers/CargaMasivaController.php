@@ -27,6 +27,52 @@ class CargaMasivaController extends Controller
         return view('layouts.carga_masiva.carga_masiva_index');
     }
 
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'archivo' => 'required|file|mimes:xlsx,xls,csv|max:10240' // 10MB máximo
+        ]);
+
+        try {
+            $file = $request->file('archivo');
+            $fileExtension = $file->getClientOriginalExtension();
+            
+            // Usar el archivo directamente desde la ruta temporal
+            $tempPath = $file->getRealPath();
+            
+            if (!$tempPath || !file_exists($tempPath)) {
+                throw new \Exception('No se pudo acceder al archivo subido');
+            }
+
+            // Procesar archivo directamente
+            $excelService = new \App\Services\ExcelImportService();
+            $result = $excelService->importFromFile($tempPath, $fileExtension);
+
+            if ($result['success']) {
+                $message = $result['message'];
+                if (!empty($result['errors'])) {
+                    $message .= ' Algunos registros tuvieron errores: ' . implode(', ', $result['errors']);
+                }
+                return redirect()->route('carga-masiva.index')
+                    ->with('success', $message);
+            } else {
+                return redirect()->route('carga-masiva.index')
+                    ->with('error', $result['message']);
+            }
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error en carga masiva: ' . $e->getMessage(), [
+                'temp_path' => $tempPath ?? 'N/A',
+                'file_exists' => isset($tempPath) ? file_exists($tempPath) : false
+            ]);
+            
+            return redirect()->route('carga-masiva.index')
+                ->with('error', 'Error al procesar el archivo: ' . $e->getMessage());
+        } finally {
+            // No necesitamos limpiar archivos temporales ya que usamos getRealPath()
+        }
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -199,14 +245,14 @@ class CargaMasivaController extends Controller
         if (empty($nombreUnidad)) {
             // Unidad por defecto si no se especifica
             $unidad = UnidadMedida::firstOrCreate(
-                ['nombre_unidad' => 'Unidad'],
+                ['nombre_unidad_medida' => 'Unidad'],
                 ['descripcion' => 'Unidad por defecto']
             );
             return $unidad->id_unidad;
         }
 
         $unidad = UnidadMedida::firstOrCreate(
-            ['nombre_unidad' => $nombreUnidad],
+            ['nombre_unidad_medida' => $nombreUnidad],
             ['descripcion' => "Unidad de medida: {$nombreUnidad}"]
         );
 

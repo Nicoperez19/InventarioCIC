@@ -27,3 +27,4 @@ class TipoInsumosTable extends Component
     }
 }
 
+

@@ -28,10 +28,8 @@ class RoleSeeder extends Seeder
         $permissions = [
             // Users
             'manage-users', 'create-users', 'edit-users', 'delete-users', 'view-users',
-            // Inventory / Products
-            'manage-inventory', 'create-products', 'edit-products', 'delete-products', 'view-products',
-            'view-inventory', 'create-inventory', 'edit-inventory', 'delete-inventory', 'apply-inventory',
-            'apply-all-inventory', 'view-inventory-discrepancies',
+            // Products
+            'create-products', 'edit-products', 'delete-products', 'view-products',
             // Requests
             'view-requests', 'create-requests', 'approve-requests', 'reject-requests', 'deliver-requests',
             'view-pending-requests',
@@ -41,6 +39,10 @@ class RoleSeeder extends Seeder
             'manage-units', 'create-units', 'edit-units', 'delete-units', 'view-units',
             // Tipo Insumos
             'manage-tipo-insumos', 'create-tipo-insumos', 'edit-tipo-insumos', 'delete-tipo-insumos', 'view-tipo-insumos',
+            // Insumos
+            'manage-insumos', 'create-insumos', 'edit-insumos', 'delete-insumos', 'view-insumos',
+            // Carga Masiva
+            'manage-bulk-upload', 'create-bulk-upload', 'view-bulk-upload',
             // Providers
             'manage-providers', 'create-providers', 'edit-providers', 'delete-providers', 'view-providers',
             // Invoices

@@ -17,7 +17,7 @@
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                             </svg>
-                            <span>Producto</span>
+                            <span>Insumo</span>
                         </div>
                     </th>
                     <th class="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -63,30 +63,30 @@
             </tr>
         </thead>
             <tbody class="bg-white divide-y divide-neutral-200">
-            @forelse($productos as $producto)
+            @forelse($insumos as $insumo)
                     <tr class="hover:bg-light-cyan/10 transition-colors duration-150">
                         <!-- ID -->
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-500">
-                                {{ $producto->id_producto }}
+                                {{ $insumo->id_insumo }}
                             </div>
                         </td>
                         
-                        <!-- Producto -->
+                        <!-- Insumo -->
                         <td class="px-3 sm:px-6 py-4">
-                            <div class="text-sm font-medium text-neutral-900">{{ $producto->nombre_producto }}</div>
+                            <div class="text-sm font-medium text-neutral-900">{{ $insumo->nombre_insumo }}</div>
                         </td>
                         
                         <!-- Unidad -->
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-neutral-600">{{ $producto->unidadMedida->nombre_unidad_medida ?? $producto->id_unidad }}</div>
+                            <div class="text-sm text-neutral-600">{{ $insumo->unidadMedida->nombre_unidad_medida ?? $insumo->id_unidad }}</div>
                         </td>
                         
                         <!-- Stock Mínimo -->
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-600">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    {{ $producto->stock_minimo }}
+                                    {{ $insumo->stock_minimo }}
                                 </span>
                             </div>
                         </td>
@@ -94,8 +94,8 @@
                         <!-- Stock Actual -->
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-600">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $producto->stock_actual <= $producto->stock_minimo ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
-                                    {{ $producto->stock_actual }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $insumo->stock_actual <= $insumo->stock_minimo ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
+                                    {{ $insumo->stock_actual }}
                                 </span>
                             </div>
                         </td>
@@ -103,14 +103,14 @@
                         <!-- Código Barras -->
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-center">
-                                @if($producto->codigo_barra)
+                                @if($insumo->codigo_barra)
                                     <div class="inline-flex items-center">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 font-mono">
-                                            {{ $producto->codigo_barra }}
+                                            {{ $insumo->codigo_barra }}
                                         </span>
                                         <button type="button" 
                                                 class="ml-2 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
-                                                onclick="openBarcodeModal('{{ $producto->id_producto }}', '{{ $producto->codigo_barra }}')"
+                                                onclick="openBarcodeModal('{{ $insumo->id_insumo }}', '{{ $insumo->codigo_barra }}')"
                                                 title="Ver código de barras">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -128,8 +128,8 @@
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center justify-end space-x-1 sm:space-x-3">
                                 <!-- Botón Ver Código de Barras -->
-                                @if($producto->codigo_barra)
-                                    <a href="{{ route('barcode.show', $producto->id_producto) }}" 
+                                @if($insumo->codigo_barra)
+                                    <a href="{{ route('barcode.show', $insumo->id_insumo) }}" 
                                        class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-2 border border-transparent text-xs font-medium rounded-md text-purple-600 bg-purple-50 hover:bg-purple-600 hover:text-white active:bg-purple-700 active:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-150"
                                        title="Ver código de barras">
                                         <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@
                                 @endif
                                 
                                 <!-- Botón Editar -->
-                                <a href="{{ route('productos.edit', $producto->id_producto) }}" 
+                                <a href="{{ route('insumos.edit', $insumo->id_insumo) }}" 
                                    class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-2 border border-transparent text-xs font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
                                     <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -149,10 +149,10 @@
                                 </a>
                                 
                                 <!-- Botón Eliminar -->
-                                <form action="{{ route('productos.destroy', $producto->id_producto) }}" 
+                                <form action="{{ route('insumos.destroy', $insumo->id_insumo) }}" 
                                       method="POST" 
                                       class="inline" 
-                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar el producto \'{{ $producto->nombre_producto }}\'? Esta acción no se puede deshacer.');">
+                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar el insumo \'{{ $insumo->nombre_insumo }}\'? Esta acción no se puede deshacer.');">
                             @csrf
                             @method('DELETE')
                                     <button type="submit" 
@@ -173,8 +173,8 @@
                                 <svg class="w-12 h-12 text-neutral-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                 </svg>
-                                <h3 class="text-lg font-medium text-neutral-900 mb-2">No hay productos</h3>
-                                <p class="text-neutral-500">Comienza creando tu primer producto para organizar tu inventario.</p>
+                                <h3 class="text-lg font-medium text-neutral-900 mb-2">No hay insumos</h3>
+                                <p class="text-neutral-500">Comienza creando tu primer insumo para organizar tu sistema.</p>
                             </div>
                         </td>
                 </tr>
@@ -201,9 +201,9 @@
             
             <!-- Contenido del modal -->
             <div class="text-center">
-                <!-- Información del producto -->
+                <!-- Información del insumo -->
                 <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-2">Producto: <span id="modalProductName" class="font-medium"></span></p>
+                    <p class="text-sm text-gray-600 mb-2">Insumo: <span id="modalInsumoName" class="font-medium"></span></p>
                     <p class="text-sm text-gray-600">Código: <span id="modalBarcode" class="font-mono font-medium text-blue-600"></span></p>
                 </div>
                 
@@ -247,25 +247,25 @@
 </div>
 
 <script>
-function openBarcodeModal(productoId, codigoBarra) {
+function openBarcodeModal(insumoId, codigoBarra) {
     // Mostrar el modal
     document.getElementById('barcodeModal').classList.remove('hidden');
     
     // Actualizar contenido
     document.getElementById('modalBarcode').textContent = codigoBarra;
-    document.getElementById('modalProductName').textContent = 'Producto ' + productoId;
+    document.getElementById('modalInsumoName').textContent = 'Insumo ' + insumoId;
     
     // Cargar imagen del código de barras
-    const imageUrl = `/barcode/${productoId}/small`;
+    const imageUrl = `/barcode/${insumoId}/small`;
     document.getElementById('modalBarcodeImage').src = imageUrl;
     
     // Configurar botones de descarga
     document.getElementById('modalDownloadBtn').onclick = function() {
-        window.open(`/barcode/${productoId}/generate`, '_blank');
+        window.open(`/barcode/${insumoId}/generate`, '_blank');
     };
     
     document.getElementById('modalSvgBtn').onclick = function() {
-        window.open(`/barcode/${productoId}/svg`, '_blank');
+        window.open(`/barcode/${insumoId}/svg`, '_blank');
     };
 }
 

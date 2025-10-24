@@ -4,7 +4,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\InsumoController;
-use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\UnidadMedidaController;
 use App\Http\Controllers\UsersController;
@@ -32,8 +31,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('insumos/unidades-medida', [InsumoController::class, 'getUnidadesMedida'])->name('api.insumos.unidades-medida');
     Route::get('insumos/low-stock', [InsumoController::class, 'getLowStock'])->name('api.insumos.low-stock');
 
-    Route::apiResource('inventarios', InventarioController::class)->names('api.inventarios');
-    Route::get('inventarios/insumos', [InventarioController::class, 'getInsumos'])->name('api.inventarios.insumos');
 
     Route::apiResource('proveedores', ProveedorController::class)->names('api.proveedores');
     Route::get('proveedores/select', [ProveedorController::class, 'getProveedores'])->name('api.proveedores.select');

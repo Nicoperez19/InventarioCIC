@@ -39,7 +39,7 @@
                             </div>
                         </td>
                         <td class="w-1/2 px-3 sm:px-6 py-4">
-                            <div class="text-sm font-medium text-neutral-900 pl-6">{{ $unidad->nombre_unidad }}</div>
+                            <div class="text-sm font-medium text-neutral-900 pl-6">{{ $unidad->nombre_unidad_medida }}</div>
                         </td>
                         <td class="w-1/4 px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center justify-end space-x-1 sm:space-x-3">
@@ -56,7 +56,7 @@
                                 <form action="{{ route('unidades.destroy', $unidad->id_unidad) }}" 
                                       method="POST" 
                                       class="inline" 
-                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar la unidad \'{{ $unidad->nombre_unidad }}\'? Esta acción no se puede deshacer.');">
+                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar la unidad \'{{ $unidad->nombre_unidad_medida }}\'? Esta acción no se puede deshacer.');">
                             @csrf
                             @method('DELETE')
                                     <button type="submit" 

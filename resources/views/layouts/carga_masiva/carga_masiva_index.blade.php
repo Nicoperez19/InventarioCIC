@@ -1,326 +1,171 @@
-@extends('layouts.app')
-
-@section('title', 'Carga Masiva de Insumos')
-
-@section('content')
-<div class="min-h-screen bg-gray-50 py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between">
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-dark-teal rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                        </svg>
+                    </div>
+                </div>
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Carga Masiva de Insumos</h1>
-                    <p class="mt-2 text-sm text-gray-600">
-                        Sube un archivo Excel (.xlsx, .xls) o CSV para crear tipos de insumo y cargar insumos automáticamente.
-                    </p>
+                    <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                        {{ __('Carga Masiva de Insumos') }}
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">Importa insumos desde archivos Excel o CSV</p>
                 </div>
             </div>
         </div>
+    </x-slot>
 
-        <!-- Formulario de carga -->
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-8">
-                <form id="cargaMasivaForm" enctype="multipart/form-data">
+    <div class="py-8">
+        <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
+            
+            <!-- Mensajes de éxito/error -->
+            @if (session('success'))
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Formulario de carga -->
+            <div class="p-4 bg-white shadow sm:p-8 sm:rounded-lg">
+                <form action="{{ route('carga-masiva.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                     @csrf
-                    <div class="space-y-6">
-                        <!-- Información del archivo -->
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Información del Archivo</h3>
-                            <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-3">
-                                        <h3 class="text-sm font-medium text-blue-800">Formato del archivo</h3>
-                                        <div class="mt-2 text-sm text-blue-700">
-                                            <ul class="list-disc list-inside space-y-1">
-                                                <li><strong>Hojas del Excel:</strong> Cada hoja creará un "Tipo de Insumo"</li>
-                                                <li><strong>Fila 4:</strong> Contiene los headers de las columnas</li>
-                                                <li><strong>Columna B:</strong> Código del insumo (se genera automáticamente si está vacío)</li>
-                                                <li><strong>Columna C:</strong> Nombre del insumo (obligatorio)</li>
-                                                <li><strong>Columna D:</strong> Unidad de medida (se crea automáticamente si no existe)</li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                    
+                    <!-- Instrucciones -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 text-light-cyan mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Instrucciones para la Carga Masiva
+                        </h3>
+                        <p class="text-sm text-gray-500 mt-1">Formato y estructura requerida del archivo</p>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div class="text-blue-700 space-y-2">
+                            <p><strong>Formato del archivo:</strong> Excel (.xlsx, .xls) o CSV</p>
+                            <p><strong>Estructura requerida:</strong></p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li>Los nombres de las hojas se convertirán en <strong>Tipos de Insumo</strong></li>
+                                <li>Los datos de insumos deben comenzar desde la <strong>fila 4</strong></li>
+                                <li><strong>Columna B:</strong> Código del insumo (opcional, se genera automáticamente si está vacío)</li>
+                                <li><strong>Columna C:</strong> Nombre del insumo (obligatorio)</li>
+                                <li><strong>Columna D:</strong> Unidad de medida (opcional, se crea automáticamente si no existe)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Selección de archivo -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-4">
+                            <svg class="w-5 h-5 text-light-cyan mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                            </svg>
+                            Seleccionar Archivo
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="archivo" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Archivo Excel o CSV
+                                </label>
+                                <input type="file" 
+                                       id="archivo" 
+                                       name="archivo" 
+                                       accept=".xlsx,.xls,.csv"
+                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                       required>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Formatos soportados: .xlsx, .xls, .csv (máximo 10MB)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ejemplo de estructura -->
+                    <div class="mb-6">
+                        <h4 class="text-md font-semibold text-gray-900 flex items-center mb-3">
+                            <svg class="w-4 h-4 text-light-cyan mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Ejemplo de Estructura del Archivo
+                        </h4>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="text-yellow-700 text-sm">
+                                <p><strong>Hoja 1:</strong> "Medicamentos"</p>
+                                <p><strong>Hoja 2:</strong> "Materiales de Oficina"</p>
+                                <p><strong>Hoja 3:</strong> "Equipos Médicos"</p>
+                                <div class="mt-2">
+                                    <p><strong>Datos en cada hoja (desde fila 4):</strong></p>
+                                    <table class="mt-2 border border-yellow-300 text-xs">
+                                        <tr class="bg-yellow-100">
+                                            <td class="border border-yellow-300 px-2 py-1"><strong>Columna B</strong></td>
+                                            <td class="border border-yellow-300 px-2 py-1"><strong>Columna C</strong></td>
+                                            <td class="border border-yellow-300 px-2 py-1"><strong>Columna D</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-yellow-300 px-2 py-1">MED001</td>
+                                            <td class="border border-yellow-300 px-2 py-1">Paracetamol 500mg</td>
+                                            <td class="border border-yellow-300 px-2 py-1">Caja</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-yellow-300 px-2 py-1"></td>
+                                            <td class="border border-yellow-300 px-2 py-1">Ibuprofeno 400mg</td>
+                                            <td class="border border-yellow-300 px-2 py-1">Caja</td>
+                                        </tr>
+                                    </table>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Selector de archivo -->
-                        <div>
-                            <label for="archivo" class="block text-sm font-medium text-gray-700 mb-2">
-                                Seleccionar archivo
-                            </label>
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors duration-200" 
-                                 id="dropzone">
-                                <div class="space-y-1 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <div class="flex text-sm text-gray-600">
-                                        <label for="archivo" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                            <span>Subir archivo</span>
-                                            <input id="archivo" name="archivo" type="file" class="sr-only" accept=".xlsx,.xls,.csv" required>
-                                        </label>
-                                        <p class="pl-1">o arrastra y suelta aquí</p>
-                                    </div>
-                                    <p class="text-xs text-gray-500">Excel (.xlsx, .xls) o CSV hasta 10MB</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botón de carga -->
-                        <div class="flex justify-end">
-                            <button type="submit" 
-                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    id="btnCargar">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                                Procesar Archivo
-                            </button>
-                        </div>
+                    <!-- Botones -->
+                    <div class="flex justify-end space-x-4">
+                        <a href="{{ route('insumos.index') }}" 
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-dark-teal rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal transition-colors duration-150 shadow-sm">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                            </svg>
+                            Procesar Archivo
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
-
-        <!-- Resultados -->
-        <div id="resultados" class="mt-8 hidden">
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Resultados de la Carga</h3>
-                </div>
-                <div class="px-6 py-4">
-                    <div id="resultadosContenido"></div>
-                </div>
-            </div>
-        </div>
     </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('cargaMasivaForm');
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('archivo');
-    const btnCargar = document.getElementById('btnCargar');
-    const resultados = document.getElementById('resultados');
-    const resultadosContenido = document.getElementById('resultadosContenido');
-
-    // Drag and drop
-    dropzone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        dropzone.classList.add('border-indigo-400', 'bg-indigo-50');
-    });
-
-    dropzone.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        dropzone.classList.remove('border-indigo-400', 'bg-indigo-50');
-    });
-
-    dropzone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        dropzone.classList.remove('border-indigo-400', 'bg-indigo-50');
-        
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            fileInput.files = files;
-            updateFileDisplay(files[0]);
-        }
-    });
-
-    // File input change
-    fileInput.addEventListener('change', function(e) {
-        if (e.target.files.length > 0) {
-            updateFileDisplay(e.target.files[0]);
-        }
-    });
-
-    function updateFileDisplay(file) {
-        const dropzoneContent = dropzone.querySelector('div');
-        dropzoneContent.innerHTML = `
-            <div class="flex items-center">
-                <svg class="w-8 h-8 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <div class="text-left">
-                    <p class="text-sm font-medium text-gray-900">${file.name}</p>
-                    <p class="text-xs text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                </div>
-            </div>
-        `;
-    }
-
-    // Form submission
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        
-        btnCargar.disabled = true;
-        btnCargar.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Procesando...
-        `;
-
-        fetch('{{ route("carga-masiva.store") }}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                mostrarResultados(data.data);
-            } else {
-                mostrarError(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al procesar el archivo');
-        })
-        .finally(() => {
-            btnCargar.disabled = false;
-            btnCargar.innerHTML = `
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                </svg>
-                Procesar Archivo
-            `;
-        });
-    });
-
-    function mostrarResultados(data) {
-        resultadosContenido.innerHTML = `
-            <div class="space-y-6">
-                <!-- Resumen -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-green-50 border border-green-200 rounded-md p-4">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-medium text-green-800">Tipos de Insumo Creados</h3>
-                                <p class="mt-1 text-sm text-green-700">${data.tipos_insumo_creados} tipos de insumo procesados</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-medium text-blue-800">Insumos Creados</h3>
-                                <p class="mt-1 text-sm text-blue-700">${data.insumos_creados} insumos procesados</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Detalles de Tipos de Insumo -->
-                ${data.tipos_insumo && data.tipos_insumo.length > 0 ? `
-                <div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-3">Tipos de Insumo Procesados</h4>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Color</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                ${data.tipos_insumo.map(tipo => `
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${tipo.nombre_tipo}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: ${tipo.color}; color: white;">
-                                                ${tipo.color}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            ${tipo.existe ? '<span class="text-yellow-600">Ya existía</span>' : '<span class="text-green-600">Creado</span>'}
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                ` : ''}
-
-                <!-- Detalles de Insumos (solo primeros 10) -->
-                ${data.insumos && data.insumos.length > 0 ? `
-                <div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-3">Insumos Creados (mostrando primeros 10)</h4>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                ${data.insumos.slice(0, 10).map(insumo => `
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${insumo.codigo_barra}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${insumo.nombre_insumo}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${insumo.tipo_insumo}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                        ${data.insumos.length > 10 ? `<p class="mt-2 text-sm text-gray-500">... y ${data.insumos.length - 10} insumos más</p>` : ''}
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-        `;
-        
-        resultados.classList.remove('hidden');
-        resultados.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function mostrarError(mensaje) {
-        resultadosContenido.innerHTML = `
-            <div class="bg-red-50 border border-red-200 rounded-md p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800">Error</h3>
-                        <p class="mt-1 text-sm text-red-700">${mensaje}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        resultados.classList.remove('hidden');
-        resultados.scrollIntoView({ behavior: 'smooth' });
-    }
-});
-</script>
-@endsection
+</x-app-layout>

@@ -12,7 +12,7 @@
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">
                     {{ __('Editar unidad') }} - {{ $unidad->id_unidad }}
                 </h2>
-                <p class="text-sm text-gray-600 mt-1">Modifica la información de la unidad {{ $unidad->nombre_unidad }}</p>
+                <p class="text-sm text-gray-600 mt-1">Modifica la información de la unidad {{ $unidad->nombre_unidad_medida }}</p>
             </div>
         </div>
     </x-slot>
@@ -55,11 +55,11 @@
                                 </svg>
                                 Nombre de la Unidad
                             </label>
-                            <input type="text" name="nombre_unidad" value="{{ old('nombre_unidad', $unidad->nombre_unidad) }}" 
+                            <input type="text" name="nombre_unidad_medida" value="{{ old('nombre_unidad_medida', $unidad->nombre_unidad_medida) }}" 
                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-light-cyan focus:border-light-cyan transition-colors" 
                                    required placeholder="Ej: Kilogramo, Litro, Metro">
                             <p class="mt-1.5 text-xs text-gray-500">Nombre descriptivo completo</p>
-                            @error('nombre_unidad')
+                            @error('nombre_unidad_medida')
                                 <div class="flex items-center mt-2 text-sm text-red-600">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>

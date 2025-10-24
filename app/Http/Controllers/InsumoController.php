@@ -15,6 +15,19 @@ class InsumoController extends Controller
         $this->middleware('auth:sanctum');
     }
 
+    // Métodos para web
+    public function create()
+    {
+        $unidades = UnidadMedida::all();
+        return view('layouts.insumo.insumo_create', compact('unidades'));
+    }
+
+    public function edit(Insumo $insumo)
+    {
+        $unidades = UnidadMedida::all();
+        return view('layouts.insumo.insumo_edit', compact('insumo', 'unidades'));
+    }
+
     public function index(Request $request): JsonResponse
     {
         try {
@@ -67,7 +80,7 @@ class InsumoController extends Controller
     public function show(Insumo $insumo): JsonResponse
     {
         try {
-            $insumo->load(['unidadMedida', 'inventarios', 'departamentos']);
+            $insumo->load(['unidadMedida', 'departamentos']);
 
             return response()->json([
                 'success' => true,
@@ -247,7 +260,7 @@ class InsumoController extends Controller
     public function getUnidadesMedida(): JsonResponse
     {
         try {
-            $unidades = UnidadMedida::orderBy('nombre_unidad')->get();
+            $unidades = UnidadMedida::orderBy('nombre_unidad_medida')->get();
 
             return response()->json([
                 'success' => true,

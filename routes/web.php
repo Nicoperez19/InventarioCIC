@@ -5,7 +5,6 @@ use App\Http\Controllers\CargaMasivaController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\InsumoController;
-use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\RoleController;
@@ -93,14 +92,6 @@ Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
     Route::post('/productos/{producto}/adjust-stock', [InsumoController::class, 'adjustStock'])->name('productos.adjust-stock');
 });
 
-// Rutas de inventario
-Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
-    Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
-    Route::post('/inventario', [InventarioController::class, 'store'])->name('inventario.store');
-    Route::put('/inventario/{inventario}', [InventarioController::class, 'update'])->name('inventario.update');
-    Route::delete('/inventario/{inventario}', [InventarioController::class, 'destroy'])->name('inventario.destroy');
-    Route::post('/inventario/{inventario}/apply', [InventarioController::class, 'apply'])->name('inventario.apply');
-});
 
 
 // Rutas de códigos de barras
@@ -151,10 +142,21 @@ Route::middleware(['auth', 'can:manage-invoices'])->group(function () {
     Route::get('/facturas/{factura}/download', [FacturaController::class, 'download'])->name('facturas.download');
 });
 
+// Rutas de gestión de insumos
+Route::middleware(['auth', 'can:manage-insumos'])->group(function () {
+    Route::view('insumos', 'layouts.insumo.insumo_index')->name('insumos.index');
+    Route::get('/insumos/create', [InsumoController::class, 'create'])->name('insumos.create');
+    Route::post('/insumos', [InsumoController::class, 'store'])->name('insumos.store');
+    Route::get('/insumos/{insumo}', [InsumoController::class, 'show'])->name('insumos.show');
+    Route::get('/insumos/{insumo}/edit', [InsumoController::class, 'edit'])->name('insumos.edit');
+    Route::put('/insumos/{insumo}', [InsumoController::class, 'update'])->name('insumos.update');
+    Route::delete('/insumos/{insumo}', [InsumoController::class, 'destroy'])->name('insumos.destroy');
+});
+
 // Rutas de carga masiva
-Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
+Route::middleware(['auth', 'can:manage-insumos'])->group(function () {
     Route::get('/carga-masiva', [CargaMasivaController::class, 'index'])->name('carga-masiva.index');
-    Route::post('/carga-masiva', [CargaMasivaController::class, 'store'])->name('carga-masiva.store');
+    Route::post('/carga-masiva/upload', [CargaMasivaController::class, 'upload'])->name('carga-masiva.upload');
 });
 
 // Rutas de gestión de solicitudes

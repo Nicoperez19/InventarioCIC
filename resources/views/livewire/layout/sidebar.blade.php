@@ -131,14 +131,6 @@ new class extends Component {}; ?>
                     </div>
                 </div>
 
-                <a href="{{ route('inventario.index') }}" 
-                   class="group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 {{ request()->routeIs('inventario.index') ? 'bg-light-cyan text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' }}">
-                    <x-icons.package class="flex-shrink-0 w-5 h-5" />
-                    <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
-                          :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
-                        Inventario
-                    </span>
-                </a>
 
                 <a href="{{ route('carga-masiva.index') }}" 
                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 {{ request()->routeIs('carga-masiva.index') ? 'bg-light-cyan text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' }}">

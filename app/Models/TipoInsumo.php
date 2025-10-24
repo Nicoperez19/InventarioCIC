@@ -13,14 +13,7 @@ class TipoInsumo extends Model
     protected $table = 'tipo_insumos';
 
     protected $fillable = [
-        'nombre_tipo',
-        'descripcion',
-        'color',
-        'activo'
-    ];
-
-    protected $casts = [
-        'activo' => 'boolean'
+        'nombre_tipo'
     ];
 
     /**
@@ -32,12 +25,12 @@ class TipoInsumo extends Model
     }
 
     /**
-     * Scope para tipos activos
+     * Scope para tipos activos (comentado - campo no existe)
      */
-    public function scopeActivos($query)
-    {
-        return $query->where('activo', true);
-    }
+    // public function scopeActivos($query)
+    // {
+    //     return $query->where('activo', true);
+    // }
 
     /**
      * Scope para ordenar por nombre
@@ -88,26 +81,26 @@ class TipoInsumo extends Model
     }
 
     /**
-     * Verificar si el tipo está activo
+     * Verificar si el tipo está activo (comentado - campo no existe)
      */
-    public function isActive(): bool
-    {
-        return $this->activo;
-    }
+    // public function isActive(): bool
+    // {
+    //     return $this->activo;
+    // }
 
     /**
-     * Activar el tipo
+     * Activar el tipo (comentado - campo no existe)
      */
-    public function activar(): void
-    {
-        $this->update(['activo' => true]);
-    }
+    // public function activar(): void
+    // {
+    //     $this->update(['activo' => true]);
+    // }
 
     /**
-     * Desactivar el tipo
+     * Desactivar el tipo (comentado - campo no existe)
      */
-    public function desactivar(): void
-    {
-        $this->update(['activo' => false]);
-    }
+    // public function desactivar(): void
+    // {
+    //     $this->update(['activo' => false]);
+    // }
 }

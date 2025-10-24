@@ -23,14 +23,25 @@ class ExcelImportService
     {
         try {
             $spreadsheet = $this->loadFile($filePath, $fileExtension);
-            $sheetNames = $spreadsheet->getSheetNames();
             
-            // Paso 1: Crear tipos de insumo desde los nombres de las hojas
-            $this->createTipoInsumosFromSheets($sheetNames);
-            
-            // Paso 2: Procesar cada hoja para crear insumos
-            foreach ($sheetNames as $sheetName) {
-                $this->processSheet($spreadsheet, $sheetName);
+            if (strtolower($fileExtension) === 'csv') {
+                // Para CSV, usar el nombre del archivo como tipo de insumo
+                $fileName = pathinfo($filePath, PATHINFO_FILENAME);
+                $this->createTipoInsumosFromSheets([$fileName]);
+                // Para CSV, usar la primera hoja (índice 0)
+                $worksheet = $spreadsheet->getSheet(0);
+                $this->processSheet($worksheet, $fileName);
+            } else {
+                // Para Excel, usar los nombres de las hojas
+                $sheetNames = $spreadsheet->getSheetNames();
+                
+                // Paso 1: Crear tipos de insumo desde los nombres de las hojas
+                $this->createTipoInsumosFromSheets($sheetNames);
+                
+                // Paso 2: Procesar cada hoja para crear insumos
+                foreach ($sheetNames as $sheetName) {
+                    $this->processSheet($spreadsheet, $sheetName);
+                }
             }
             
             return [
@@ -69,9 +80,7 @@ class ExcelImportService
             
             if (!$tipoInsumo) {
                 $tipoInsumo = TipoInsumo::create([
-                    'nombre_tipo' => $sheetName,
-                    'descripcion' => "Tipo de insumo creado automáticamente desde hoja: {$sheetName}",
-                    'activo' => true
+                    'nombre_tipo' => $sheetName
                 ]);
             }
             
@@ -79,12 +88,18 @@ class ExcelImportService
         }
     }
 
-    private function processSheet($spreadsheet, $sheetName)
+    private function processSheet($spreadsheetOrWorksheet, $sheetName)
     {
-        $worksheet = $spreadsheet->getSheetByName($sheetName);
-        if (!$worksheet) {
-            $this->errors[] = "No se pudo acceder a la hoja: {$sheetName}";
-            return;
+        // Si es un Spreadsheet, obtener la hoja por nombre
+        if (method_exists($spreadsheetOrWorksheet, 'getSheetByName')) {
+            $worksheet = $spreadsheetOrWorksheet->getSheetByName($sheetName);
+            if (!$worksheet) {
+                $this->errors[] = "No se pudo acceder a la hoja: {$sheetName}";
+                return;
+            }
+        } else {
+            // Si ya es un Worksheet, usarlo directamente
+            $worksheet = $spreadsheetOrWorksheet;
         }
 
         $tipoInsumoId = $this->tipoInsumoMap[$sheetName] ?? null;
@@ -194,3 +209,4 @@ class ExcelImportService
         return $this->successCount;
     }
 }
+

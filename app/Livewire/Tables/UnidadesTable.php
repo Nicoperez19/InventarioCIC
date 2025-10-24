@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\Unidad;
+use App\Models\UnidadMedida;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -15,7 +15,7 @@ class UnidadesTable extends Component
     public function render()
     {
         return view('livewire.tables.unidades-table', [
-            'unidades' => Unidad::paginate(10),
+            'unidades' => UnidadMedida::paginate(10),
         ]);
     }
 

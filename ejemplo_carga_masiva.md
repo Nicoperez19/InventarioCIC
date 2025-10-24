@@ -85,3 +85,4 @@ Después de procesar este archivo, el sistema creará:
 - **Excel**: .xlsx, .xls
 - **CSV**: .csv
 - **Tamaño máximo**: 10MB
+

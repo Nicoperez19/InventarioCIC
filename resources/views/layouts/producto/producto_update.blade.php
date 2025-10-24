@@ -89,7 +89,7 @@
                                         required>
                                     @foreach($unidades as $u)
                                         <option value="{{ $u->id_unidad }}" {{ old('id_unidad', $producto->id_unidad) === $u->id_unidad ? 'selected' : '' }}>
-                                            {{ $u->nombre_unidad }} ({{ $u->id_unidad }})
+                                            {{ $u->nombre_unidad_medida }} ({{ $u->id_unidad }})
                                         </option>
                                     @endforeach
                                 </select>
