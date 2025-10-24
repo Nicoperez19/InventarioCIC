@@ -18,7 +18,6 @@ class UsersController extends Controller
     public function __construct(UserService $userService)
     {
         $this->middleware('auth');
-        $this->middleware('can:manage-users')->except(['edit', 'update']);
         $this->userService = $userService;
     }
 

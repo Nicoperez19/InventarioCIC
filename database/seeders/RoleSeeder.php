@@ -27,20 +27,21 @@ class RoleSeeder extends Seeder
 
         $permissions = [
             // Users
-            'manage-users', 'create-users', 'edit-users', 'delete-users', 'view-users',
+            'create-users', 'edit-users', 'delete-users', 'view-users',
             // Inventory / Products
-            'manage-inventory', 'create-products', 'edit-products', 'delete-products', 'view-products',
+            'create-products', 'edit-products', 'delete-products', 'view-products',
             'view-inventory', 'create-inventory', 'edit-inventory', 'delete-inventory', 'apply-inventory',
+            'apply-all-inventory', 'view-inventory-discrepancies',
             // Requests
             'view-requests', 'create-requests', 'approve-requests', 'reject-requests', 'deliver-requests',
             'view-pending-requests',
             // Departments
-            'manage-departments', 'create-departments', 'edit-departments', 'delete-departments', 'view-departments',
+            'create-departments', 'edit-departments', 'delete-departments', 'view-departments',
             // Units
-            'manage-units', 'create-units', 'edit-units', 'delete-units', 'view-units',
+            'create-units', 'edit-units', 'delete-units', 'view-units',
             // Roles & permissions
-            'manage-roles', 'create-roles', 'edit-roles', 'delete-roles', 'view-roles',
-            'manage-permissions', 'create-permissions', 'edit-permissions', 'delete-permissions', 'view-permissions',
+            'create-roles', 'edit-roles', 'delete-roles', 'view-roles',
+            'create-permissions', 'edit-permissions', 'delete-permissions', 'view-permissions',
         ];
 
         foreach ($permissions as $name) {

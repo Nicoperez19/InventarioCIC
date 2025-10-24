@@ -11,7 +11,7 @@
             @forelse($permissions as $permission)
                 <tr class="hover:bg-light-cyan/10 transition-colors duration-150">
                     <td class="px-4 py-2">{{ $permission->id }}</td>
-                    <td class="px-4 py-2">{{ $permission->name }}</td>
+                    <td class="px-4 py-2">{{ translatePermission($permission->name) }}</td>
                     <td class="px-4 py-2">
                         <a href="{{ route('permissions.edit', $permission) }}" class="text-blue-500 mr-3">Editar</a>
                         <form action="{{ route('permissions.destroy', $permission) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar este permiso?');">
