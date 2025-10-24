@@ -50,14 +50,10 @@ class User extends Authenticatable
         return $this->belongsTo(Departamento::class, 'id_depto', 'id_depto');
     }
 
-    public function solicitudes(): HasMany
-    {
-        return $this->hasMany(Solicitud::class, 'id_usuario', 'run');
-    }
 
-    public function movimientos(): HasMany
+    public function facturas(): HasMany
     {
-        return $this->hasMany(Movimientos::class, 'id_usuario', 'run');
+        return $this->hasMany(Factura::class, 'run', 'run');
     }
 
     // Métodos de autenticación personalizados

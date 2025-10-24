@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('unidads', function (Blueprint $table) {
+        Schema::create('unidad_medidas', function (Blueprint $table) {
             $table->string('id_unidad')->primary();
-            $table->string('nombre_unidad');
+            $table->string('nombre_unidad_medida');
             $table->softDeletes(); // Agregar soft deletes
             $table->timestamps();
 
             // Índices para optimización
-            $table->index(['nombre_unidad', 'deleted_at']);
+            $table->index(['nombre_unidad_medida', 'deleted_at']);
             $table->index('created_at');
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('unidads');
+        Schema::dropIfExists('unidad_medidas');
     }
 };

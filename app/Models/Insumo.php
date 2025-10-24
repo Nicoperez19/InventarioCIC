@@ -9,21 +9,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Producto extends Model
+class Insumo extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'id_producto',
+        'id_insumo',
         'codigo_barra',
-        'nombre_producto',
+        'nombre_insumo',
         'stock_minimo',
         'stock_actual',
-        'observaciones',
         'id_unidad',
     ];
 
-    protected $primaryKey = 'id_producto';
+    protected $table = 'insumos';
+
+    protected $primaryKey = 'id_insumo';
 
     public $incrementing = false;
 
@@ -41,29 +42,15 @@ class Producto extends Model
     }
 
     // Relaciones
-    public function unidad(): BelongsTo
+    public function unidadMedida(): BelongsTo
     {
-        return $this->belongsTo(Unidad::class, 'id_unidad', 'id_unidad');
+        return $this->belongsTo(UnidadMedida::class, 'id_unidad', 'id_unidad');
     }
 
-    public function inventarios(): HasMany
-    {
-        return $this->hasMany(Inventario::class, 'id_producto', 'id_producto');
-    }
-
-    public function movimientos(): HasMany
-    {
-        return $this->hasMany(Movimientos::class, 'id_producto', 'id_producto');
-    }
-
-    public function detalleSolicitudes(): HasMany
-    {
-        return $this->hasMany(Detalle_Solicitud::class, 'id_producto', 'id_producto');
-    }
-
+   
     public function departamentos(): BelongsToMany
     {
-        return $this->belongsToMany(Departamento::class, 'departamento_producto', 'id_producto', 'id_depto')
+        return $this->belongsToMany(Departamento::class, 'departamento_insumo', 'id_insumo', 'id_depto')
             ->withTimestamps();
     }
 

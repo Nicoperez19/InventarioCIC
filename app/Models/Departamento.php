@@ -12,6 +12,8 @@ class Departamento extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'departamentos';
+
     protected $fillable = [
         'id_depto',
         'nombre_depto',
@@ -38,11 +40,12 @@ class Departamento extends Model
         return $this->hasMany(User::class, 'id_depto', 'id_depto');
     }
 
-    public function productos(): BelongsToMany
+    public function insumos(): BelongsToMany
     {
-        return $this->belongsToMany(Producto::class, 'departamento_producto', 'id_depto', 'id_producto')
+        return $this->belongsToMany(Insumo::class, 'departamento_insumo', 'id_depto', 'id_insumo')
             ->withTimestamps();
     }
+
 
     // Métodos de negocio
     public function getActiveUsersCountAttribute(): int

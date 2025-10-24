@@ -3,9 +3,11 @@
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\CargaMasivaController;
 use App\Http\Controllers\DepartamentoController;
+use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\UnidadController;
@@ -129,4 +131,16 @@ Route::middleware(['auth', 'can:manage-roles'])->group(function () {
     Route::get('/permissions/{permission}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
     Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
     Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+});
+
+// Rutas de proveedores
+Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
+    Route::resource('proveedores', ProveedorController::class);
+    Route::get('/proveedores-api', [ProveedorController::class, 'getProveedores'])->name('proveedores.api');
+});
+
+// Rutas de facturas
+Route::middleware(['auth'])->group(function () {
+    Route::resource('facturas', FacturaController::class);
+    Route::get('/facturas/{factura}/download', [FacturaController::class, 'download'])->name('facturas.download');
 });

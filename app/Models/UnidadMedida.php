@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Unidad extends Model
+class UnidadMedida extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -15,6 +15,8 @@ class Unidad extends Model
         'id_unidad',
         'nombre_unidad',
     ];
+
+    protected $table = 'unidad_medidas';
 
     protected $primaryKey = 'id_unidad';
 
@@ -32,58 +34,58 @@ class Unidad extends Model
     }
 
     // Relaciones
-    public function productos(): HasMany
+    public function insumos(): HasMany
     {
-        return $this->hasMany(Producto::class, 'id_unidad', 'id_unidad');
+        return $this->hasMany(Insumo::class, 'id_unidad', 'id_unidad');
     }
 
     // Métodos de negocio
-    public function getActiveProductsCountAttribute(): int
+    public function getActiveInsumosCountAttribute(): int
     {
-        return $this->productos()->whereNull('deleted_at')->count();
+        return $this->insumos()->whereNull('deleted_at')->count();
     }
 
-    public function getTotalProductsCountAttribute(): int
+    public function getTotalInsumosCountAttribute(): int
     {
-        return $this->productos()->count();
+        return $this->insumos()->count();
     }
 
-    public function hasActiveProducts(): bool
+    public function hasActiveInsumos(): bool
     {
-        return $this->active_products_count > 0;
+        return $this->active_insumos_count > 0;
     }
 
     public function canBeDeleted(): bool
     {
-        return ! $this->hasActiveProducts();
+        return ! $this->hasActiveInsumos();
     }
 
     public function getTotalStockAttribute(): int
     {
-        return $this->productos()->sum('stock_actual');
+        return $this->insumos()->sum('stock_actual');
     }
 
-    public function getLowStockProductsCountAttribute(): int
+    public function getLowStockInsumosCountAttribute(): int
     {
-        return $this->productos()->whereRaw('stock_actual <= stock_minimo')->count();
+        return $this->insumos()->whereRaw('stock_actual <= stock_minimo')->count();
     }
 
-    public function getOutOfStockProductsCountAttribute(): int
+    public function getOutOfStockInsumosCountAttribute(): int
     {
-        return $this->productos()->where('stock_actual', '<=', 0)->count();
+        return $this->insumos()->where('stock_actual', '<=', 0)->count();
     }
 
     // Scopes
-    public function scopeWithActiveProducts($query)
+    public function scopeWithActiveInsumos($query)
     {
-        return $query->whereHas('productos', function ($q) {
+        return $query->whereHas('insumos', function ($q) {
             $q->whereNull('deleted_at');
         });
     }
 
-    public function scopeWithoutProducts($query)
+    public function scopeWithoutInsumos($query)
     {
-        return $query->whereDoesntHave('productos');
+        return $query->whereDoesntHave('insumos');
     }
 
     public function scopeOrderByName($query, string $direction = 'asc')
@@ -91,33 +93,33 @@ class Unidad extends Model
         return $query->orderBy('nombre_unidad', $direction);
     }
 
-    public function scopeWithProductsCount($query)
+    public function scopeWithInsumosCount($query)
     {
-        return $query->withCount('productos');
+        return $query->withCount('insumos');
     }
 
     public function scopeWithStockInfo($query)
     {
         return $query->withCount([
-            'productos as total_products',
-            'productos as low_stock_products' => function ($q) {
+            'insumos as total_insumos',
+            'insumos as low_stock_insumos' => function ($q) {
                 $q->whereRaw('stock_actual <= stock_minimo');
             },
-            'productos as out_of_stock_products' => function ($q) {
+            'insumos as out_of_stock_insumos' => function ($q) {
                 $q->where('stock_actual', '<=', 0);
             },
         ]);
     }
 
     // Métodos estáticos
-    public static function getWithProducts()
+    public static function getWithInsumos()
     {
-        return static::withActiveProducts()->withStockInfo()->orderByName()->get();
+        return static::withActiveInsumos()->withStockInfo()->orderByName()->get();
     }
 
     public static function getEmpty()
     {
-        return static::withoutProducts()->orderByName()->get();
+        return static::withoutInsumos()->orderByName()->get();
     }
 
     public static function findByName(string $nombre): ?self
@@ -125,15 +127,15 @@ class Unidad extends Model
         return static::where('nombre_unidad', $nombre)->first();
     }
 
-    public static function createUnidad(array $data): self
+    public static function createUnidadMedida(array $data): self
     {
         return static::create($data);
     }
 
     public static function getWithLowStock()
     {
-        return static::withActiveProducts()
-            ->whereHas('productos', function ($q) {
+        return static::withActiveInsumos()
+            ->whereHas('insumos', function ($q) {
                 $q->whereRaw('stock_actual <= stock_minimo');
             })
             ->withStockInfo()
