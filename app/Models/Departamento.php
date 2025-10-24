@@ -46,6 +46,11 @@ class Departamento extends Model
             ->withTimestamps();
     }
 
+    public function solicitudes(): HasMany
+    {
+        return $this->hasMany(Solicitud::class, 'departamento_id', 'id_depto');
+    }
+
 
     // Métodos de negocio
     public function getActiveUsersCountAttribute(): int

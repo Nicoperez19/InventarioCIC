@@ -27,3 +27,4 @@ class ProveedoresTable extends Component
         return 'vendor.livewire.tailwind';
     }
 }
+

@@ -2,23 +2,21 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\Factura;
-use Illuminate\Support\Facades\Auth;
+use App\Models\TipoInsumo;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 
-#[Title('Facturas')]
-class FacturasTable extends Component
+#[Title('Tipos de Insumo')]
+class TipoInsumosTable extends Component
 {
     use WithPagination;
 
     public function render()
     {
-        return view('livewire.tables.facturas-table', [
-            'facturas' => Factura::where('run', Auth::user()->run)
-                ->with('proveedor')
-                ->orderBy('created_at', 'desc')
+        return view('livewire.tables.tipo-insumos-table', [
+            'tiposInsumo' => TipoInsumo::withCount('insumos')
+                ->orderBy('nombre_tipo')
                 ->paginate(10),
         ]);
     }

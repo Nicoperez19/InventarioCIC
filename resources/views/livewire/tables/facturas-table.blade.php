@@ -36,14 +36,7 @@
                             <span class="hidden sm:inline">Fecha</span>
                         </div>
                     </th>
-                    <th class="w-1/12 px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        <div class="flex items-center space-x-1 pl-6">
-                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                            </svg>
-                            <span class="hidden sm:inline">Archivo</span>
-                        </div>
-                    </th>
+                  
                     <th class="w-2/12 px-3 sm:px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <div class="flex items-center justify-end space-x-1 pr-6">
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,19 +64,7 @@
                         <td class="w-2/12 px-3 sm:px-6 py-4">
                             <div class="text-sm text-neutral-600 pl-6">{{ $factura->fecha_factura->format('d/m/Y') }}</div>
                         </td>
-                        <td class="w-1/12 px-3 sm:px-6 py-4">
-                            <div class="text-sm text-neutral-600 pl-6">
-                                @if($factura->tieneArchivo())
-                                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                @else
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                @endif
-                            </div>
-                        </td>
+                    
                         <td class="w-2/12 px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center justify-end space-x-1 sm:space-x-3">
                                 <!-- Botón Ver -->
@@ -156,3 +137,4 @@
         {{ $facturas->links() }}
     </div>
 </div>
+

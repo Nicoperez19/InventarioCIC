@@ -32,6 +32,10 @@ return new class extends Migration
 
             // Índice compuesto para consultas de stock
             $table->index(['stock_actual', 'stock_minimo', 'deleted_at']);
+
+            $table->foreignId('tipo_insumo_id')->nullable()->constrained('tipo_insumos')->onDelete('set null');
+            $table->index('tipo_insumo_id');
+            
         });
     }
 

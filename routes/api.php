@@ -19,26 +19,26 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('users', UsersController::class);
-    Route::get('users/departamentos', [UsersController::class, 'getDepartamentos']);
-    Route::get('users/permissions', [UsersController::class, 'getPermissions']);
+    Route::apiResource('users', UsersController::class)->names('api.users');
+    Route::get('users/departamentos', [UsersController::class, 'getDepartamentos'])->name('api.users.departamentos');
+    Route::get('users/permissions', [UsersController::class, 'getPermissions'])->name('api.users.permissions');
 
-    Route::apiResource('departamentos', DepartamentoController::class);
+    Route::apiResource('departamentos', DepartamentoController::class)->names('api.departamentos');
 
-    Route::apiResource('unidades-medida', UnidadMedidaController::class);
+    Route::apiResource('unidades-medida', UnidadMedidaController::class)->names('api.unidades-medida');
 
-    Route::apiResource('insumos', InsumoController::class);
-    Route::post('insumos/{insumo}/adjust-stock', [InsumoController::class, 'adjustStock']);
-    Route::get('insumos/unidades-medida', [InsumoController::class, 'getUnidadesMedida']);
-    Route::get('insumos/low-stock', [InsumoController::class, 'getLowStock']);
+    Route::apiResource('insumos', InsumoController::class)->names('api.insumos');
+    Route::post('insumos/{insumo}/adjust-stock', [InsumoController::class, 'adjustStock'])->name('api.insumos.adjust-stock');
+    Route::get('insumos/unidades-medida', [InsumoController::class, 'getUnidadesMedida'])->name('api.insumos.unidades-medida');
+    Route::get('insumos/low-stock', [InsumoController::class, 'getLowStock'])->name('api.insumos.low-stock');
 
-    Route::apiResource('inventarios', InventarioController::class);
-    Route::get('inventarios/insumos', [InventarioController::class, 'getInsumos']);
+    Route::apiResource('inventarios', InventarioController::class)->names('api.inventarios');
+    Route::get('inventarios/insumos', [InventarioController::class, 'getInsumos'])->name('api.inventarios.insumos');
 
-    Route::apiResource('proveedores', ProveedorController::class);
-    Route::get('proveedores/select', [ProveedorController::class, 'getProveedores']);
+    Route::apiResource('proveedores', ProveedorController::class)->names('api.proveedores');
+    Route::get('proveedores/select', [ProveedorController::class, 'getProveedores'])->name('api.proveedores.select');
 
-    Route::apiResource('facturas', FacturaController::class);
-    Route::get('facturas/{factura}/download', [FacturaController::class, 'download']);
-    Route::get('facturas/proveedores', [FacturaController::class, 'getProveedores']);
+    Route::apiResource('facturas', FacturaController::class)->names('api.facturas');
+    Route::get('facturas/{factura}/download', [FacturaController::class, 'download'])->name('api.facturas.download');
+    Route::get('facturas/proveedores', [FacturaController::class, 'getProveedores'])->name('api.facturas.proveedores');
 });

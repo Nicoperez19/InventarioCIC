@@ -20,6 +20,8 @@ class Insumo extends Model
         'stock_minimo',
         'stock_actual',
         'id_unidad',
+        'tipo_insumo_id',
+        'departamento_id',
     ];
 
     protected $table = 'insumos';
@@ -52,6 +54,16 @@ class Insumo extends Model
     {
         return $this->belongsToMany(Departamento::class, 'departamento_insumo', 'id_insumo', 'id_depto')
             ->withTimestamps();
+    }
+
+    public function tipoInsumo(): BelongsTo
+    {
+        return $this->belongsTo(TipoInsumo::class, 'tipo_insumo_id');
+    }
+
+    public function departamento(): BelongsTo
+    {
+        return $this->belongsTo(Departamento::class, 'departamento_id');
     }
 
     // Métodos de negocio

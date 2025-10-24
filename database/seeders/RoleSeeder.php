@@ -27,25 +27,27 @@ class RoleSeeder extends Seeder
 
         $permissions = [
             // Users
-            'create-users', 'edit-users', 'delete-users', 'view-users',
+            'manage-users', 'create-users', 'edit-users', 'delete-users', 'view-users',
             // Inventory / Products
-            'create-products', 'edit-products', 'delete-products', 'view-products',
+            'manage-inventory', 'create-products', 'edit-products', 'delete-products', 'view-products',
             'view-inventory', 'create-inventory', 'edit-inventory', 'delete-inventory', 'apply-inventory',
             'apply-all-inventory', 'view-inventory-discrepancies',
             // Requests
             'view-requests', 'create-requests', 'approve-requests', 'reject-requests', 'deliver-requests',
             'view-pending-requests',
             // Departments
-            'create-departments', 'edit-departments', 'delete-departments', 'view-departments',
+            'manage-departments', 'create-departments', 'edit-departments', 'delete-departments', 'view-departments',
             // Units
-            'create-units', 'edit-units', 'delete-units', 'view-units',
+            'manage-units', 'create-units', 'edit-units', 'delete-units', 'view-units',
+            // Tipo Insumos
+            'manage-tipo-insumos', 'create-tipo-insumos', 'edit-tipo-insumos', 'delete-tipo-insumos', 'view-tipo-insumos',
             // Providers
-            'create-providers', 'edit-providers', 'delete-providers', 'view-providers',
+            'manage-providers', 'create-providers', 'edit-providers', 'delete-providers', 'view-providers',
             // Invoices
-            'create-invoices', 'edit-invoices', 'delete-invoices', 'view-invoices', 'download-invoices',
+            'manage-invoices', 'create-invoices', 'edit-invoices', 'delete-invoices', 'view-invoices', 'download-invoices',
             // Roles & permissions
-            'create-roles', 'edit-roles', 'delete-roles', 'view-roles',
-            'create-permissions', 'edit-permissions', 'delete-permissions', 'view-permissions',
+            'manage-roles', 'create-roles', 'edit-roles', 'delete-roles', 'view-roles',
+            'manage-permissions', 'create-permissions', 'edit-permissions', 'delete-permissions', 'view-permissions',
         ];
 
         foreach ($permissions as $name) {
