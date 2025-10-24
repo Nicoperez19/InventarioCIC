@@ -1,10 +1,8 @@
 import axios from 'axios';
-import Alpine from 'alpinejs';
 
 window.axios = axios;
-window.Alpine = Alpine;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-// Start Alpine.js
-Alpine.start();
+// Alpine.js se carga automáticamente a través de Livewire 3
+// Livewire incluye Alpine.js de forma nativa

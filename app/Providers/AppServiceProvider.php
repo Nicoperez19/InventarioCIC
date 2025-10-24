@@ -32,8 +32,9 @@ class AppServiceProvider extends ServiceProvider
             Model::preventLazyLoading();
         }
 
-        // Configurar paginación
-        Paginator::useBootstrapFive();
+        // Configurar paginación con Tailwind CSS
+        Paginator::defaultView('vendor.livewire.tailwind');
+        Paginator::defaultSimpleView('vendor.livewire.simple-tailwind');
 
         // Configurar timezone
         date_default_timezone_set('America/Santiago');

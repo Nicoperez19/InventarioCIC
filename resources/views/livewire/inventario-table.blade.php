@@ -1,4 +1,3 @@
-
 <div class="w-full bg-white shadow-sm rounded-lg border border-neutral-200 overflow-hidden">
     <!-- Tabla -->
     <div class="w-full overflow-x-auto">
@@ -49,7 +48,7 @@
         </thead>
             <tbody class="bg-white divide-y divide-neutral-200">
             @forelse($productos as $producto)
-                    <tr class="hover:bg-light-cyan/10 transition-colors duration-150">
+                    <tr wire:key="producto-{{ $producto->id_producto }}" class="hover:bg-light-cyan/10 transition-colors duration-150">
                         <td class="w-1/12 px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-500">
                                 {{ $producto->id_producto }}
@@ -110,5 +109,10 @@
             @endforelse
         </tbody>
     </table>
+    </div>
+    
+    <!-- Paginación -->
+    <div class="px-4 py-3 bg-gray-50 border-t border-neutral-200">
+        {{ $productos->links() }}
     </div>
 </div>
