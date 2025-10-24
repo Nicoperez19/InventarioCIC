@@ -4,14 +4,15 @@ use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\CargaMasivaController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\FacturaController;
+use App\Http\Controllers\InsumoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SolicitudController;
-use App\Http\Controllers\UnidadController;
+// use App\Http\Controllers\SolicitudController;
+use App\Http\Controllers\UnidadMedidaController;
 use App\Http\Controllers\UsersController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Ruta principal
@@ -30,7 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Logout
     Route::post('logout', function () {
-        auth()->logout();
+        Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
 
@@ -61,22 +62,22 @@ Route::middleware(['auth', 'can:manage-departments'])->group(function () {
 // Rutas de unidades
 Route::middleware(['auth', 'can:manage-units'])->group(function () {
     Route::view('unidades', 'layouts.unidad.unidad_index')->name('unidades');
-    Route::get('/unidades/create', [UnidadController::class, 'create'])->name('unidades.create');
-    Route::post('/unidades', [UnidadController::class, 'store'])->name('unidades.store');
-    Route::get('/unidades/{unidad}/edit', [UnidadController::class, 'edit'])->name('unidades.edit');
-    Route::put('/unidades/{unidad}', [UnidadController::class, 'update'])->name('unidades.update');
-    Route::delete('/unidades/{unidad}', [UnidadController::class, 'destroy'])->name('unidades.destroy');
+    Route::get('/unidades/create', [UnidadMedidaController::class, 'create'])->name('unidades.create');
+    Route::post('/unidades', [UnidadMedidaController::class, 'store'])->name('unidades.store');
+    Route::get('/unidades/{unidad}/edit', [UnidadMedidaController::class, 'edit'])->name('unidades.edit');
+    Route::put('/unidades/{unidad}', [UnidadMedidaController::class, 'update'])->name('unidades.update');
+    Route::delete('/unidades/{unidad}', [UnidadMedidaController::class, 'destroy'])->name('unidades.destroy');
 });
 
-// Rutas de productos
+// Rutas de productos (insumos)
 Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
     Route::view('productos', 'layouts.producto.producto_index')->name('productos');
-    Route::get('/productos/create', [ProductoController::class, 'create'])->name('productos.create');
-    Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
-    Route::get('/productos/{producto}/edit', [ProductoController::class, 'edit'])->name('productos.edit');
-    Route::put('/productos/{producto}', [ProductoController::class, 'update'])->name('productos.update');
-    Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
-    Route::post('/productos/{producto}/adjust-stock', [ProductoController::class, 'adjustStock'])->name('productos.adjust-stock');
+    Route::get('/productos/create', [InsumoController::class, 'create'])->name('productos.create');
+    Route::post('/productos', [InsumoController::class, 'store'])->name('productos.store');
+    Route::get('/productos/{producto}/edit', [InsumoController::class, 'edit'])->name('productos.edit');
+    Route::put('/productos/{producto}', [InsumoController::class, 'update'])->name('productos.update');
+    Route::delete('/productos/{producto}', [InsumoController::class, 'destroy'])->name('productos.destroy');
+    Route::post('/productos/{producto}/adjust-stock', [InsumoController::class, 'adjustStock'])->name('productos.adjust-stock');
 });
 
 // Rutas de inventario
@@ -88,19 +89,19 @@ Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
     Route::post('/inventario/{inventario}/apply', [InventarioController::class, 'apply'])->name('inventario.apply');
 });
 
-// Rutas de solicitudes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/solicitudes', [SolicitudController::class, 'index'])->name('solicitudes.index');
-    Route::get('/solicitudes/create', [SolicitudController::class, 'create'])->name('solicitudes.create');
-    Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
-    Route::get('/solicitudes/{solicitud}', [SolicitudController::class, 'show'])->name('solicitudes.show');
-    Route::post('/solicitudes/{solicitud}/approve', [SolicitudController::class, 'approve'])->name('solicitudes.approve');
-    Route::post('/solicitudes/{solicitud}/reject', [SolicitudController::class, 'reject'])->name('solicitudes.reject');
-    Route::post('/solicitudes/{solicitud}/deliver', [SolicitudController::class, 'deliver'])->name('solicitudes.deliver');
-    Route::delete('/solicitudes/{solicitud}', [SolicitudController::class, 'destroy'])->name('solicitudes.destroy');
-    Route::get('/solicitudes-pendientes', [SolicitudController::class, 'pending'])->name('solicitudes.pending');
-    Route::get('/mis-solicitudes', [SolicitudController::class, 'myRequests'])->name('solicitudes.my-requests');
-});
+// Rutas de solicitudes (comentadas temporalmente)
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/solicitudes', [SolicitudController::class, 'index'])->name('solicitudes.index');
+//     Route::get('/solicitudes/create', [SolicitudController::class, 'create'])->name('solicitudes.create');
+//     Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
+//     Route::get('/solicitudes/{solicitud}', [SolicitudController::class, 'show'])->name('solicitudes.show');
+//     Route::post('/solicitudes/{solicitud}/approve', [SolicitudController::class, 'approve'])->name('solicitudes.approve');
+//     Route::post('/solicitudes/{solicitud}/reject', [SolicitudController::class, 'reject'])->name('solicitudes.reject');
+//     Route::post('/solicitudes/{solicitud}/deliver', [SolicitudController::class, 'deliver'])->name('solicitudes.deliver');
+//     Route::delete('/solicitudes/{solicitud}', [SolicitudController::class, 'destroy'])->name('solicitudes.destroy');
+//     Route::get('/solicitudes-pendientes', [SolicitudController::class, 'pending'])->name('solicitudes.pending');
+//     Route::get('/mis-solicitudes', [SolicitudController::class, 'myRequests'])->name('solicitudes.my-requests');
+// });
 
 // Rutas de carga masiva
 Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
@@ -134,13 +135,25 @@ Route::middleware(['auth', 'can:manage-roles'])->group(function () {
 });
 
 // Rutas de proveedores
-Route::middleware(['auth', 'can:manage-inventory'])->group(function () {
-    Route::resource('proveedores', ProveedorController::class);
+Route::middleware(['auth', 'can:view-providers'])->group(function () {
+    Route::view('proveedores', 'layouts.proveedor.proveedor_index')->name('proveedores.index');
+    Route::get('/proveedores/create', [ProveedorController::class, 'create'])->name('proveedores.create');
+    Route::post('/proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
+    Route::get('/proveedores/{proveedor}', [ProveedorController::class, 'show'])->name('proveedores.show');
+    Route::get('/proveedores/{proveedor}/edit', [ProveedorController::class, 'edit'])->name('proveedores.edit');
+    Route::put('/proveedores/{proveedor}', [ProveedorController::class, 'update'])->name('proveedores.update');
+    Route::delete('/proveedores/{proveedor}', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
     Route::get('/proveedores-api', [ProveedorController::class, 'getProveedores'])->name('proveedores.api');
 });
 
 // Rutas de facturas
-Route::middleware(['auth'])->group(function () {
-    Route::resource('facturas', FacturaController::class);
+Route::middleware(['auth', 'can:view-invoices'])->group(function () {
+    Route::view('facturas', 'layouts.factura.factura_index')->name('facturas.index');
+    Route::get('/facturas/create', [FacturaController::class, 'create'])->name('facturas.create');
+    Route::post('/facturas', [FacturaController::class, 'store'])->name('facturas.store');
+    Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
+    Route::get('/facturas/{factura}/edit', [FacturaController::class, 'edit'])->name('facturas.edit');
+    Route::put('/facturas/{factura}', [FacturaController::class, 'update'])->name('facturas.update');
+    Route::delete('/facturas/{factura}', [FacturaController::class, 'destroy'])->name('facturas.destroy');
     Route::get('/facturas/{factura}/download', [FacturaController::class, 'download'])->name('facturas.download');
 });

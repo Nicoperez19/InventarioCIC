@@ -39,6 +39,10 @@ class RoleSeeder extends Seeder
             'create-departments', 'edit-departments', 'delete-departments', 'view-departments',
             // Units
             'create-units', 'edit-units', 'delete-units', 'view-units',
+            // Providers
+            'create-providers', 'edit-providers', 'delete-providers', 'view-providers',
+            // Invoices
+            'create-invoices', 'edit-invoices', 'delete-invoices', 'view-invoices', 'download-invoices',
             // Roles & permissions
             'create-roles', 'edit-roles', 'delete-roles', 'view-roles',
             'create-permissions', 'edit-permissions', 'delete-permissions', 'view-permissions',
@@ -54,6 +58,8 @@ class RoleSeeder extends Seeder
         $roleUsuario->syncPermissions([
             Permission::firstOrCreate(['name' => 'view-products']),
             Permission::firstOrCreate(['name' => 'view-requests']),
+            Permission::firstOrCreate(['name' => 'view-providers']),
+            Permission::firstOrCreate(['name' => 'view-invoices']),
         ]);
     }
 }

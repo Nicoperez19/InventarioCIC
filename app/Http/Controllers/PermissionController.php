@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdatePermissionRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
 
@@ -21,11 +22,18 @@ class PermissionController extends Controller
         return view('layouts.permission.permission_update', compact('permission'));
     }
 
-    public function update(UpdatePermissionRequest $request, Permission $permission): RedirectResponse
+    public function update(Request $request, Permission $permission): RedirectResponse
     {
-        $validated = $request->validated();
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:permissions,name,' . $permission->id,
+            'guard_name' => 'required|string|max:255'
+        ]);
 
-        $permission->update($validated);
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $permission->update($validator->validated());
 
         return redirect()->route('permissions.index')->with('status', 'Permiso actualizado correctamente.');
     }

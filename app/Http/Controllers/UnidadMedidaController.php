@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Departamento;
+use App\Models\UnidadMedida;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class DepartamentoController extends Controller
+class UnidadMedidaController extends Controller
 {
     public function __construct()
     {
@@ -17,44 +17,45 @@ class DepartamentoController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = Departamento::withCount('users');
+            $query = UnidadMedida::withCount('insumos');
 
             if ($request->has('search')) {
                 $search = $request->get('search');
-                $query->where('nombre_depto', 'like', "%{$search}%");
+                $query->where('nombre_unidad_medida', 'like', "%{$search}%");
             }
 
-            $departamentos = $query->orderByName()->paginate($request->get('per_page', 15));
+            $unidades = $query->orderByName()
+                ->paginate($request->get('per_page', 15));
 
             return response()->json([
                 'success' => true,
-                'data' => $departamentos,
-                'message' => 'Departamentos obtenidos exitosamente'
+                'data' => $unidades,
+                'message' => 'Unidades de medida obtenidas exitosamente'
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener departamentos: ' . $e->getMessage()
+                'message' => 'Error al obtener unidades de medida: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function show(Departamento $departamento): JsonResponse
+    public function show(UnidadMedida $unidadMedida): JsonResponse
     {
         try {
-            $departamento->load(['users', 'insumos']);
+            $unidadMedida->load(['insumos']);
 
             return response()->json([
                 'success' => true,
-                'data' => $departamento,
-                'message' => 'Departamento obtenido exitosamente'
+                'data' => $unidadMedida,
+                'message' => 'Unidad de medida obtenida exitosamente'
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener departamento: ' . $e->getMessage()
+                'message' => 'Error al obtener unidad de medida: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -63,8 +64,8 @@ class DepartamentoController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'id_depto' => 'required|string|max:20|unique:departamentos,id_depto',
-                'nombre_depto' => 'required|string|max:255'
+                'id_unidad' => 'required|string|max:20|unique:unidad_medidas,id_unidad',
+                'nombre_unidad_medida' => 'required|string|max:255'
             ]);
 
             if ($validator->fails()) {
@@ -75,28 +76,28 @@ class DepartamentoController extends Controller
                 ], 422);
             }
 
-            $departamento = Departamento::create($request->all());
+            $unidadMedida = UnidadMedida::create($request->all());
 
             return response()->json([
                 'success' => true,
-                'data' => $departamento,
-                'message' => 'Departamento creado exitosamente'
+                'data' => $unidadMedida,
+                'message' => 'Unidad de medida creada exitosamente'
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear departamento: ' . $e->getMessage()
+                'message' => 'Error al crear unidad de medida: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function update(Request $request, Departamento $departamento): JsonResponse
+    public function update(Request $request, UnidadMedida $unidadMedida): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
-                'id_depto' => 'sometimes|string|max:20|unique:departamentos,id_depto,' . $departamento->id_depto,
-                'nombre_depto' => 'sometimes|string|max:255'
+                'id_unidad' => 'sometimes|string|max:20|unique:unidad_medidas,id_unidad,' . $unidadMedida->id_unidad,
+                'nombre_unidad_medida' => 'sometimes|string|max:255'
             ]);
 
             if ($validator->fails()) {
@@ -107,43 +108,43 @@ class DepartamentoController extends Controller
                 ], 422);
             }
 
-            $departamento->update($request->all());
+            $unidadMedida->update($request->all());
 
             return response()->json([
                 'success' => true,
-                'data' => $departamento,
-                'message' => 'Departamento actualizado exitosamente'
+                'data' => $unidadMedida,
+                'message' => 'Unidad de medida actualizada exitosamente'
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar departamento: ' . $e->getMessage()
+                'message' => 'Error al actualizar unidad de medida: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function destroy(Departamento $departamento): JsonResponse
+    public function destroy(UnidadMedida $unidadMedida): JsonResponse
     {
         try {
-            if ($departamento->hasActiveUsers()) {
+            if ($unidadMedida->hasActiveInsumos()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se puede eliminar el departamento porque tiene usuarios activos'
+                    'message' => 'No se puede eliminar la unidad de medida porque tiene insumos asociados'
                 ], 422);
             }
 
-            $departamento->delete();
+            $unidadMedida->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Departamento eliminado exitosamente'
+                'message' => 'Unidad de medida eliminada exitosamente'
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar departamento: ' . $e->getMessage()
+                'message' => 'Error al eliminar unidad de medida: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -13,7 +13,7 @@ class UnidadMedida extends Model
 
     protected $fillable = [
         'id_unidad',
-        'nombre_unidad',
+        'nombre_unidad_medida',
     ];
 
     protected $table = 'unidad_medidas';
@@ -90,7 +90,7 @@ class UnidadMedida extends Model
 
     public function scopeOrderByName($query, string $direction = 'asc')
     {
-        return $query->orderBy('nombre_unidad', $direction);
+        return $query->orderBy('nombre_unidad_medida', $direction);
     }
 
     public function scopeWithInsumosCount($query)
@@ -124,7 +124,7 @@ class UnidadMedida extends Model
 
     public static function findByName(string $nombre): ?self
     {
-        return static::where('nombre_unidad', $nombre)->first();
+        return static::where('nombre_unidad_medida', $nombre)->first();
     }
 
     public static function createUnidadMedida(array $data): self
