@@ -14,3 +14,4 @@ class PermissionsTable extends Component
         ]);
     }
 }
+

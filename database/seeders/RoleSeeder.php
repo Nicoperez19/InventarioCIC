@@ -28,10 +28,10 @@ class RoleSeeder extends Seeder
         $permissions = [
             // Users
             'manage-users', 'create-users', 'edit-users', 'delete-users', 'view-users',
-            // Products
-            'create-products', 'edit-products', 'delete-products', 'view-products',
+            // Products/Inventory
+            'manage-inventory', 'create-products', 'edit-products', 'delete-products', 'view-products',
             // Requests
-            'view-requests', 'create-requests', 'approve-requests', 'reject-requests', 'deliver-requests',
+            'manage-requests', 'view-requests', 'create-requests', 'approve-requests', 'reject-requests', 'deliver-requests',
             'view-pending-requests',
             // Departments
             'manage-departments', 'create-departments', 'edit-departments', 'delete-departments', 'view-departments',
