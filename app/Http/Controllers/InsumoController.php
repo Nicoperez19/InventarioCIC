@@ -19,7 +19,7 @@ class InsumoController extends Controller
     public function edit(Insumo $insumo)
     {
         $unidades = UnidadMedida::all();
-        return view('layouts.insumo.insumo_edit', compact('insumo', 'unidades'));
+        return view('layouts.insumo.insumo_update', compact('insumo', 'unidades'));
     }
     public function index(Request $request): JsonResponse
     {

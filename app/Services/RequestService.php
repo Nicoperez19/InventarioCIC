@@ -1,7 +1,7 @@
 <?php
 namespace App\Services;
 use App\Models\Detalle_Solicitud;
-use App\Models\Producto;
+use App\Models\Insumo;
 use App\Models\Solicitud;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,22 +18,22 @@ class RequestService
                     'observaciones' => $data['observaciones'] ?? null,
                     'id_usuario' => $userId,
                 ]);
-                foreach ($data['productos'] as $productoData) {
-                    $producto = Producto::find($productoData['id_producto']);
-                    if (! $producto->canReduceStock($productoData['cantidad'])) {
-                        throw new \Exception("No hay suficiente stock para el producto: {$producto->nombre_producto}");
+                foreach ($data['insumos'] as $insumoData) {
+                    $insumo = Insumo::find($insumoData['id_insumo']);
+                    if (! $insumo->canReduceStock($insumoData['cantidad'])) {
+                        throw new \Exception("No hay suficiente stock para el insumo: {$insumo->nombre_insumo}");
                     }
                     Detalle_Solicitud::create([
                         'id_detalle_solicitud' => uniqid('DET_'),
                         'id_solicitud' => $solicitud->id_solicitud,
-                        'id_producto' => $productoData['id_producto'],
-                        'cantidad_solicitud' => $productoData['cantidad'],
+                        'id_insumo' => $insumoData['id_insumo'],
+                        'cantidad_solicitud' => $insumoData['cantidad'],
                     ]);
                 }
                 Log::info('Solicitud creada', [
                     'solicitud_id' => $solicitud->id_solicitud,
                     'usuario_id' => $userId,
-                    'productos_count' => count($data['productos']),
+                    'insumos_count' => count($data['insumos']),
                 ]);
                 return $solicitud;
             });
@@ -54,7 +54,7 @@ class RequestService
                 }
                 foreach ($solicitud->detalleSolicitudes as $detalle) {
                     if (! $detalle->canBeFulfilled()) {
-                        throw new \Exception("No hay suficiente stock para el producto: {$detalle->producto->nombre_producto}");
+                        throw new \Exception("No hay suficiente stock para el insumo: {$detalle->insumo->nombre_insumo}");
                     }
                 }
                 $solicitud->approve();

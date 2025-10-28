@@ -60,7 +60,7 @@ Route::middleware(['auth', 'can:manage-tipo-insumos'])->group(function () {
     Route::delete('/tipo-insumos/{tipoInsumo}', [TipoInsumoController::class, 'destroy'])->name('tipo-insumos.destroy');
 });
 Route::middleware(['auth', 'can:manage-insumos'])->group(function () {
-    Route::view('insumos', 'layouts.producto.producto_index')->name('insumos.index');
+    Route::view('insumos', 'layouts.insumo.insumo_index')->name('insumos.index');
     Route::get('/insumos/create', [InsumoController::class, 'create'])->name('insumos.create');
     Route::post('/insumos', [InsumoController::class, 'store'])->name('insumos.store');
     Route::get('/insumos/{insumo}', [InsumoController::class, 'show'])->name('insumos.show');

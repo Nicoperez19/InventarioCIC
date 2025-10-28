@@ -1,6 +1,6 @@
 <?php
 namespace App\Services;
-use App\Models\Producto;
+use App\Models\Insumo;
 use Illuminate\Support\Facades\Storage;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Picqer\Barcode\BarcodeGeneratorSVG;
@@ -43,7 +43,7 @@ class BarcodeService
     }
     private function getNextSequenceForUnit(string $unidadId = null): int
     {
-        $lastBarcode = Producto::where('id_unidad', $unidadId)
+        $lastBarcode = Insumo::where('id_unidad', $unidadId)
             ->whereNotNull('codigo_barra')
             ->orderBy('codigo_barra', 'desc')
             ->first();
@@ -69,7 +69,7 @@ class BarcodeService
     }
     private function barcodeExists(string $barcode): bool
     {
-        return Producto::where('codigo_barra', $barcode)->exists();
+        return Insumo::where('codigo_barra', $barcode)->exists();
     }
     public function generateBarcodeImage(string $barcode, string $filename = null): string
     {
@@ -77,7 +77,7 @@ class BarcodeService
             $filename = "barcode_{$barcode}.png";
         }
         $imageData = $this->generatorPNG->getBarcode($barcode, BarcodeGeneratorPNG::TYPE_CODE_128, 2, 50, [255, 255, 255], [0, 0, 0]);
-        $path = "codigos_productos/{$filename}";
+        $path = "codigos_insumos/{$filename}";
         Storage::disk('public')->put($path, $imageData);
         return $path;
     }
@@ -87,7 +87,7 @@ class BarcodeService
             $filename = "barcode_small_{$barcode}.png";
         }
         $imageData = $this->generatorPNG->getBarcode($barcode, BarcodeGeneratorPNG::TYPE_CODE_128, 1, 30, [255, 255, 255], [0, 0, 0]);
-        $path = "codigos_productos/{$filename}";
+        $path = "codigos_insumos/{$filename}";
         Storage::disk('public')->put($path, $imageData);
         return $path;
     }
@@ -97,7 +97,7 @@ class BarcodeService
             $filename = "barcode_{$barcode}.svg";
         }
         $svgData = $this->generatorSVG->getBarcode($barcode, BarcodeGeneratorSVG::TYPE_CODE_128, 2, 50);
-        $path = "codigos_productos/{$filename}";
+        $path = "codigos_insumos/{$filename}";
         Storage::disk('public')->put($path, $svgData);
         return $path;
     }

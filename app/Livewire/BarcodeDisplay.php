@@ -1,48 +1,48 @@
 <?php
 namespace App\Livewire;
-use App\Models\Producto;
+use App\Models\Insumo;
 use App\Services\BarcodeService;
 use Livewire\Component;
 class BarcodeDisplay extends Component
 {
-    public Producto $producto;
+    public Insumo $insumo;
     public string $barcodeUrl = '';
     public bool $showBarcode = false;
-    public function mount(Producto $producto)
+    public function mount(Insumo $insumo)
     {
-        $this->producto = $producto;
+        $this->insumo = $insumo;
         $this->loadBarcode();
     }
     public function loadBarcode()
     {
-        if ($this->producto->codigo_barra) {
+        if ($this->insumo->codigo_barra) {
             $barcodeService = new BarcodeService();
-            $this->barcodeUrl = $barcodeService->getBarcodeUrl($this->producto->codigo_barra);
+            $this->barcodeUrl = $barcodeService->getBarcodeUrl($this->insumo->codigo_barra);
             $this->showBarcode = true;
         }
     }
     public function regenerateBarcode()
     {
-        if (!$this->producto->codigo_barra) {
+        if (!$this->insumo->codigo_barra) {
             return;
         }
         $barcodeService = new BarcodeService();
-        $barcodeService->deleteBarcodeImage($this->producto->codigo_barra);
-        $nuevoCodigo = $barcodeService->generateUniqueBarcode($this->producto->id_unidad);
-        $this->producto->update(['codigo_barra' => $nuevoCodigo]);
+        $barcodeService->deleteBarcodeImage($this->insumo->codigo_barra);
+        $nuevoCodigo = $barcodeService->generateUniqueBarcode($this->insumo->id_unidad);
+        $this->insumo->update(['codigo_barra' => $nuevoCodigo]);
         $barcodeService->generateBarcodeImage($nuevoCodigo);
         $this->loadBarcode();
         session()->flash('message', 'Código de barras regenerado exitosamente');
     }
     public function downloadBarcode()
     {
-        if (!$this->producto->codigo_barra) {
+        if (!$this->insumo->codigo_barra) {
             return;
         }
         $barcodeService = new BarcodeService();
-        $imagePath = $barcodeService->generateBarcodeImage($this->producto->codigo_barra);
+        $imagePath = $barcodeService->generateBarcodeImage($this->insumo->codigo_barra);
         $fullPath = storage_path('app/public/' . $imagePath);
-        return response()->download($fullPath, "codigo_barras_{$this->producto->id_producto}.png");
+        return response()->download($fullPath, "codigo_barras_{$this->insumo->id_insumo}.png");
     }
     public function render()
     {
