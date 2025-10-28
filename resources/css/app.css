@@ -1,3 +1,66 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Variables CSS personalizadas - Nueva Paleta Principal */
+:root {
+    /* Colores principales del sistema */
+    --primary-50: #f0f4f6;
+    --primary-100: #d1dde2;
+    --primary-200: #a3bbc5;
+    --primary-300: #7599a8;
+    --primary-400: #47778b;
+    --primary-500: #306073;  /* Azul acero principal */
+    --primary-600: #264d5c;
+    --primary-700: #1c3a45;
+    --primary-800: #12272e;
+    --primary-900: #081417;
+    
+    --secondary-50: #f4f5f0;
+    --secondary-100: #e8ebd6;
+    --secondary-200: #d1d7ad;
+    --secondary-300: #bac384;
+    --secondary-400: #a3af5b;
+    --secondary-500: #9AA644;  /* Verde principal */
+    --secondary-600: #7a8536;
+    --secondary-700: #5b6429;
+    --secondary-800: #3c431c;
+    --secondary-900: #1d220e;
+    
+    /* Colores semánticos */
+    --primary-color: var(--primary-500);
+    --secondary-color: var(--secondary-500);
+    --background-color: #ffffff;
+    --surface-color: var(--neutral-50);
+    --text-primary: var(--primary-800);
+    --text-secondary: var(--primary-600);
+    --success-color: var(--secondary-500);
+    --info-color: var(--primary-500);
+    --warning-color: #eab308;
+    --error-color: #ef4444;
+}
+
+/* Clases de utilidad personalizadas */
+.bg-primary-light { background-color: var(--primary-100); }
+.bg-primary-main { background-color: var(--primary-500); }
+.bg-primary-dark { background-color: var(--primary-700); }
+
+.bg-secondary-light { background-color: var(--secondary-100); }
+.bg-secondary-main { background-color: var(--secondary-500); }
+.bg-secondary-dark { background-color: var(--secondary-700); }
+
+.text-primary-light { color: var(--primary-300); }
+.text-primary-main { color: var(--primary-500); }
+.text-primary-dark { color: var(--primary-800); }
+
+.text-secondary-light { color: var(--secondary-300); }
+.text-secondary-main { color: var(--secondary-500); }
+.text-secondary-dark { color: var(--secondary-800); }
+
+.border-primary-light { border-color: var(--primary-200); }
+.border-primary-main { border-color: var(--primary-500); }
+.border-primary-dark { border-color: var(--primary-700); }
+
+.border-secondary-light { border-color: var(--secondary-200); }
+.border-secondary-main { border-color: var(--secondary-500); }
+.border-secondary-dark { border-color: var(--secondary-700); }

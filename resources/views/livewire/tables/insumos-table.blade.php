@@ -1,8 +1,8 @@
 <div class="w-full overflow-hidden bg-white border rounded-lg shadow-sm border-neutral-200">
     <!-- Tabla -->
     <div class="w-full overflow-x-auto">
-        <table class="w-full divide-y divide-neutral-200">
-        <thead class="bg-gray-50">
+        <table class="w-full divide-y divide-neutral-200" style="min-width: 1000px;">
+        <thead class="bg-primary-100">
             <tr>
                     <th class="px-3 py-4 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase sm:px-6">
                         <div class="flex items-center space-x-1">
@@ -57,7 +57,7 @@
         </thead>
             <tbody class="bg-white divide-y divide-neutral-200">
             @forelse($insumos as $insumo)
-                    <tr class="transition-colors duration-150 hover:bg-light-cyan/10">
+                    <tr class="transition-colors duration-150 hover:bg-secondary-50">
                         <!-- ID -->
                         <td class="px-3 py-4 sm:px-6 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-500">
@@ -125,7 +125,7 @@
                                 
                                 <!-- Botón Editar -->
                                 <a href="{{ route('insumos.edit', $insumo->id_insumo) }}" 
-                                   class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 transition-colors duration-150 border border-transparent rounded-md sm:px-3 sm:py-2 bg-blue-50 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                   class="inline-flex items-center px-2 py-1 text-xs font-medium transition-all duration-150 border border-transparent rounded-md sm:px-3 sm:py-2 text-primary-600 bg-primary-50 hover:bg-primary-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400">
                                     <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
@@ -140,7 +140,7 @@
                             @csrf
                             @method('DELETE')
                                     <button type="submit" 
-                                            class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 transition-colors duration-150 border border-transparent rounded-md sm:px-3 sm:py-2 bg-red-50 hover:bg-red-600 hover:text-white active:bg-red-700 active:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                            class="inline-flex items-center px-2 py-1 text-xs font-medium transition-colors duration-150 border border-transparent rounded-md sm:px-3 sm:py-2 text-danger-600 bg-danger-50 hover:bg-danger-600 hover:text-white active:bg-danger-700 active:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger-500">
                                         <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>

@@ -19,41 +19,40 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-dark-black mb-2">Iniciar Sesión</h2>
-        <p class="text-neutral-500">Ingresa tus credenciales para acceder al sistema</p>
+    <div class="mb-8 text-center">
+        <h2 class="mb-2 text-2xl font-bold text-primary-800">Iniciar Sesión</h2>
+        <p class="text-neutral-600">Ingresa tus credenciales para acceder al sistema</p>
     </div>
 
     <x-auth-session-status class="mb-6" :status="session('status')" />
 
     <form wire:submit="login" class="space-y-6">
         <div>
-            <x-input-label for="run" :value="__('RUN')" class="text-dark-black font-medium" />
-            <div class="mt-2 relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <x-input-label for="email" :value="__('Correo Electrónico')" class="font-semibold text-primary-700" />
+            <div class="relative mt-2">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
-                <x-text-input wire:model="form.run" id="run" 
-                    class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-xl shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-light-cyan focus:border-light-cyan transition-colors" 
-                    type="text" name="run" required autofocus autocomplete="username" 
-                    placeholder="12.345.678-9" 
-                    oninput="formatRun(this)" />
+                <x-text-input wire:model="form.email" id="email" 
+                    class="block w-full py-3 pl-10 pr-3 transition-all duration-200 border shadow-sm border-neutral-300 rounded-xl placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 hover:border-primary-300" 
+                    type="email" name="email" required autofocus autocomplete="username" 
+                    placeholder="tu@correo.com" />
             </div>
             <x-input-error :messages="$errors->get('form.run')" class="mt-2" />
         </div>
 
         <div>
-            <x-input-label for="password" :value="__('Contraseña')" class="text-dark-black font-medium" />
-            <div class="mt-2 relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <x-input-label for="password" :value="__('Contraseña')" class="font-semibold text-primary-700" />
+            <div class="relative mt-2">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
                 <x-text-input wire:model="form.password" id="password" 
-                    class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-xl shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-light-cyan focus:border-light-cyan transition-colors"
+                    class="block w-full py-3 pl-10 pr-3 transition-all duration-200 border shadow-sm border-neutral-300 rounded-xl placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 hover:border-primary-300"
                     type="password" name="password" required autocomplete="current-password" 
                     placeholder="••••••••" />
             </div>
@@ -63,12 +62,12 @@ new #[Layout('layouts.guest')] class extends Component
         <div class="flex items-center justify-between">
             <label for="remember" class="flex items-center">
                 <input wire:model="form.remember" id="remember" type="checkbox" 
-                    class="h-4 w-4 text-light-cyan focus:ring-light-cyan border-neutral-300 rounded">
+                    class="w-4 h-4 rounded text-secondary-500 focus:ring-secondary-500 border-neutral-300">
                 <span class="ml-2 text-sm text-neutral-600">{{ __('Recordarme') }}</span>
             </label>
 
             @if (Route::has('password.request'))
-                <a class="text-sm text-light-cyan hover:text-dark-teal font-medium transition-colors" 
+                <a class="text-sm font-medium transition-colors text-secondary-500 hover:text-primary-600" 
                    href="{{ route('password.request') }}" wire:navigate>
                     {{ __('¿Olvidaste tu contraseña?') }}
                 </a>
@@ -77,7 +76,7 @@ new #[Layout('layouts.guest')] class extends Component
 
         <div>
             <button type="submit" 
-                class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-dark-teal hover:bg-navy-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-cyan transition-all duration-200 transform hover:scale-[1.02]">
+                class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>

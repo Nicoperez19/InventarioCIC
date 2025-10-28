@@ -1,28 +1,31 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center space-x-3 sm:space-x-4">
                 <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-dark-teal rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-400 to-primary-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                         </svg>
                     </div>
                 </div>
-                <div>
-                    <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-lg sm:text-xl font-semibold leading-tight text-gray-800 truncate">
                         {{ __('Gestión de Tipos de Insumo') }}
                     </h2>
-                    <p class="text-sm text-gray-600 mt-1">Administra y organiza los tipos de insumo del sistema</p>
+                    <p class="text-xs sm:text-sm text-gray-600 mt-1 hidden sm:block">Administra y organiza los tipos de insumo del sistema</p>
                 </div>
             </div>
-            <a href="{{ route('tipo-insumos.create') }}" 
-               class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-dark-teal rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal transition-colors duration-150 shadow-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Agregar Tipo de Insumo
-            </a>
+            <div class="flex-shrink-0 w-full sm:w-auto">
+                <a href="{{ route('tipo-insumos.create') }}" 
+                   class="inline-flex items-center justify-center w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-secondary-500 rounded-lg hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400 transition-all duration-150 shadow-sm">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span class="sm:hidden">Agregar</span>
+                    <span class="hidden sm:inline">Agregar Tipo de Insumo</span>
+                </a>
+            </div>
         </div>
     </x-slot>
 

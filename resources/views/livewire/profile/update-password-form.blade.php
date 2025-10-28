@@ -42,8 +42,8 @@ new class extends Component
     <header class="mb-8">
         <div class="flex items-center space-x-3 mb-4">
             <div class="flex-shrink-0">
-                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 bg-secondary-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
                 </div>
@@ -64,7 +64,7 @@ new class extends Component
             <div>
                 <x-input-label for="update_password_current_password" :value="__('Contraseña actual')" class="text-sm font-medium text-gray-700 mb-2" />
                 <x-text-input wire:model="current_password" id="update_password_current_password" name="current_password" type="password" 
-                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-dark-teal focus:border-dark-teal" 
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-secondary-400 focus:border-secondary-400" 
                     autocomplete="current-password" 
                     placeholder="Ingresa tu contraseña actual" />
                 <x-input-error :messages="$errors->get('current_password')" class="mt-2" />
@@ -74,7 +74,7 @@ new class extends Component
                 <div>
                     <x-input-label for="update_password_password" :value="__('Nueva contraseña')" class="text-sm font-medium text-gray-700 mb-2" />
                     <x-text-input wire:model="password" id="update_password_password" name="password" type="password" 
-                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-dark-teal focus:border-dark-teal" 
+                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-secondary-400 focus:border-secondary-400" 
                         autocomplete="new-password" 
                         placeholder="Ingresa tu nueva contraseña" />
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
@@ -83,7 +83,7 @@ new class extends Component
                 <div>
                     <x-input-label for="update_password_password_confirmation" :value="__('Confirmar contraseña')" class="text-sm font-medium text-gray-700 mb-2" />
                     <x-text-input wire:model="password_confirmation" id="update_password_password_confirmation" name="password_confirmation" type="password" 
-                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-dark-teal focus:border-dark-teal" 
+                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-secondary-400 focus:border-secondary-400" 
                         autocomplete="new-password" 
                         placeholder="Confirma tu nueva contraseña" />
                     <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
@@ -101,7 +101,7 @@ new class extends Component
                 </div>
             </x-action-message>
             
-            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-dark-teal rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal transition-colors duration-150 shadow-sm">
+            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-secondary-500 rounded-lg hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400 transition-all duration-150 shadow-sm">
                 {{ __('Actualizar Contraseña') }}
             </button>
         </div>

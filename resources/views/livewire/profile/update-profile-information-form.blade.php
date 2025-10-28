@@ -66,8 +66,8 @@ new class extends Component
     <header class="mb-8">
         <div class="flex items-center space-x-3 mb-4">
             <div class="flex-shrink-0">
-                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
@@ -88,7 +88,7 @@ new class extends Component
             <div>
                 <x-input-label for="name" :value="__('Nombre completo')" class="text-sm font-medium text-gray-700 mb-2" />
                 <x-text-input wire:model="name" id="name" name="name" type="text" 
-                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-dark-teal focus:border-dark-teal" 
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-secondary-400 focus:border-secondary-400" 
                     required autofocus autocomplete="name" 
                     placeholder="Ingresa tu nombre completo" />
                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
@@ -97,7 +97,7 @@ new class extends Component
             <div>
                 <x-input-label for="email" :value="__('Correo electrónico')" class="text-sm font-medium text-gray-700 mb-2" />
                 <x-text-input wire:model="email" id="email" name="email" type="email" 
-                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-dark-teal focus:border-dark-teal" 
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-secondary-400 focus:border-secondary-400" 
                     required autocomplete="username" 
                     placeholder="tu@ejemplo.com" />
                 <x-input-error class="mt-2" :messages="$errors->get('email')" />
@@ -146,7 +146,7 @@ new class extends Component
                 </div>
             </x-action-message>
             
-            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-dark-teal rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal transition-colors duration-150 shadow-sm">
+            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-secondary-500 rounded-lg hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400 transition-all duration-150 shadow-sm">
                 {{ __('Guardar Cambios') }}
             </button>
         </div>
