@@ -2,7 +2,7 @@
     <!-- Tabla -->
     <div class="w-full overflow-x-auto">
         <table class="w-full table-fixed divide-y divide-neutral-200">
-        <thead class="bg-gray-50">
+        <thead class="bg-primary-100">
             <tr>
                     <th class="w-2/12 px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <div class="flex items-center space-x-1">
@@ -37,7 +37,7 @@
                         </div>
                     </th>
                   
-                    <th class="w-2/12 px-3 sm:px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="w-3/12 px-3 sm:px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <div class="flex items-center justify-end space-x-1 pr-6">
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
@@ -49,7 +49,7 @@
         </thead>
             <tbody class="bg-white divide-y divide-neutral-200">
             @forelse($facturas as $factura)
-                    <tr wire:key="factura-{{ $factura->id }}" class="hover:bg-light-cyan/10 transition-colors duration-150">
+                    <tr wire:key="factura-{{ $factura->id }}" class="hover:bg-secondary-50 transition-colors duration-150">
                         <td class="w-2/12 px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-900">
                                 {{ $factura->numero_factura }}
@@ -65,7 +65,7 @@
                             <div class="text-sm text-neutral-600 pl-6">{{ $factura->fecha_factura->format('d/m/Y') }}</div>
                         </td>
                     
-                        <td class="w-2/12 px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <td class="w-3/12 px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center justify-end space-x-1 sm:space-x-3">
                                 <!-- Botón Ver -->
                                 <a href="{{ route('facturas.show', $factura->id) }}" 
@@ -117,7 +117,7 @@
                 </tr>
             @empty
                 <tr>
-                        <td class="px-3 sm:px-6 py-12 text-center" colspan="6">
+                        <td class="px-3 sm:px-6 py-12 text-center" colspan="5">
                             <div class="flex flex-col items-center">
                                 <svg class="w-12 h-12 text-neutral-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -133,7 +133,7 @@
     </div>
     
     <!-- Paginación -->
-    <div class="px-4 py-3 bg-gray-50 border-t border-neutral-200">
+    <div class="px-4 py-3 bg-primary-50 border-t border-neutral-200">
         {{ $facturas->links() }}
     </div>
 </div>

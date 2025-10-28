@@ -16,23 +16,23 @@
         @livewireStyles
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-dark-teal flex items-center justify-center p-4">
+        <div class="min-h-screen bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 flex items-center justify-center p-4">
             <!-- Contenedor principal -->
             <div class="w-full max-w-md">
                 <!-- Título -->
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold text-light-gray mb-2">GestionCIC</h1>
-                    <p class="text-light-gray/80">Sistema de Gestión de Inventario</p>
+                    <h1 class="text-4xl font-bold text-white mb-2">GestionCIC</h1>
+                    <p class="text-white/90 text-lg">Sistema de Gestión de Inventario</p>
                 </div>
 
                 <!-- Card de login -->
-                <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-strong p-8 border border-white/20">
+                <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/30">
                     {{ $slot }}
                 </div>
 
                 <!-- Footer -->
                 <div class="text-center mt-6">
-                    <p class="text-light-gray/60 text-sm">
+                    <p class="text-white/70 text-sm">
                         © {{ date('Y') }} GestionCIC. Todos los derechos reservados.
                     </p>
                 </div>

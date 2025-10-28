@@ -2,7 +2,7 @@
     <!-- Tabla -->
     <div class="w-full overflow-x-auto">
         <table class="w-full table-fixed divide-y divide-neutral-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-primary-100">
                 <tr>
                     <th
                         class="w-1/12 px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -52,7 +52,7 @@
             <tbody class="bg-white divide-y divide-neutral-200">
                 @forelse($proveedores as $proveedor)
                     <tr wire:key="proveedor-{{ $proveedor->id }}"
-                        class="hover:bg-light-cyan/10 transition-colors duration-150">
+                        class="hover:bg-secondary-50 transition-colors duration-150">
                         <td class="w-1/12 px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-500">
                                 {{ $proveedor->rut }}
@@ -112,7 +112,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td class="px-3 sm:px-6 py-12 text-center" colspan="6">
+                        <td class="px-3 sm:px-6 py-12 text-center" colspan="4">
                             <div class="flex flex-col items-center">
                                 <svg class="w-12 h-12 text-neutral-500 mb-4" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -132,7 +132,7 @@
     </div>
 
     <!-- Paginación -->
-    <div class="px-4 py-3 bg-gray-50 border-t border-neutral-200">
+    <div class="px-4 py-3 bg-primary-50 border-t border-neutral-200">
         {{ $proveedores->links() }}
     </div>
 

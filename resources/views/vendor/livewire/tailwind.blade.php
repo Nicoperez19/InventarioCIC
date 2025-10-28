@@ -75,10 +75,10 @@
                                 @foreach ($element as $page => $url)
                                     @if ($page == $paginator->currentPage())
                                         <span aria-current="page">
-                                            <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-white bg-light-cyan border border-light-cyan cursor-default leading-5">{{ $page }}</span>
+                                            <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-white bg-primary-500 border border-primary-500 cursor-default leading-5">{{ $page }}</span>
                                         </span>
                                     @else
-                                        <button wire:click="gotoPage({{ $page }})" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-white hover:bg-dark-teal hover:border-dark-teal focus:z-10 focus:outline-none focus:ring-2 focus:ring-light-cyan focus:border-light-cyan active:bg-light-cyan active:text-white transition ease-in-out duration-150" aria-label="Ir a la página {{ $page }}">
+                                        <button wire:click="gotoPage({{ $page }})" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-primary-600 bg-white border border-primary-300 leading-5 hover:text-white hover:bg-primary-500 hover:border-primary-500 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 active:bg-primary-600 active:text-white transition ease-in-out duration-150" aria-label="Ir a la página {{ $page }}">
                                             {{ $page }}
                                         </button>
                                     @endif
@@ -88,7 +88,7 @@
                     @else
                         {{-- Si solo hay una página, mostrar el número 1 --}}
                         <span aria-current="page">
-                            <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-white bg-light-cyan border border-light-cyan cursor-default leading-5">1</span>
+                            <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-white bg-primary-500 border border-primary-500 cursor-default leading-5">1</span>
                         </span>
                     @endif
 
