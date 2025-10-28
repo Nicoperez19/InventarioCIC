@@ -1,15 +1,9 @@
 <?php
-
 namespace Database\Seeders;
-
 use App\Models\Departamento;
 use Illuminate\Database\Seeder;
-
 class DepartamentoSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $departamentos = [
@@ -54,7 +48,6 @@ class DepartamentoSeeder extends Seeder
                 'nombre_depto' => 'Oficina',
             ],
         ];
-
         foreach ($departamentos as $departamento) {
             Departamento::create($departamento);
         }

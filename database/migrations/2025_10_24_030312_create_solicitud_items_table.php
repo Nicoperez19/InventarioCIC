@@ -1,14 +1,9 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('solicitud_items', function (Blueprint $table) {
@@ -22,17 +17,11 @@ return new class extends Migration
             $table->text('observaciones_item')->nullable();
             $table->enum('estado_item', ['pendiente', 'aprobado', 'rechazado', 'entregado'])->default('pendiente');
             $table->timestamps();
-            
-            // Índices para optimizar consultas
             $table->index(['solicitud_id', 'estado_item']);
             $table->index(['insumo_id', 'estado_item']);
             $table->unique(['solicitud_id', 'insumo_id']); // Evitar duplicados
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('solicitud_items');

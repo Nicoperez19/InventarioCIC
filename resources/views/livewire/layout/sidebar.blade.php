@@ -64,10 +64,10 @@ new class extends Component {}; ?>
 
 
                 <!-- Menú desplegable de Insumos -->
-                <div x-data="{ insumosOpen: {{ request()->routeIs('productos') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'true' : 'false' }} }">
+                <div x-data="{ insumosOpen: {{ request()->routeIs('insumos') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'true' : 'false' }} }">
                     <!-- Botón principal de Insumos -->
                     <button @click="insumosOpen = !insumosOpen"
-                        class="group flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 {{ request()->routeIs('productos') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'bg-light-cyan text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' }}">
+                        class="group flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 {{ request()->routeIs('insumos') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'bg-light-cyan text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' }}">
                         <div class="flex items-center">
                             <x-icons.package class="flex-shrink-0 w-5 h-5" />
                             <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
@@ -90,8 +90,8 @@ new class extends Component {}; ?>
                         x-transition:leave-start="transform opacity-100 scale-100"
                         x-transition:leave-end="transform opacity-0 scale-95" class="ml-6 space-y-1">
                         <!-- Todos los Insumos -->
-                        <a href="{{ route('productos') }}"
-                            class="group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 {{ request()->routeIs('productos') ? 'bg-light-cyan text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
+                        <a href="{{ route('insumos.index') }}"
+                            class="group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 {{ request()->routeIs('insumos') ? 'bg-light-cyan text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                             <x-icons.package class="flex-shrink-0 w-4 h-4" />
                             <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
                                 :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">

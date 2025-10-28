@@ -1,10 +1,7 @@
 <?php
-
 namespace App\Livewire\Tables;
-
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
-
 class RolesTable extends Component
 {
     public function render()
@@ -14,4 +11,3 @@ class RolesTable extends Component
         ]);
     }
 }
-

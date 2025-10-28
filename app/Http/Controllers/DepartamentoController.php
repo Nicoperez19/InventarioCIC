@@ -1,37 +1,29 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Departamento;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
 class DepartamentoController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth:sanctum');
     }
-
     public function index(Request $request): JsonResponse
     {
         try {
             $query = Departamento::withCount('users');
-
             if ($request->has('search')) {
                 $search = $request->get('search');
                 $query->where('nombre_depto', 'like', "%{$search}%");
             }
-
             $departamentos = $query->orderByName()->paginate($request->get('per_page', 15));
-
             return response()->json([
                 'success' => true,
                 'data' => $departamentos,
                 'message' => 'Departamentos obtenidos exitosamente'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -39,18 +31,15 @@ class DepartamentoController extends Controller
             ], 500);
         }
     }
-
     public function show(Departamento $departamento): JsonResponse
     {
         try {
             $departamento->load(['users', 'insumos']);
-
             return response()->json([
                 'success' => true,
                 'data' => $departamento,
                 'message' => 'Departamento obtenido exitosamente'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -58,7 +47,6 @@ class DepartamentoController extends Controller
             ], 500);
         }
     }
-
     public function store(Request $request): JsonResponse
     {
         try {
@@ -66,7 +54,6 @@ class DepartamentoController extends Controller
                 'id_depto' => 'required|string|max:20|unique:departamentos,id_depto',
                 'nombre_depto' => 'required|string|max:255'
             ]);
-
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
@@ -74,15 +61,12 @@ class DepartamentoController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-
             $departamento = Departamento::create($request->all());
-
             return response()->json([
                 'success' => true,
                 'data' => $departamento,
                 'message' => 'Departamento creado exitosamente'
             ], 201);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -90,7 +74,6 @@ class DepartamentoController extends Controller
             ], 500);
         }
     }
-
     public function update(Request $request, Departamento $departamento): JsonResponse
     {
         try {
@@ -98,7 +81,6 @@ class DepartamentoController extends Controller
                 'id_depto' => 'sometimes|string|max:20|unique:departamentos,id_depto,' . $departamento->id_depto,
                 'nombre_depto' => 'sometimes|string|max:255'
             ]);
-
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
@@ -106,15 +88,12 @@ class DepartamentoController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-
             $departamento->update($request->all());
-
             return response()->json([
                 'success' => true,
                 'data' => $departamento,
                 'message' => 'Departamento actualizado exitosamente'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -122,7 +101,6 @@ class DepartamentoController extends Controller
             ], 500);
         }
     }
-
     public function destroy(Departamento $departamento): JsonResponse
     {
         try {
@@ -132,14 +110,11 @@ class DepartamentoController extends Controller
                     'message' => 'No se puede eliminar el departamento porque tiene usuarios activos'
                 ], 422);
             }
-
             $departamento->delete();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Departamento eliminado exitosamente'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

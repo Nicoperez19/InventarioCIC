@@ -1,15 +1,9 @@
 <?php
-
 namespace Database\Seeders;
-
 use App\Models\UnidadMedida;
 use Illuminate\Database\Seeder;
-
 class UnidadSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $unidades = [
@@ -21,7 +15,6 @@ class UnidadSeeder extends Seeder
             'Botella',
             'Kilogramo',
         ];
-
         foreach ($unidades as $index => $nombre) {
             UnidadMedida::create([
                 'id_unidad' => 'U'.str_pad($index + 1, 3, '0', STR_PAD_LEFT),

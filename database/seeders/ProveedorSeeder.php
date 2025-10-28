@@ -1,16 +1,10 @@
 <?php
-
 namespace Database\Seeders;
-
 use App\Models\Proveedor;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
 class ProveedorSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $proveedores = [
@@ -40,7 +34,6 @@ class ProveedorSeeder extends Seeder
                 'telefono' => '+56 2 6789 0123'
             ]
         ];
-
         foreach ($proveedores as $proveedor) {
             Proveedor::create($proveedor);
         }

@@ -20,7 +20,7 @@
     <div class="py-8">
         <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <form method="POST" action="{{ route('productos.store') }}" class="p-6 space-y-6">
+                <form method="POST" action="{{ route('insumos.store') }}" class="p-6 space-y-6">
                     @csrf
 
                     <!-- Información básica -->
@@ -63,16 +63,6 @@
                     <div class="border-b border-gray-200 pb-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Información de inventario</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Stock Mínimo</label>
-                                <input type="number" name="stock_minimo" value="{{ old('stock_minimo', 0) }}" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-dark-teal focus:border-dark-teal" 
-                                       required min="0" placeholder="0">
-                                @error('stock_minimo')
-                                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
-
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Stock Actual</label>
                                 <input type="number" name="stock_actual" value="{{ old('stock_actual', 0) }}" 
@@ -119,7 +109,7 @@
 
                     <!-- Botones de acción -->
                     <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
-                        <a href="{{ route('productos') }}" 
+                        <a href="{{ route('insumos.index') }}" 
                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal">
                             Cancelar
                         </a>

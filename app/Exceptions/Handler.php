@@ -1,14 +1,11 @@
 <?php
-
 namespace App\Exceptions;
-
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
-
 class Handler extends ExceptionHandler
 {
     /**
@@ -21,7 +18,6 @@ class Handler extends ExceptionHandler
         'password',
         'password_confirmation',
     ];
-
     /**
      * Register the exception handling callbacks for the application.
      */
@@ -31,7 +27,6 @@ class Handler extends ExceptionHandler
             //
         });
     }
-
     /**
      * Render an exception into an HTTP response.
      */
@@ -46,13 +41,11 @@ class Handler extends ExceptionHandler
                     'error' => 'Forbidden'
                 ], 403);
             }
-
             // Para requests web, mostrar una página de error 403
             return response()->view('errors.403', [
                 'message' => 'No tienes permisos para acceder a esta página'
             ], 403);
         }
-
         // Manejar errores 404
         if ($exception instanceof NotFoundHttpException) {
             if ($request->expectsJson()) {
@@ -63,7 +56,6 @@ class Handler extends ExceptionHandler
                 ], 404);
             }
         }
-
         // Manejar errores de validación
         if ($exception instanceof ValidationException) {
             if ($request->expectsJson()) {
@@ -74,7 +66,6 @@ class Handler extends ExceptionHandler
                 ], 422);
             }
         }
-
         // Manejar errores de throttling
         if ($exception instanceof ThrottleRequestsException) {
             if ($request->expectsJson()) {
@@ -85,9 +76,7 @@ class Handler extends ExceptionHandler
                 ], 429);
             }
         }
-
         return parent::render($request, $exception);
     }
 }
-
 

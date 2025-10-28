@@ -1,23 +1,13 @@
 <?php
-
 if (!function_exists('translatePermission')) {
-    /**
-     * Traduce el nombre de un permiso del inglés al español
-     *
-     * @param string $permissionName
-     * @return string
-     */
     function translatePermission(string $permissionName): string
     {
         $translations = [
-            // Users
             'manage-users' => 'Gestionar usuarios',
             'create-users' => 'Crear usuarios',
             'edit-users' => 'Editar usuarios',
             'delete-users' => 'Eliminar usuarios',
             'view-users' => 'Ver usuarios',
-            
-            // Inventory / Products
             'manage-inventory' => 'Gestionar inventario',
             'create-products' => 'Crear productos',
             'edit-products' => 'Editar productos',
@@ -30,56 +20,37 @@ if (!function_exists('translatePermission')) {
             'apply-inventory' => 'Aplicar inventario',
             'apply-all-inventory' => 'Aplicar todo el inventario',
             'view-inventory-discrepancies' => 'Ver discrepancias de inventario',
-            
-            // Requests
             'view-requests' => 'Ver solicitudes',
             'create-requests' => 'Crear solicitudes',
             'approve-requests' => 'Aprobar solicitudes',
             'reject-requests' => 'Rechazar solicitudes',
             'deliver-requests' => 'Entregar solicitudes',
             'view-pending-requests' => 'Ver solicitudes pendientes',
-            
-            // Departments
             'manage-departments' => 'Gestionar departamentos',
             'create-departments' => 'Crear departamentos',
             'edit-departments' => 'Editar departamentos',
             'delete-departments' => 'Eliminar departamentos',
             'view-departments' => 'Ver departamentos',
-            
-            // Units
             'manage-units' => 'Gestionar unidades',
             'create-units' => 'Crear unidades',
             'edit-units' => 'Editar unidades',
             'delete-units' => 'Eliminar unidades',
             'view-units' => 'Ver unidades',
-            
-            // Roles
             'manage-roles' => 'Gestionar roles',
             'create-roles' => 'Crear roles',
             'edit-roles' => 'Editar roles',
             'delete-roles' => 'Eliminar roles',
             'view-roles' => 'Ver roles',
-            
-            // Permissions
             'manage-permissions' => 'Gestionar permisos',
             'create-permissions' => 'Crear permisos',
             'edit-permissions' => 'Editar permisos',
             'delete-permissions' => 'Eliminar permisos',
             'view-permissions' => 'Ver permisos',
         ];
-
         return $translations[$permissionName] ?? $permissionName;
     }
 }
-
 if (!function_exists('groupPermissionsByContext')) {
-    /**
-     * Agrupa los permisos por contexto (Usuarios, Productos, etc.)
-     * con sus acciones (Ver, Agregar, Editar, Eliminar, Gestionar)
-     *
-     * @param \Illuminate\Support\Collection $permissions
-     * @return array
-     */
     function groupPermissionsByContext($permissions): array
     {
         $grouped = [
@@ -116,58 +87,39 @@ if (!function_exists('groupPermissionsByContext')) {
                 'permissions' => []
             ],
         ];
-
         foreach ($permissions as $permission) {
             $name = $permission->name;
-            
-            // Usuarios
             if (str_contains($name, 'user')) {
                 $grouped['Usuarios']['permissions'][] = $permission;
             }
-            // Productos
             elseif (str_contains($name, 'product')) {
                 $grouped['Productos']['permissions'][] = $permission;
             }
-            // Inventario
             elseif (str_contains($name, 'inventory')) {
                 $grouped['Inventario']['permissions'][] = $permission;
             }
-            // Solicitudes
             elseif (str_contains($name, 'request')) {
                 $grouped['Solicitudes']['permissions'][] = $permission;
             }
-            // Departamentos
             elseif (str_contains($name, 'department')) {
                 $grouped['Departamentos']['permissions'][] = $permission;
             }
-            // Unidades
             elseif (str_contains($name, 'unit')) {
                 $grouped['Unidades']['permissions'][] = $permission;
             }
-            // Roles
             elseif (str_contains($name, 'role')) {
                 $grouped['Roles']['permissions'][] = $permission;
             }
-            // Permisos
             elseif (str_contains($name, 'permission')) {
                 $grouped['Permisos']['permissions'][] = $permission;
             }
         }
-
-        // Filtrar grupos vacíos
         return array_filter($grouped, function($group) {
             return !empty($group['permissions']);
         });
     }
 }
-
 if (!function_exists('getPermissionAction')) {
-    /**
-     * Obtiene la acción de un permiso (view, create, edit, delete, manage, etc.)
-     *
-     * @param string $permissionName
-     * @return string
-     */
     function getPermissionAction(string $permissionName): string
     {
         if (str_starts_with($permissionName, 'view-')) return 'view';
@@ -179,8 +131,6 @@ if (!function_exists('getPermissionAction')) {
         if (str_starts_with($permissionName, 'reject-')) return 'reject';
         if (str_starts_with($permissionName, 'deliver-')) return 'deliver';
         if (str_starts_with($permissionName, 'apply-')) return 'apply';
-        
         return 'other';
     }
 }
-

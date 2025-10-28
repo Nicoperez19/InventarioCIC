@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Solicitud;
 use App\Models\SolicitudItem;
 use App\Models\Insumo;
@@ -10,40 +8,25 @@ use App\Models\TipoInsumo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
 class SolicitudController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
     }
-
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $solicitudes = Solicitud::with(['user', 'departamento', 'tipoInsumo', 'items.insumo'])
             ->orderBy('fecha_solicitud', 'desc')
             ->paginate(15);
-
         return view('layouts.solicitud.solicitud_index', compact('solicitudes'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $departamentos = Departamento::orderBy('nombre_depto')->get();
         $tiposInsumo = TipoInsumo::activos()->orderBy('nombre_tipo')->get();
-        
         return view('layouts.solicitud.solicitud_create', compact('departamentos', 'tiposInsumo'));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -56,11 +39,8 @@ class SolicitudController extends Controller
             'items.*.cantidad_solicitada' => 'required|integer|min:1',
             'items.*.observaciones_item' => 'nullable|string|max:500',
         ]);
-
         try {
             DB::beginTransaction();
-
-            // Crear la solicitud
             $solicitud = Solicitud::create([
                 'tipo_solicitud' => $request->tipo_solicitud,
                 'observaciones' => $request->observaciones,
@@ -69,8 +49,6 @@ class SolicitudController extends Controller
                 'tipo_insumo_id' => $request->tipo_insumo_id,
                 'fecha_solicitud' => now(),
             ]);
-
-            // Crear los items de la solicitud
             foreach ($request->items as $item) {
                 SolicitudItem::create([
                     'solicitud_id' => $solicitud->id,
@@ -79,56 +57,37 @@ class SolicitudController extends Controller
                     'observaciones_item' => $item['observaciones_item'] ?? null,
                 ]);
             }
-
             DB::commit();
-
             return redirect()->route('solicitudes.index')
                 ->with('success', 'Solicitud creada exitosamente.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
                 ->with('error', 'Error al crear la solicitud: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Solicitud $solicitud)
     {
         $solicitud->load(['user', 'departamento', 'tipoInsumo', 'items.insumo.unidadMedida', 'aprobadoPor', 'entregadoPor']);
-        
         return view('layouts.solicitud.solicitud_show', compact('solicitud'));
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Solicitud $solicitud)
     {
         if ($solicitud->estado !== 'pendiente') {
             return redirect()->route('solicitudes.index')
                 ->with('error', 'No se puede editar una solicitud que no está pendiente.');
         }
-
         $departamentos = Departamento::orderBy('nombre_depto')->get();
         $tiposInsumo = TipoInsumo::activos()->orderBy('nombre_tipo')->get();
         $solicitud->load(['items.insumo.unidadMedida']);
-        
         return view('layouts.solicitud.solicitud_edit', compact('solicitud', 'departamentos', 'tiposInsumo'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Solicitud $solicitud)
     {
         if ($solicitud->estado !== 'pendiente') {
             return redirect()->route('solicitudes.index')
                 ->with('error', 'No se puede editar una solicitud que no está pendiente.');
         }
-
         $request->validate([
             'tipo_solicitud' => 'required|in:individual,masiva',
             'departamento_id' => 'required|exists:departamentos,id_depto',
@@ -139,21 +98,15 @@ class SolicitudController extends Controller
             'items.*.cantidad_solicitada' => 'required|integer|min:1',
             'items.*.observaciones_item' => 'nullable|string|max:500',
         ]);
-
         try {
             DB::beginTransaction();
-
-            // Actualizar la solicitud
             $solicitud->update([
                 'tipo_solicitud' => $request->tipo_solicitud,
                 'observaciones' => $request->observaciones,
                 'departamento_id' => $request->departamento_id,
                 'tipo_insumo_id' => $request->tipo_insumo_id,
             ]);
-
-            // Eliminar items existentes y crear nuevos
             $solicitud->items()->delete();
-
             foreach ($request->items as $item) {
                 SolicitudItem::create([
                     'solicitud_id' => $solicitud->id,
@@ -162,29 +115,21 @@ class SolicitudController extends Controller
                     'observaciones_item' => $item['observaciones_item'] ?? null,
                 ]);
             }
-
             DB::commit();
-
             return redirect()->route('solicitudes.index')
                 ->with('success', 'Solicitud actualizada exitosamente.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
                 ->with('error', 'Error al actualizar la solicitud: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Solicitud $solicitud)
     {
         if ($solicitud->estado !== 'pendiente') {
             return redirect()->route('solicitudes.index')
                 ->with('error', 'No se puede eliminar una solicitud que no está pendiente.');
         }
-
         try {
             $solicitud->delete();
             return redirect()->route('solicitudes.index')
@@ -194,17 +139,12 @@ class SolicitudController extends Controller
                 ->with('error', 'Error al eliminar la solicitud: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Aprobar una solicitud
-     */
     public function aprobar(Request $request, Solicitud $solicitud)
     {
         if ($solicitud->estado !== 'pendiente') {
             return redirect()->route('solicitudes.index')
                 ->with('error', 'Solo se pueden aprobar solicitudes pendientes.');
         }
-
         try {
             $solicitud->aprobar(Auth::id());
             return redirect()->route('solicitudes.index')
@@ -214,17 +154,12 @@ class SolicitudController extends Controller
                 ->with('error', 'Error al aprobar la solicitud: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Rechazar una solicitud
-     */
     public function rechazar(Request $request, Solicitud $solicitud)
     {
         if ($solicitud->estado !== 'pendiente') {
             return redirect()->route('solicitudes.index')
                 ->with('error', 'Solo se pueden rechazar solicitudes pendientes.');
         }
-
         try {
             $solicitud->rechazar(Auth::id());
             return redirect()->route('solicitudes.index')
@@ -234,17 +169,12 @@ class SolicitudController extends Controller
                 ->with('error', 'Error al rechazar la solicitud: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Entregar una solicitud
-     */
     public function entregar(Request $request, Solicitud $solicitud)
     {
         if ($solicitud->estado !== 'aprobada') {
             return redirect()->route('solicitudes.index')
                 ->with('error', 'Solo se pueden entregar solicitudes aprobadas.');
         }
-
         try {
             $solicitud->entregar(Auth::id());
             return redirect()->route('solicitudes.index')
@@ -254,36 +184,23 @@ class SolicitudController extends Controller
                 ->with('error', 'Error al entregar la solicitud: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Obtener insumos por tipo y departamento (para AJAX)
-     */
     public function getInsumos(Request $request)
     {
         $query = Insumo::with(['unidadMedida', 'tipoInsumo', 'departamento']);
-
         if ($request->tipo_insumo_id) {
             $query->where('tipo_insumo_id', $request->tipo_insumo_id);
         }
-
         if ($request->departamento_id) {
             $query->where('departamento_id', $request->departamento_id);
         }
-
         $insumos = $query->orderBy('nombre_insumo')->get();
-
         return response()->json($insumos);
     }
-
-    /**
-     * Obtener todos los insumos disponibles (para solicitud masiva)
-     */
     public function getAllInsumos(Request $request)
     {
         $insumos = Insumo::with(['unidadMedida', 'tipoInsumo', 'departamento'])
             ->orderBy('nombre_insumo')
             ->get();
-
         return response()->json($insumos);
     }
 }

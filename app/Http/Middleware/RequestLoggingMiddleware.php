@@ -1,12 +1,9 @@
 <?php
-
 namespace App\Http\Middleware;
-
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
-
 class RequestLoggingMiddleware
 {
     /**
@@ -17,7 +14,6 @@ class RequestLoggingMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $startTime = microtime(true);
-        
         // Log de entrada
         Log::info('Request iniciado', [
             'method' => $request->method(),
@@ -33,13 +29,10 @@ class RequestLoggingMiddleware
             'request_data' => $request->except(['password', 'password_confirmation', '_token']),
             'timestamp' => now()->toISOString()
         ]);
-
         try {
             $response = $next($request);
-            
             $endTime = microtime(true);
             $duration = round(($endTime - $startTime) * 1000, 2); // en milisegundos
-            
             // Log de salida exitosa
             Log::info('Request completado exitosamente', [
                 'method' => $request->method(),
@@ -50,13 +43,10 @@ class RequestLoggingMiddleware
                 'response_size' => strlen($response->getContent()),
                 'timestamp' => now()->toISOString()
             ]);
-            
             return $response;
-            
         } catch (\Exception $e) {
             $endTime = microtime(true);
             $duration = round(($endTime - $startTime) * 1000, 2);
-            
             // Log de error
             Log::error('Request falló con excepción', [
                 'method' => $request->method(),
@@ -75,7 +65,6 @@ class RequestLoggingMiddleware
                 ],
                 'timestamp' => now()->toISOString()
             ]);
-            
             throw $e;
         }
     }
