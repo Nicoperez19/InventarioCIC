@@ -28,17 +28,17 @@ new #[Layout('layouts.guest')] class extends Component
 
     <form wire:submit="login" class="space-y-6">
         <div>
-            <x-input-label for="email" :value="__('Correo Electrónico')" class="font-semibold text-primary-700" />
+            <x-input-label for="run" :value="__('RUN')" class="font-semibold text-primary-700" />
             <div class="relative mt-2">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
-                <x-text-input wire:model="form.email" id="email" 
+                <x-text-input wire:model="form.run" id="run" 
                     class="block w-full py-3 pl-10 pr-3 transition-all duration-200 border shadow-sm border-neutral-300 rounded-xl placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 hover:border-primary-300" 
-                    type="email" name="email" required autofocus autocomplete="username" 
-                    placeholder="tu@correo.com" />
+                    type="text" name="run" required autofocus autocomplete="username" 
+                    placeholder="12.345.678-9" oninput="formatRun(this)" />
             </div>
             <x-input-error :messages="$errors->get('form.run')" class="mt-2" />
         </div>
