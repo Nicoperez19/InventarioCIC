@@ -2,28 +2,54 @@
 namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
+
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::create([
-            'run' => '12345678-9',
-            'nombre' => 'Admin',
-            'correo' => 'admin@ucsc.cl',
-            'contrasena' => bcrypt('password'),
-            'id_depto' => 'CIC_admin', // Departamento de Administración
-        ]);
-        $worker = User::create([
-            'run' => '98765432-1',
-            'nombre' => 'Worker',
-            'correo' => 'worker@ucsc.cl',
-            'contrasena' => bcrypt('password'),
-            'id_depto' => 'CIC_info', // Departamento de Informática
-        ]);
-        $adminRole = Role::firstOrCreate(['name' => 'Administrador']);
-        $userRole = Role::firstOrCreate(['name' => 'Usuario']);
-        $admin->assignRole($adminRole);
-        $worker->assignRole($userRole);
+        // Crear usuarios principales (asumiendo que los departamentos ya existen)
+        $admin = User::firstOrCreate(
+            ['run' => '11111111-1'],
+            [
+                'nombre' => 'Administrador',
+                'correo' => 'admin@empresa.com',
+                'contrasena' => Hash::make('password123'),
+                'id_depto' => 'CIC_admin' // Usar departamento existente
+            ]
+        );
+
+        $jefe = User::firstOrCreate(
+            ['run' => '12345678-9'],
+            [
+                'nombre' => 'Jefe Departamento',
+                'correo' => 'jefe@empresa.com',
+                'contrasena' => Hash::make('password123'),
+                'id_depto' => 'CIC_info' // Usar departamento existente
+            ]
+        );
+
+        $auxiliar = User::firstOrCreate(
+            ['run' => '87654321-0'],
+            [
+                'nombre' => 'Auxiliar',
+                'correo' => 'auxiliar@empresa.com',
+                'contrasena' => Hash::make('password123'),
+                'id_depto' => 'CIC_ofic' // Usar departamento existente
+            ]
+        );
+
+      
+        $worker = User::firstOrCreate(
+            ['run' => '98765432-1'],
+            [
+                'nombre' => 'Worker',
+                'correo' => 'worker@ucsc.cl',
+                'contrasena' => Hash::make('password'),
+                'id_depto' => 'CIC_info'
+            ]
+        );
+
+
     }
 }

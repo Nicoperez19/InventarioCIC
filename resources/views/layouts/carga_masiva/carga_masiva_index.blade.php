@@ -72,14 +72,15 @@
                     <div class="p-4 mb-6 border border-blue-200 rounded-lg bg-blue-50">
                         <div class="space-y-2 text-blue-700">
                             <p><strong>Formato del archivo:</strong> Excel (.xlsx, .xls) o CSV</p>
-                            <p><strong>Estructura requerida:</strong></p>
-                            <ul class="ml-4 space-y-1 list-disc list-inside">
-                                <li>Los nombres de las hojas se convertirán en <strong>Tipos de Insumo</strong></li>
-                                <li>Los datos de insumos deben comenzar desde la <strong>fila 4</strong></li>
-                                <li><strong>Columna B:</strong> Código del insumo (opcional, se genera automáticamente si está vacío)</li>
-                                <li><strong>Columna C:</strong> Nombre del insumo (obligatorio)</li>
-                                <li><strong>Columna D:</strong> Unidad de medida (opcional, se crea automáticamente si no existe)</li>
-                            </ul>
+                                    <p><strong>Estructura requerida:</strong></p>
+                                    <ul class="ml-4 space-y-1 list-disc list-inside">
+                                        <li>Los nombres de las hojas se convertirán en <strong>Tipos de Insumo</strong></li>
+                                        <li>Los datos de insumos deben comenzar desde la <strong>fila 4</strong></li>
+                                        <li><strong>Columna B:</strong> Código del insumo (opcional, se genera automáticamente si está vacío)</li>
+                                        <li><strong>Columna C:</strong> Nombre del insumo (obligatorio)</li>
+                                        <li><strong>Columna D:</strong> Unidad de medida (opcional, se crea automáticamente si no existe)</li>
+                                        <li><strong>Columna E:</strong> Stock actual (opcional, se establece en 0 si está vacío o no es numérico)</li>
+                                    </ul>
                         </div>
                     </div>
 

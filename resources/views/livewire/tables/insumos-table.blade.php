@@ -1,4 +1,26 @@
 <div class="w-full bg-white shadow-sm rounded-lg border border-neutral-200 overflow-hidden">
+    <!-- Mensajes de error -->
+    @if ($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <div class="text-sm text-red-700">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Tabla -->
     <div class="w-full overflow-x-auto">
         <table class="w-full divide-y divide-neutral-200">
@@ -77,9 +99,19 @@
                         <!-- Stock Actual -->
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-600">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    {{ $insumo->stock_actual }}
-                                </span>
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" 
+                                           wire:model.live.debounce.100ms="stockValues.{{ $insumo->id_insumo }}"
+                                           wire:change="updateStock('{{ $insumo->id_insumo }}', $event.target.value)"
+                                           class="w-20 px-2 py-1 text-xs font-medium text-center border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('stock_' . $insumo->id_insumo) border-red-500 @enderror"
+                                           min="0"
+                                           step="1"
+                                           value="{{ $stockValues[$insumo->id_insumo] ?? $insumo->stock_actual }}">
+                                    <span class="text-xs text-gray-500">{{ $insumo->unidadMedida->nombre_unidad_medida ?? 'unidades' }}</span>
+                                </div>
+                                @error('stock_' . $insumo->id_insumo)
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </td>
                         

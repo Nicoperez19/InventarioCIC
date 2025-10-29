@@ -94,6 +94,8 @@ class ExcelImportService
             $codigoInsumo = $worksheet->getCell('B' . $row)->getValue();
             $nombreInsumo = $worksheet->getCell('C' . $row)->getValue();
             $unidadMedida = $worksheet->getCell('D' . $row)->getValue();
+            $stockActual = $worksheet->getCell('E' . $row)->getValue();
+            
             if (empty($nombreInsumo)) {
                 $this->errors[] = "Fila {$row}: Nombre del insumo es requerido";
                 return;
@@ -101,6 +103,14 @@ class ExcelImportService
             if (empty($codigoInsumo)) {
                 $codigoInsumo = $this->generateInsumoCode();
             }
+            
+            // Validar y procesar stock actual
+            if (empty($stockActual) || !is_numeric($stockActual)) {
+                $stockActual = 0;
+            } else {
+                $stockActual = (int) $stockActual;
+            }
+            
             $unidadMedidaId = $this->findOrCreateUnidadMedida($unidadMedida);
             $insumoExistente = Insumo::where('id_insumo', $codigoInsumo)->first();
             if ($insumoExistente) {
@@ -113,7 +123,7 @@ class ExcelImportService
                 'nombre_insumo' => $nombreInsumo,
                 'id_unidad' => $unidadMedidaId,
                 'tipo_insumo_id' => $tipoInsumoId,
-                'stock_actual' => 0,
+                'stock_actual' => $stockActual,
                 'codigo_barra' => null
             ]);
             DB::commit();

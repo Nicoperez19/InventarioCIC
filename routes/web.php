@@ -72,6 +72,14 @@ Route::middleware(['auth', 'can:manage-insumos'])->group(function () {
     Route::post('/carga-masiva/upload', [CargaMasivaController::class, 'upload'])->name('carga-masiva.upload');
     Route::get('/carga-masiva/template', [CargaMasivaController::class, 'downloadTemplate'])->name('carga-masiva.template');
 });
+
+Route::middleware(['auth', 'can:solicitar-insumos'])->group(function () {
+    Route::view('solicitudes', 'layouts.solicitud.solicitud_index')->name('solicitudes');
+});
+
+Route::middleware(['auth', 'can:manage-roles'])->group(function () {
+    Route::view('configuracion-permisos', 'layouts.configuracion.configuracion_index')->name('configuracion-permisos');
+});
 Route::middleware(['auth', 'can:manage-roles'])->group(function () {
     Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
     Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
@@ -104,7 +112,7 @@ Route::middleware(['auth', 'can:manage-invoices'])->group(function () {
     Route::get('/facturas/{factura}/download', [FacturaController::class, 'download'])->name('facturas.download');
 });
 Route::middleware(['auth', 'can:manage-requests'])->group(function () {
-    Route::view('solicitudes', 'layouts.solicitud.solicitud_index')->name('solicitudes.index');
+    Route::view('admin-solicitudes', 'layouts.admin.admin_solicitudes_index')->name('admin-solicitudes');
     Route::get('/solicitudes/create', [SolicitudController::class, 'create'])->name('solicitudes.create');
     Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
     Route::get('/solicitudes/{solicitud}', [SolicitudController::class, 'show'])->name('solicitudes.show');

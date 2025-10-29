@@ -103,24 +103,6 @@
                                     <span class="hidden sm:inline">Editar</span>
                                 </a>
                                 
-                                <!-- Botón Toggle Status -->
-                                <form action="{{ route('tipo-insumos.toggle-status', $tipoInsumo->id) }}" 
-                                      method="POST" 
-                                      class="inline">
-                            @csrf
-                                    <button type="submit" 
-                                            class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-2 border border-transparent text-xs font-medium rounded-md {{ $tipoInsumo->activo ? 'text-warning-600 bg-warning-50 hover:bg-warning-600 hover:text-white' : 'text-success-600 bg-success-50 hover:bg-success-600 hover:text-white' }} focus:outline-none focus:ring-2 focus:ring-offset-2 {{ $tipoInsumo->activo ? 'focus:ring-warning-500' : 'focus:ring-success-500' }} transition-colors duration-150">
-                                        <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            @if($tipoInsumo->activo)
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
-                                            @else
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            @endif
-                                        </svg>
-                                        <span class="hidden sm:inline">{{ $tipoInsumo->activo ? 'Desactivar' : 'Activar' }}</span>
-                                    </button>
-                        </form>
-                                
                                 <!-- Botón Eliminar -->
                                 <form action="{{ route('tipo-insumos.destroy', $tipoInsumo->id) }}" 
                                       method="POST" 

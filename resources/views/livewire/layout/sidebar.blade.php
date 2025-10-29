@@ -35,6 +35,20 @@ new class extends Component {}; ?>
                     </span>
                 </a>
 
+                @can('solicitar-insumos')
+                <a href="{{ route('solicitudes') }}"
+                    class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('solicitudes') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
+                    <svg class="flex-shrink-0 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
+                        :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
+                        Solicitudes
+                    </span>
+                </a>
+                @endcan
+
+                @can('manage-users')
                 <a href="{{ route('users') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('users') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.users class="flex-shrink-0 w-5 h-5" />
@@ -43,7 +57,9 @@ new class extends Component {}; ?>
                         Usuarios
                     </span>
                 </a>
+                @endcan
 
+                @can('manage-departments')
                 <a href="{{ route('departamentos') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('departamentos') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.building class="flex-shrink-0 w-5 h-5" />
@@ -52,7 +68,9 @@ new class extends Component {}; ?>
                         Departamentos
                     </span>
                 </a>
+                @endcan
 
+                @can('manage-units')
                 <a href="{{ route('unidades') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('unidades') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.cube class="flex-shrink-0 w-5 h-5" />
@@ -61,8 +79,10 @@ new class extends Component {}; ?>
                         Unidades
                     </span>
                 </a>
+                @endcan
 
 
+                @canany(['manage-insumos', 'view-insumos'])
                 <!-- Menú desplegable de Insumos -->
                 <div x-data="{ insumosOpen: {{ request()->routeIs('insumos') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'true' : 'false' }} }">
                     <!-- Botón principal de Insumos -->
@@ -89,6 +109,7 @@ new class extends Component {}; ?>
                         x-transition:leave="transition ease-in duration-75"
                         x-transition:leave-start="transform opacity-100 scale-100"
                         x-transition:leave-end="transform opacity-0 scale-95" class="mt-2 ml-6 space-y-1">
+                        @can('view-insumos')
                         <!-- Todos los Insumos -->
                         <a href="{{ route('insumos.index') }}"
                             class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('insumos.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
@@ -98,7 +119,9 @@ new class extends Component {}; ?>
                                 Todos los Insumos
                             </span>
                         </a>
+                        @endcan
 
+                        @can('view-tipo-insumos')
                         <!-- Tipos de Insumo -->
                         <a href="{{ route('tipo-insumos.index') }}"
                             class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('tipo-insumos.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
@@ -112,10 +135,13 @@ new class extends Component {}; ?>
                                 Tipos de Insumo
                             </span>
                         </a>
+                        @endcan
                     </div>
                 </div>
+                @endcanany
 
 
+                @can('manage-bulk-upload')
                 <a href="{{ route('carga-masiva.index') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('carga-masiva.index') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.upload class="flex-shrink-0 w-5 h-5" />
@@ -124,7 +150,9 @@ new class extends Component {}; ?>
                         Carga Masiva
                     </span>
                 </a>
+                @endcan
 
+                @can('view-providers')
                 <a href="{{ route('proveedores.index') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('proveedores.index') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.truck class="flex-shrink-0 w-5 h-5" />
@@ -133,7 +161,9 @@ new class extends Component {}; ?>
                         Proveedores
                     </span>
                 </a>
+                @endcan
 
+                @can('view-invoices')
                 <a href="{{ route('facturas.index') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('facturas.index') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.document class="flex-shrink-0 w-5 h-5" />
@@ -142,6 +172,34 @@ new class extends Component {}; ?>
                         Facturas
                     </span>
                 </a>
+                @endcan
+
+                @can('manage-requests')
+                <a href="{{ route('admin-solicitudes') }}"
+                    class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('admin-solicitudes') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
+                    <svg class="flex-shrink-0 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
+                        :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
+                        Admin Solicitudes
+                    </span>
+                </a>
+                @endcan
+
+                @can('manage-roles')
+                <a href="{{ route('configuracion-permisos') }}"
+                    class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('configuracion-permisos') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
+                    <svg class="flex-shrink-0 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
+                        :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
+                        Configuración
+                    </span>
+                </a>
+                @endcan
             </div>
         </nav>
 
