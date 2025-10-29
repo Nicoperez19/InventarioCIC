@@ -28,7 +28,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 Route::middleware(['auth', 'can:manage-users'])->group(function () {
     Route::view('users', 'layouts.user.user_index')->name('users');
-    Route::get('/users/create', [UsersController::class, 'create'])->name('users.create');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
     Route::get('/users/{user}/edit', [UsersController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
