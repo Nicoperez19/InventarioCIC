@@ -13,6 +13,20 @@ new class extends Component { }; ?>
                     <x-icons.menu-fold-right x-show="!isSidebarOpen" aria-hidden="true" class="w-6 h-6 md:block" />
                     <x-icons.menu-fold-left x-show="isSidebarOpen" aria-hidden="true" class="w-6 h-6 md:block" />
                 </x-button>
+                
+                <!-- Logo y nombre cuando el sidebar está cerrado -->
+                <div x-show="!isSidebarOpen" x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 transform scale-95"
+                     x-transition:enter-end="opacity-100 transform scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 transform scale-100"
+                     x-transition:leave-end="opacity-0 transform scale-95"
+                     class="flex items-center ml-4">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-2 mr-3">
+                        <img src="{{ asset('storage/images/logo.png') }}" alt="Logo GestionCIC" class="h-8 w-auto">
+                    </div>
+                    <h1 class="text-xl font-semibold text-white">GestionCIC</h1>
+                </div>
             </div>
 
             <div class="hidden md:flex md:items-center">

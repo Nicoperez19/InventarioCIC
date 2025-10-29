@@ -16,16 +16,19 @@
         @livewireStyles
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 flex items-center justify-center p-4">
-            <!-- Contenedor principal -->
-            <div class="w-full max-w-md">
-                <!-- Título -->
-                <div class="text-center mb-8">
-                    <h1 class="text-4xl font-bold text-white mb-2">GestionCIC</h1>
-                    <p class="text-white/90 text-lg">Sistema de Gestión de Inventario</p>
+        <div class="min-h-screen bg-gradient-to-b from-secondary-500 via-primary-500 to-primary-700 flex flex-col justify-center items-center p-4">
+            <!-- Logo y Título -->
+            <div class="text-center mb-8">
+                <!-- Logo -->
+                <div class="flex justify-center mb-4">
+                    <img src="{{ asset('storage/images/logo.png') }}" alt="Logo GestionCIC" class="h-32 w-auto">
                 </div>
+                <h1 class="text-4xl font-bold text-white mb-2">GestionCIC</h1>
+                <p class="text-white/90 text-lg">Sistema de Gestión de Inventario</p>
+            </div>
 
-                <!-- Card de login -->
+            <!-- Card de login -->
+            <div class="w-full max-w-md">
                 <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/30">
                     {{ $slot }}
                 </div>

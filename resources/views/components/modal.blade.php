@@ -21,22 +21,32 @@
     @keydown.escape.window="show = false" @keydown.tab.prevent="navigateFocus($event)"
     class="fixed inset-0 z-[150] px-4 pt-8 overflow-y-auto sm:px-0" style="display: none;">
     <!-- Background overlay -->
-    <div x-show="show" class="fixed inset-0 transition-opacity bg-gray-500 opacity-75 dark:bg-gray-900"
+    <div x-show="show" class="fixed inset-0 transition-opacity bg-gray-400 opacity-60 backdrop-blur-sm"
         @click="show = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
 
     <!-- Modal -->
     <div x-show="show"
-        class="mb-6 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidthClass }} sm:mx-auto"
+        class="mb-6 bg-white rounded-xl overflow-hidden shadow-2xl transform transition-all sm:w-full {{ $maxWidthClass }} sm:mx-auto"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
 
-        <div class="p-2 text-lg font-semibold text-center text-white bg-red-700 dark:bg-dark-eval-1">
-            {{ $title ?? ($header ?? '') }}
+        <div class="px-6 py-4 text-lg font-semibold text-white bg-primary-500 flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                {{ $title ?? ($header ?? '') }}
+            </div>
+            <button @click="show = false" class="text-white hover:text-gray-200 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
         </div>
 
         <!-- Contenido del modal -->
