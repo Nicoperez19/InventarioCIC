@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'can:manage-users'])->group(function () {
     Route::view('users', 'layouts.user.user_index')->name('users');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}', [UsersController::class, 'show'])->name('users.show');
     Route::get('/users/{user}/edit', [UsersController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
@@ -37,6 +38,7 @@ Route::middleware(['auth', 'can:manage-departments'])->group(function () {
     Route::view('departamentos', 'layouts.departamento.departamento_index')->name('departamentos');
     Route::get('/departamentos/create', [DepartamentoController::class, 'create'])->name('departamentos.create');
     Route::post('/departamentos', [DepartamentoController::class, 'store'])->name('departamentos.store');
+    Route::get('/departamentos/{departamento}', [DepartamentoController::class, 'show'])->name('departamentos.show');
     Route::get('/departamentos/{departamento}/edit', [DepartamentoController::class, 'edit'])->name('departamentos.edit');
     Route::put('/departamentos/{departamento}', [DepartamentoController::class, 'update'])->name('departamentos.update');
     Route::delete('/departamentos/{departamento}', [DepartamentoController::class, 'destroy'])->name('departamentos.destroy');
@@ -45,6 +47,7 @@ Route::middleware(['auth', 'can:manage-units'])->group(function () {
     Route::view('unidades', 'layouts.unidad.unidad_index')->name('unidades');
     Route::get('/unidades/create', [UnidadMedidaController::class, 'create'])->name('unidades.create');
     Route::post('/unidades', [UnidadMedidaController::class, 'store'])->name('unidades.store');
+    Route::get('/unidades/{unidad}', [UnidadMedidaController::class, 'show'])->name('unidades.show');
     Route::get('/unidades/{unidad}/edit', [UnidadMedidaController::class, 'edit'])->name('unidades.edit');
     Route::put('/unidades/{unidad}', [UnidadMedidaController::class, 'update'])->name('unidades.update');
     Route::delete('/unidades/{unidad}', [UnidadMedidaController::class, 'destroy'])->name('unidades.destroy');
