@@ -2,8 +2,11 @@
 namespace App\Http\Controllers;
 use App\Models\Insumo;
 use App\Models\UnidadMedida;
+use App\Services\BarcodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 class InsumoController extends Controller
 {
@@ -230,5 +233,39 @@ class InsumoController extends Controller
                 'message' => 'Error al obtener insumos con stock bajo: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function generateBarcode(Insumo $insumo): BinaryFileResponse
+    {
+        if (!$insumo->codigo_barra) {
+            abort(404, 'El insumo no tiene código de barras asignado');
+        }
+
+        $barcodeService = new BarcodeService();
+        $imagePath = $barcodeService->generateBarcodeImage($insumo->codigo_barra);
+        $fullPath = storage_path('app/public/' . $imagePath);
+
+        if (!file_exists($fullPath)) {
+            abort(404, 'No se pudo generar la imagen del código de barras');
+        }
+
+        return response()->download($fullPath, "codigo_barras_{$insumo->id_insumo}.png");
+    }
+
+    public function generateBarcodeSvg(Insumo $insumo): BinaryFileResponse
+    {
+        if (!$insumo->codigo_barra) {
+            abort(404, 'El insumo no tiene código de barras asignado');
+        }
+
+        $barcodeService = new BarcodeService();
+        $imagePath = $barcodeService->generateBarcodeSVG($insumo->codigo_barra);
+        $fullPath = storage_path('app/public/' . $imagePath);
+
+        if (!file_exists($fullPath)) {
+            abort(404, 'No se pudo generar la imagen SVG del código de barras');
+        }
+
+        return response()->download($fullPath, "codigo_barras_{$insumo->id_insumo}.svg");
     }
 }

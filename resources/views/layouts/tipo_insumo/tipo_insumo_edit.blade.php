@@ -131,7 +131,7 @@
 
                     <!-- Botones de acción -->
                     <div class="flex items-center justify-end pt-8 mt-8 border-t border-gray-200 space-x-3">
-                        <a href="{{ route('tipo-insumos.index') }}" 
+                        <a href="{{ route('tipo-insumos.index') }}"
                            class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400 transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

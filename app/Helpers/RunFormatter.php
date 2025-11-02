@@ -22,20 +22,5 @@ class RunFormatter
         return substr($input, 0, 8) . '-' . substr($input, 8, 1);
     }
     
-    public static function isValid(string $run): bool
-    {
-        $run = trim($run);
-        if (empty($run)) {
-            return false;
-        }
-        
-        $pattern = '/^[0-9]{7,8}-[0-9kK]$/';
-        return preg_match($pattern, $run);
-    }
-    
-    public static function clean(string $run): string
-    {
-        return preg_replace('/[^0-9kK]/', '', strtoupper($run));
-    }
 }
 

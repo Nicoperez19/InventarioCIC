@@ -34,16 +34,7 @@ class BarcodeDisplay extends Component
         $this->loadBarcode();
         session()->flash('message', 'Código de barras regenerado exitosamente');
     }
-    public function downloadBarcode()
-    {
-        if (!$this->insumo->codigo_barra) {
-            return;
-        }
-        $barcodeService = new BarcodeService();
-        $imagePath = $barcodeService->generateBarcodeImage($this->insumo->codigo_barra);
-        $fullPath = storage_path('app/public/' . $imagePath);
-        return response()->download($fullPath, "codigo_barras_{$this->insumo->id_insumo}.png");
-    }
+
     public function render()
     {
         return view('livewire.barcode-display');

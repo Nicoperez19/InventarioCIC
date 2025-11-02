@@ -4,6 +4,8 @@ use App\Models\TipoInsumo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 class TipoInsumoController extends Controller
 {
     public function __construct()
@@ -138,6 +140,53 @@ class TipoInsumoController extends Controller
                 'success' => false,
                 'message' => 'Error al obtener tipos de insumo: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function generatePdf(TipoInsumo $tipoInsumo)
+    {
+        try {
+            // Cargar el tipo de insumo con sus insumos y relaciones
+            $tipoInsumo->load([
+                'insumos' => function($query) {
+                    $query->with('unidadMedida')
+                          ->orderBy('nombre_insumo');
+                }
+            ]);
+
+            // Configurar opciones de DomPDF
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true);
+            $options->set('defaultFont', 'Arial');
+
+            // Crear instancia de DomPDF
+            $dompdf = new Dompdf($options);
+
+            // Renderizar la vista del PDF
+            $html = view('pdf.tipo-insumo-insumos', [
+                'tipoInsumo' => $tipoInsumo,
+                'insumos' => $tipoInsumo->insumos,
+                'fecha' => now()->format('d/m/Y H:i:s')
+            ])->render();
+
+            // Cargar HTML en DomPDF
+            $dompdf->loadHtml($html);
+
+            // Configurar el tamaño del papel
+            $dompdf->setPaper('A4', 'portrait');
+
+            // Renderizar el PDF
+            $dompdf->render();
+
+            // Generar nombre del archivo
+            $nombreArchivo = 'Insumos_' . str_replace(' ', '_', $tipoInsumo->nombre_tipo) . '_' . now()->format('Y-m-d') . '.pdf';
+
+            // Retornar el PDF como descarga
+            return $dompdf->stream($nombreArchivo);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al generar el PDF: ' . $e->getMessage());
         }
     }
 }

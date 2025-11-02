@@ -20,5 +20,7 @@ class TipoInsumosTable extends Component
     {
         return 'vendor.livewire.tailwind';
     }
+
+    protected $paginationTheme = 'tailwind';
 }
 

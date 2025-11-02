@@ -90,9 +90,9 @@ new class extends Component {}; ?>
 
                 @canany(['manage-insumos', 'view-insumos'])
                 <!-- Menú desplegable de Insumos -->
-                <div x-data="{ insumosOpen: {{ request()->routeIs('insumos') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'true' : 'false' }} }">
+                <div x-data="{ insumosOpen: {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'true' : 'false' }} }">
                     <!-- Botón principal de Insumos -->
-                    <button @click="insumosOpen = !insumosOpen"
+                    <button type="button" @click="insumosOpen = !insumosOpen"
                         class="group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'bg-secondary-100 text-primary-800 border border-secondary-300' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                         <div class="flex items-center">
                             <x-icons.package class="flex-shrink-0 w-5 h-5" />
@@ -193,19 +193,6 @@ new class extends Component {}; ?>
                 </a>
                 @endcan
 
-                @can('manage-roles')
-                <a href="{{ route('configuracion-permisos') }}"
-                    class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('configuracion-permisos') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
-                    <svg class="flex-shrink-0 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
-                        :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
-                        Configuración
-                    </span>
-                </a>
-                @endcan
             </div>
         </nav>
 
@@ -227,7 +214,7 @@ new class extends Component {}; ?>
             </div>
             
             <div class="space-y-1">
-                <a href="{{ route('profile') }}" wire:navigate
+                <a href="{{ route('profile') }}"
                     class="flex items-center px-3 py-2 text-sm font-medium transition-all duration-200 rounded-lg text-primary-700 hover:bg-secondary-100 hover:text-primary-900">
                     <svg class="flex-shrink-0 w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>

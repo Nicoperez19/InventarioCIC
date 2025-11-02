@@ -107,7 +107,7 @@
 
                     <!-- Botones de acción -->
                     <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
-                        <a href="{{ route('insumos.index') }}" 
+                        <a href="{{ route('insumos.index') }}"
                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-teal">
                             Cancelar
                         </a>

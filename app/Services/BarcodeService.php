@@ -81,16 +81,7 @@ class BarcodeService
         Storage::disk('public')->put($path, $imageData);
         return $path;
     }
-    public function generateSmallBarcode(string $barcode, string $filename = null): string
-    {
-        if (!$filename) {
-            $filename = "barcode_small_{$barcode}.png";
-        }
-        $imageData = $this->generatorPNG->getBarcode($barcode, BarcodeGeneratorPNG::TYPE_CODE_128, 1, 30, [255, 255, 255], [0, 0, 0]);
-        $path = "codigos_insumos/{$filename}";
-        Storage::disk('public')->put($path, $imageData);
-        return $path;
-    }
+
     public function generateBarcodeSVG(string $barcode, string $filename = null): string
     {
         if (!$filename) {
@@ -136,5 +127,28 @@ class BarcodeService
             'unit' => $unitInfo,
             'checksum' => substr($barcode, 7, 1)
         ];
+    }
+
+    public function getBarcodeUrl(string $barcode): string
+    {
+        $filename = "barcode_{$barcode}.png";
+        $path = "codigos_insumos/{$filename}";
+        
+        // Si la imagen no existe, generarla
+        if (!Storage::disk('public')->exists($path)) {
+            $this->generateBarcodeImage($barcode, $filename);
+        }
+        
+        return asset('storage/' . $path);
+    }
+
+    public function deleteBarcodeImage(string $barcode): void
+    {
+        $filename = "barcode_{$barcode}.png";
+        $path = "codigos_insumos/{$filename}";
+        
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 }

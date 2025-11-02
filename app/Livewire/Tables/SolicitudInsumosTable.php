@@ -15,6 +15,7 @@ class SolicitudInsumosTable extends Component
     public $insumos;
     public $cantidades = [];
     public $tipoInsumoFiltro = null;
+    public $errores = [];
 
     public function mount()
     {
@@ -86,23 +87,79 @@ class SolicitudInsumosTable extends Component
     public function actualizarCantidad($insumoId, $cantidad)
     {
         $cantidad = (int) $cantidad;
-        $insumo = $this->insumos->find($insumoId);
         
-        if ($insumo && $cantidad >= 0 && $cantidad <= $insumo->stock_actual) {
-            $this->cantidades[$insumoId] = $cantidad;
-        } else {
+        // Buscar el insumo en la colección por id_insumo
+        $insumo = $this->insumos->firstWhere('id_insumo', $insumoId);
+        
+        // Limpiar error previo para este insumo
+        unset($this->errores[$insumoId]);
+        
+        if (!$insumo) {
             $this->cantidades[$insumoId] = 0;
+            $this->errores[$insumoId] = 'Insumo no encontrado';
+            return;
         }
+        
+        // Validar que no sea negativo - si es negativo, poner en 0
+        if ($cantidad < 0) {
+            $this->cantidades[$insumoId] = 0;
+            $this->errores[$insumoId] = 'No se pueden solicitar valores negativos';
+            return;
+        }
+        
+        // Validar que no exceda el stock disponible - si excede, poner en 0
+        if ($cantidad > $insumo->stock_actual) {
+            $this->cantidades[$insumoId] = 0;
+            $this->errores[$insumoId] = "No puedes solicitar más de {$insumo->stock_actual} unidades. El valor se ha restablecido a 0.";
+            return;
+        }
+        
+        // Si todo está bien, asignar la cantidad
+        $this->cantidades[$insumoId] = $cantidad;
     }
 
     public function crearSolicitud()
     {
+        // Limpiar errores previos
+        $this->errores = [];
+        
         $itemsConCantidad = collect($this->cantidades)->filter(function($cantidad) {
             return $cantidad > 0;
         });
 
         if ($itemsConCantidad->isEmpty()) {
             session()->flash('error', 'Debe seleccionar al menos un insumo con cantidad mayor a 0');
+            return;
+        }
+
+        // Validar todas las cantidades antes de crear la solicitud
+        $erroresValidacion = [];
+        
+        foreach ($itemsConCantidad as $insumoId => $cantidad) {
+            // Validar que la cantidad no sea negativa
+            if ($cantidad < 0) {
+                $erroresValidacion[$insumoId] = 'No se pueden solicitar valores negativos';
+                continue;
+            }
+            
+            // Verificar que el insumo existe y tiene suficiente stock
+            $insumo = Insumo::find($insumoId);
+            if (!$insumo) {
+                $erroresValidacion[$insumoId] = 'Insumo no encontrado';
+                continue;
+            }
+            
+            // Validar que no se exceda el stock disponible
+            if ($cantidad > $insumo->stock_actual) {
+                $erroresValidacion[$insumoId] = "No puedes solicitar más de {$insumo->stock_actual} unidades de {$insumo->nombre_insumo} (stock disponible: {$insumo->stock_actual})";
+            }
+        }
+        
+        // Si hay errores, mostrarlos y no continuar
+        if (!empty($erroresValidacion)) {
+            $this->errores = $erroresValidacion;
+            $mensajeError = 'Errores de validación: ' . implode(', ', $erroresValidacion);
+            session()->flash('error', $mensajeError);
             return;
         }
 
@@ -125,12 +182,26 @@ class SolicitudInsumosTable extends Component
 
             // Crear los items de la solicitud y reducir stock
             foreach ($itemsConCantidad as $insumoId => $cantidad) {
-                // Verificar que hay suficiente stock
-                $insumo = Insumo::find($insumoId);
-                if (!$insumo || $insumo->stock_actual < $cantidad) {
+                // Obtener el insumo con bloqueo para evitar condiciones de carrera
+                $insumo = Insumo::lockForUpdate()->find($insumoId);
+                
+                if (!$insumo) {
                     DB::rollBack();
-                    $nombreInsumo = $insumo ? $insumo->nombre_insumo : $insumoId;
-                    session()->flash('error', "No hay suficiente stock para el insumo {$nombreInsumo}");
+                    session()->flash('error', "El insumo con ID {$insumoId} no fue encontrado");
+                    return;
+                }
+                
+                // Verificar nuevamente el stock (doble verificación)
+                if ($insumo->stock_actual < $cantidad) {
+                    DB::rollBack();
+                    session()->flash('error', "No hay suficiente stock para el insumo {$insumo->nombre_insumo}. Stock disponible: {$insumo->stock_actual}, solicitado: {$cantidad}");
+                    return;
+                }
+                
+                // Validar que la cantidad no sea negativa (segunda verificación)
+                if ($cantidad < 0) {
+                    DB::rollBack();
+                    session()->flash('error', "No se pueden solicitar valores negativos para el insumo {$insumo->nombre_insumo}");
                     return;
                 }
 
@@ -151,10 +222,14 @@ class SolicitudInsumosTable extends Component
 
             DB::commit();
             
-            session()->flash('success', "Solicitud #{$solicitud->numero_solicitud} creada y aprobada exitosamente con {$itemsConCantidad->count()} insumos. El stock ha sido reducido automáticamente.");
+            session()->flash('success', "Solicitud #{$solicitud->numero_solicitud} creada y aprobada exitosamente con {$itemsConCantidad->count()} insumo(s). El stock ha sido reducido automáticamente.");
             
-            // Limpiar cantidades
+            // Limpiar cantidades y errores
             $this->cantidades = array_fill_keys(array_keys($this->cantidades), 0);
+            $this->errores = [];
+            
+            // Recargar insumos para actualizar el stock
+            $this->cargarInsumos();
             
         } catch (\Exception $e) {
             DB::rollBack();
@@ -165,6 +240,7 @@ class SolicitudInsumosTable extends Component
     public function limpiarSolicitud()
     {
         $this->cantidades = array_fill_keys(array_keys($this->cantidades), 0);
+        $this->errores = [];
         session()->flash('info', 'Solicitud limpiada');
     }
 

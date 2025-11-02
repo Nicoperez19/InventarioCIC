@@ -60,6 +60,7 @@ Route::middleware(['auth', 'can:manage-tipo-insumos'])->group(function () {
     Route::get('/tipo-insumos/{tipoInsumo}/edit', [TipoInsumoController::class, 'edit'])->name('tipo-insumos.edit');
     Route::put('/tipo-insumos/{tipoInsumo}', [TipoInsumoController::class, 'update'])->name('tipo-insumos.update');
     Route::delete('/tipo-insumos/{tipoInsumo}', [TipoInsumoController::class, 'destroy'])->name('tipo-insumos.destroy');
+    Route::get('/tipo-insumos/{tipoInsumo}/pdf', [TipoInsumoController::class, 'generatePdf'])->name('tipo-insumos.pdf');
 });
 Route::middleware(['auth', 'can:manage-insumos'])->group(function () {
     Route::view('insumos', 'layouts.insumo.insumo_index')->name('insumos.index');
@@ -69,8 +70,8 @@ Route::middleware(['auth', 'can:manage-insumos'])->group(function () {
     Route::get('/insumos/{insumo}/edit', [InsumoController::class, 'edit'])->name('insumos.edit');
     Route::put('/insumos/{insumo}', [InsumoController::class, 'update'])->name('insumos.update');
     Route::delete('/insumos/{insumo}', [InsumoController::class, 'destroy'])->name('insumos.destroy');
-});
-Route::middleware(['auth', 'can:manage-insumos'])->group(function () {
+    Route::get('/barcode/{insumo}/generate', [InsumoController::class, 'generateBarcode'])->name('barcode.generate');
+    Route::get('/barcode/{insumo}/svg', [InsumoController::class, 'generateBarcodeSvg'])->name('barcode.svg');
     Route::get('/carga-masiva', [CargaMasivaController::class, 'index'])->name('carga-masiva.index');
     Route::post('/carga-masiva/upload', [CargaMasivaController::class, 'upload'])->name('carga-masiva.upload');
     Route::get('/carga-masiva/template', [CargaMasivaController::class, 'downloadTemplate'])->name('carga-masiva.template');
@@ -80,9 +81,6 @@ Route::middleware(['auth', 'can:solicitar-insumos'])->group(function () {
     Route::view('solicitudes', 'layouts.solicitud.solicitud_index')->name('solicitudes');
 });
 
-Route::middleware(['auth', 'can:manage-roles'])->group(function () {
-    Route::view('configuracion-permisos', 'layouts.configuracion.configuracion_index')->name('configuracion-permisos');
-});
 Route::middleware(['auth', 'can:manage-roles'])->group(function () {
     Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
     Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
@@ -115,7 +113,7 @@ Route::middleware(['auth', 'can:manage-invoices'])->group(function () {
     Route::get('/facturas/{factura}/download', [FacturaController::class, 'download'])->name('facturas.download');
 });
 Route::middleware(['auth', 'can:manage-requests'])->group(function () {
-    Route::view('admin-solicitudes', 'layouts.admin.admin_solicitudes_index')->name('admin-solicitudes');
+    Route::view('admin-solicitudes', 'layouts.admin_solicitudes.admin_solicitudes_index')->name('admin-solicitudes');
     Route::get('/solicitudes/create', [SolicitudController::class, 'create'])->name('solicitudes.create');
     Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
     Route::get('/solicitudes/{solicitud}', [SolicitudController::class, 'show'])->name('solicitudes.show');

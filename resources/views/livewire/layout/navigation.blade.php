@@ -49,12 +49,9 @@ new class extends Component { }; ?>
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('profile')">
                             {{ __('Perfil') }}
                         </x-dropdown-link>
-                        {{-- <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Configuración') }}
-                        </x-dropdown-link> --}}
 
 
                         <form method="POST" action="{{ route('logout') }}">

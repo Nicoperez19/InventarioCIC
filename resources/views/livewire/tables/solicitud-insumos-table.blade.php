@@ -174,15 +174,27 @@
                         
                         <!-- Cantidad a Solicitar -->
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center justify-center">
+                            <div class="flex flex-col items-center justify-center space-y-1">
                                 <input type="number" 
-                                       wire:model.live.debounce.200ms="cantidades.{{ $insumo->id_insumo }}"
+                                       wire:model.defer="cantidades.{{ $insumo->id_insumo }}"
                                        wire:change="actualizarCantidad('{{ $insumo->id_insumo }}', $event.target.value)"
-                                       class="w-20 px-2 py-1 text-xs font-medium text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                       wire:blur="actualizarCantidad('{{ $insumo->id_insumo }}', $event.target.value)"
+                                       class="w-20 px-2 py-1 text-xs font-medium text-center border rounded transition-colors {{ isset($errores[$insumo->id_insumo]) ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' }}"
                                        min="0"
                                        max="{{ $insumo->stock_actual }}"
                                        step="1"
-                                       value="{{ $cantidades[$insumo->id_insumo] ?? 0 }}">
+                                       value="{{ $cantidades[$insumo->id_insumo] ?? 0 }}"
+                                       placeholder="0"
+                                       data-max-stock="{{ $insumo->stock_actual }}"
+                                       data-insumo-id="{{ $insumo->id_insumo }}">
+                                @if(isset($errores[$insumo->id_insumo]))
+                                    <span class="text-xs text-red-600 text-center max-w-32" title="{{ $errores[$insumo->id_insumo] }}">
+                                        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                        {{ Str::limit($errores[$insumo->id_insumo], 25) }}
+                                    </span>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -226,3 +238,66 @@
         </div>
     @endif
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const timeouts = new Map(); // Usar un mapa para trackear timeouts por input
+    
+    function validarInput(input) {
+        if (!input || input.type !== 'number' || !input.hasAttribute('data-max-stock')) {
+            return;
+        }
+        
+        const maxValue = parseInt(input.getAttribute('data-max-stock')) || 0;
+        let currentValue = input.value === '' ? 0 : parseInt(input.value) || 0;
+        
+        // Si el valor es negativo o excede el máximo, establecer a 0
+        if (currentValue < 0 || (maxValue > 0 && currentValue > maxValue)) {
+            input.value = 0;
+            // Disparar evento change una sola vez para que Livewire actualice
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+    
+    // Validar solo cuando salga del campo (blur)
+    document.addEventListener('blur', function(e) {
+        if (e.target.type === 'number' && e.target.hasAttribute('data-max-stock')) {
+            const inputId = e.target.getAttribute('data-insumo-id');
+            if (timeouts.has(inputId)) {
+                clearTimeout(timeouts.get(inputId));
+                timeouts.delete(inputId);
+            }
+            validarInput(e.target);
+        }
+    }, true);
+    
+    // Validación al presionar Enter
+    document.addEventListener('keydown', function(e) {
+        if (e.target.type === 'number' && e.target.hasAttribute('data-max-stock')) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const inputId = e.target.getAttribute('data-insumo-id');
+                if (timeouts.has(inputId)) {
+                    clearTimeout(timeouts.get(inputId));
+                    timeouts.delete(inputId);
+                }
+                validarInput(e.target);
+                e.target.blur();
+            }
+        }
+    }, true);
+    
+    // NO validar mientras escribe - solo trackear para limpiar timeout si es necesario
+    document.addEventListener('input', function(e) {
+        if (e.target.type === 'number' && e.target.hasAttribute('data-max-stock')) {
+            const inputId = e.target.getAttribute('data-insumo-id');
+            // Limpiar cualquier timeout pendiente para este input
+            if (timeouts.has(inputId)) {
+                clearTimeout(timeouts.get(inputId));
+            }
+            // NO validar aquí - solo permitir escribir libremente
+        }
+    }, true);
+});
+</script>

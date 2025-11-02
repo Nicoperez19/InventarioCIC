@@ -91,4 +91,6 @@ class InsumosTable extends Component
     {
         return 'vendor.livewire.tailwind';
     }
+
+    protected $paginationTheme = 'tailwind';
 }

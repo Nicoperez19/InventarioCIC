@@ -198,8 +198,7 @@
                                     'solicitudes' => 'Solicitudes',
                                     'roles' => 'Roles',
                                     'permisos' => 'Permisos',
-                                    'reportes' => 'Reportes',
-                                    'configuracion' => 'Configuración'
+                                    'reportes' => 'Reportes'
                                 ];
                                 
                                 // Definir acciones en orden
@@ -428,8 +427,7 @@
                                     'solicitudes' => 'Solicitudes',
                                     'roles' => 'Roles',
                                     'permisos' => 'Permisos',
-                                    'reportes' => 'Reportes',
-                                    'configuracion' => 'Configuración'
+                                    'reportes' => 'Reportes'
                                 ];
                                 
                                 // Definir acciones en orden

@@ -245,7 +245,8 @@
                             <div class="flex items-center justify-end space-x-1 sm:space-x-3">
                                 <!-- Botón Ver Código de Barras -->
                                 @if($insumo->codigo_barra)
-                                    <a href="{{ route('barcode.show', $insumo->id_insumo) }}" 
+                                    <a href="{{ route('barcode.generate', $insumo->id_insumo) }}" 
+                                       target="_blank"
                                        class="inline-flex items-center px-2 py-1 text-xs font-medium transition-all duration-150 border border-transparent rounded-md sm:px-3 sm:py-2 text-success-600 bg-success-50 hover:bg-success-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success-400"
                                        title="Ver código de barras">
                                         <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
