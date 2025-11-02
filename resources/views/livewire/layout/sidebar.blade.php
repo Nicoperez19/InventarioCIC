@@ -12,12 +12,18 @@ new class extends Component {}; ?>
         x-transition:enter-end="w-64 opacity-100" x-transition:leave="transition-all duration-300 ease-in-out"
         x-transition:leave-start="w-64 opacity-100" x-transition:leave-end="w-0 opacity-0">
 
-        <div class="relative flex items-center justify-center h-16 overflow-hidden shadow-lg bg-primary-500">
+        <div class="relative flex items-center h-16 overflow-hidden shadow-lg bg-primary-500 px-3">
             <!-- Efecto de brillo sutil -->
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent"></div>
             <div class="relative z-10 flex items-center">
-                    <h1 class="overflow-hidden text-xl font-semibold text-white transition-all duration-300 ease-in-out drop-shadow-sm"
-                    :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
+                <!-- Logo -->
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl p-2 mr-3">
+                    <img src="{{ asset('storage/images/logo.png') }}" alt="Logo GestionCIC" class="h-10 w-auto">
+                </div>
+                
+                <!-- Nombre del sistema -->
+                <h1 class="overflow-hidden text-xl font-semibold text-white transition-all duration-300 ease-in-out drop-shadow-sm"
+                :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
                     GestionCIC
                 </h1>
             </div>

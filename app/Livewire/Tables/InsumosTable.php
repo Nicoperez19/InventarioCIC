@@ -1,53 +1,94 @@
 <?php
 namespace App\Livewire\Tables;
 use App\Models\Insumo;
+use App\Models\UnidadMedida;
+use App\Models\TipoInsumo;
 use Livewire\Component;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-
+use Livewire\WithPagination;
+use Livewire\Attributes\Title;
+#[Title('Insumos')]
 class InsumosTable extends Component
 {
-    public $stockValues = [];
+    use WithPagination;
+    
+    public $search = '';
+    public $unidadFilter = '';
+    public $tipoInsumoFilter = '';
+    public $stockFilter = '';
+    public $perPage = 10;
 
-    public function mount()
+    public function updatingSearch()
     {
-        // Inicializar los valores de stock
-        $insumos = Insumo::all();
-        foreach ($insumos as $insumo) {
-            $this->stockValues[$insumo->id_insumo] = $insumo->stock_actual;
-        }
+        $this->resetPage();
     }
 
-    public function updateStock($insumoId, $newValue)
+    public function updatingUnidadFilter()
     {
-        try {
-            // Validación rápida
-            if (!is_numeric($newValue) || $newValue < 0) {
-                $this->addError('stock_' . $insumoId, 'El stock debe ser un número positivo');
-                return;
-            }
+        $this->resetPage();
+    }
 
-            // Actualización directa en la base de datos (más rápido que find + save)
-            $updated = Insumo::where('id_insumo', $insumoId)
-                ->update(['stock_actual' => (int) $newValue]);
+    public function updatingTipoInsumoFilter()
+    {
+        $this->resetPage();
+    }
 
-            if ($updated === 0) {
-                $this->addError('stock_' . $insumoId, 'El insumo no existe o ha sido eliminado');
-                return;
-            }
+    public function updatingStockFilter()
+    {
+        $this->resetPage();
+    }
 
-            // Actualizar el valor local
-            $this->stockValues[$insumoId] = (int) $newValue;
-
-        } catch (\Exception $e) {
-            $this->addError('stock_' . $insumoId, 'Error al actualizar el stock');
-        }
+    public function updatingPerPage()
+    {
+        $this->resetPage();
     }
 
     public function render()
     {
+        $query = Insumo::with(['unidadMedida', 'tipoInsumo']);
+
+        // Búsqueda por texto
+        if ($this->search) {
+            $query->where(function($q) {
+                $q->where('nombre_insumo', 'like', '%' . $this->search . '%')
+                  ->orWhere('codigo_barra', 'like', '%' . $this->search . '%')
+                  ->orWhere('id_insumo', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // Filtro por unidad de medida
+        if ($this->unidadFilter) {
+            $query->where('id_unidad', $this->unidadFilter);
+        }
+
+        // Filtro por tipo de insumo
+        if ($this->tipoInsumoFilter) {
+            $query->where('tipo_insumo_id', $this->tipoInsumoFilter);
+        }
+
+        // Filtro por estado de stock
+        if ($this->stockFilter) {
+            match ($this->stockFilter) {
+                'agotado' => $query->where('stock_actual', '<=', 0),
+                'bajo' => $query->where(function($q) {
+                    $q->whereColumn('stock_actual', '<=', 'stock_minimo')
+                      ->where('stock_actual', '>', 0);
+                }),
+                'normal' => $query->where('stock_actual', '>', 0),
+                default => null
+            };
+        }
+
+        $insumos = $query->orderBy('nombre_insumo')->paginate($this->perPage);
+
         return view('livewire.tables.insumos-table', [
-            'insumos' => Insumo::with('unidadMedida')->get(),
+            'insumos' => $insumos,
+            'unidades' => UnidadMedida::orderBy('nombre_unidad_medida')->get(),
+            'tiposInsumo' => TipoInsumo::orderBy('nombre_tipo')->get(),
         ]);
+    }
+
+    public function paginationView()
+    {
+        return 'vendor.livewire.tailwind';
     }
 }

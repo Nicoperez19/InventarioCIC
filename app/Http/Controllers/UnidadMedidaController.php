@@ -8,7 +8,7 @@ class UnidadMedidaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum');
+        $this->middleware('auth');
     }
     public function index(Request $request): JsonResponse
     {
@@ -35,10 +35,13 @@ class UnidadMedidaController extends Controller
     public function show(UnidadMedida $unidadMedida): JsonResponse
     {
         try {
-            $unidadMedida->load(['insumos']);
+            // No cargar relaciones innecesarias, solo devolver los datos básicos
             return response()->json([
                 'success' => true,
-                'data' => $unidadMedida,
+                'data' => [
+                    'id_unidad' => $unidadMedida->id_unidad,
+                    'nombre_unidad_medida' => $unidadMedida->nombre_unidad_medida,
+                ],
                 'message' => 'Unidad de medida obtenida exitosamente'
             ]);
         } catch (\Exception $e) {
