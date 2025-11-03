@@ -106,11 +106,13 @@ Route::middleware(['auth', 'can:manage-invoices'])->group(function () {
     Route::view('facturas', 'layouts.factura.factura_index')->name('facturas.index');
     Route::get('/facturas/create', [FacturaController::class, 'create'])->name('facturas.create');
     Route::post('/facturas', [FacturaController::class, 'store'])->name('facturas.store');
+    Route::post('/facturas/upload', [FacturaController::class, 'upload'])->name('facturas.upload');
     Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
     Route::get('/facturas/{factura}/edit', [FacturaController::class, 'edit'])->name('facturas.edit');
     Route::put('/facturas/{factura}', [FacturaController::class, 'update'])->name('facturas.update');
     Route::delete('/facturas/{factura}', [FacturaController::class, 'destroy'])->name('facturas.destroy');
     Route::get('/facturas/{factura}/download', [FacturaController::class, 'download'])->name('facturas.download');
+    Route::get('/facturas/{factura}/view', [FacturaController::class, 'view'])->name('facturas.view');
 });
 Route::middleware(['auth', 'can:manage-requests'])->group(function () {
     Route::view('admin-solicitudes', 'layouts.admin_solicitudes.admin_solicitudes_index')->name('admin-solicitudes');

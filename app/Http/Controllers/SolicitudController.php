@@ -220,24 +220,15 @@ class SolicitudController extends Controller
             $solicitud->load([
                 'user', 
                 'departamento', 
-                'tipoInsumo',
-                'items.insumo.unidadMedida',
-                'aprobadoPor',
-                'entregadoPor'
+                'items.insumo'
             ]);
 
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
-            // Título
-            $sheet->setCellValue('A1', 'Solicitud de Insumos - GestionCIC');
-            $sheet->mergeCells('A1:E1');
-            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $row = 1;
 
-            $row = 3;
-
-            // Información de la solicitud
+            // Información básica
             $sheet->setCellValue('A' . $row, 'N° Solicitud:');
             $sheet->setCellValue('B' . $row, $solicitud->numero_solicitud);
             $sheet->getStyle('A' . $row)->getFont()->setBold(true);
@@ -250,38 +241,16 @@ class SolicitudController extends Controller
 
             $sheet->setCellValue('A' . $row, 'Solicitante:');
             $sheet->setCellValue('B' . $row, $solicitud->user->nombre ?? 'N/A');
-            $sheet->setCellValue('C' . $row, 'RUN:');
-            $sheet->setCellValue('D' . $row, $solicitud->user->run ?? 'N/A');
             $sheet->getStyle('A' . $row)->getFont()->setBold(true);
-            $sheet->getStyle('C' . $row)->getFont()->setBold(true);
             $row++;
 
             $sheet->setCellValue('A' . $row, 'Departamento:');
             $sheet->setCellValue('B' . $row, $solicitud->departamento->nombre_depto ?? 'N/A');
-            $sheet->setCellValue('C' . $row, 'Estado:');
-            $sheet->setCellValue('D' . $row, ucfirst($solicitud->estado));
             $sheet->getStyle('A' . $row)->getFont()->setBold(true);
-            $sheet->getStyle('C' . $row)->getFont()->setBold(true);
-            $row++;
-
-            $sheet->setCellValue('A' . $row, 'Tipo:');
-            $sheet->setCellValue('B' . $row, ucfirst($solicitud->tipo_solicitud));
-            $sheet->getStyle('A' . $row)->getFont()->setBold(true);
-            $row++;
-
-            if ($solicitud->observaciones) {
-                $row++;
-                $sheet->setCellValue('A' . $row, 'Observaciones:');
-                $sheet->setCellValue('B' . $row, $solicitud->observaciones);
-                $sheet->mergeCells('B' . $row . ':E' . $row);
-                $sheet->getStyle('A' . $row)->getFont()->setBold(true);
-                $sheet->getStyle('B' . $row)->getAlignment()->setWrapText(true);
-            }
-
             $row += 2;
 
-            // Encabezados de items
-            $headers = ['Item', 'Insumo', 'ID Insumo', 'Unidad', 'Cant. Solicitada', 'Cant. Aprobada', 'Cant. Entregada', 'Estado'];
+            // Encabezados de insumos
+            $headers = ['Insumo'];
             $col = 'A';
             foreach ($headers as $header) {
                 $sheet->setCellValue($col . $row, $header);
@@ -290,7 +259,6 @@ class SolicitudController extends Controller
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setRGB('4472C4');
                 $sheet->getStyle($col . $row)->getFont()->getColor()->setRGB('FFFFFF');
-                $sheet->getStyle($col . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle($col . $row)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
@@ -303,48 +271,25 @@ class SolicitudController extends Controller
             }
             $row++;
 
-            // Datos de items
-            $itemNum = 1;
+            // Listado de insumos
             foreach ($solicitud->items as $item) {
-                $sheet->setCellValue('A' . $row, $itemNum);
-                $sheet->setCellValue('B' . $row, $item->insumo->nombre_insumo ?? 'N/A');
-                $sheet->setCellValue('C' . $row, $item->insumo->id_insumo ?? 'N/A');
-                $sheet->setCellValue('D' . $row, $item->insumo->unidadMedida->nombre_unidad_medida ?? 'N/A');
-                $sheet->setCellValue('E' . $row, $item->cantidad_solicitada);
-                $sheet->setCellValue('F' . $row, $item->cantidad_aprobada ?? '-');
-                $sheet->setCellValue('G' . $row, $item->cantidad_entregada ?? '-');
-                $sheet->setCellValue('H' . $row, ucfirst($item->estado_item ?? 'pendiente'));
+                $sheet->setCellValue('A' . $row, $item->insumo->nombre_insumo ?? 'N/A');
 
                 // Estilos de fila
-                foreach (range('A', 'H') as $col) {
-                    $sheet->getStyle($col . $row)->applyFromArray([
-                        'borders' => [
-                            'allBorders' => [
-                                'borderStyle' => Border::BORDER_THIN,
-                                'color' => ['rgb' => 'CCCCCC'],
-                            ],
+                $sheet->getStyle('A' . $row)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => 'CCCCCC'],
                         ],
-                    ]);
-                }
+                    ],
+                ]);
                 $row++;
-                $itemNum++;
             }
-
-            // Totales
-            $row++;
-            $sheet->setCellValue('D' . $row, 'TOTALES:');
-            $sheet->setCellValue('E' . $row, $solicitud->items->sum('cantidad_solicitada'));
-            $sheet->setCellValue('F' . $row, $solicitud->items->sum('cantidad_aprobada') ?? 0);
-            $sheet->setCellValue('G' . $row, $solicitud->items->sum('cantidad_entregada') ?? 0);
-            $sheet->getStyle('D' . $row . ':H' . $row)->getFont()->setBold(true);
-            $sheet->getStyle('D' . $row . ':H' . $row)->getFill()
-                ->setFillType(Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('E7E6E6');
 
             // Autoajustar columnas
-            foreach (range('A', 'H') as $col) {
-                $sheet->getColumnDimension($col)->setAutoSize(true);
-            }
+            $sheet->getColumnDimension('A')->setAutoSize(true);
+            $sheet->getColumnDimension('B')->setAutoSize(true);
 
             // Generar nombre del archivo
             $nombreArchivo = 'Solicitud_' . $solicitud->numero_solicitud . '_' . now()->format('Y-m-d') . '.xlsx';
@@ -372,10 +317,7 @@ class SolicitudController extends Controller
             $solicitud->load([
                 'user', 
                 'departamento', 
-                'tipoInsumo',
-                'items.insumo.unidadMedida',
-                'aprobadoPor',
-                'entregadoPor'
+                'items.insumo'
             ]);
 
             // Configurar opciones de DomPDF

@@ -38,7 +38,17 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Monto Total</label>
-                                <p class="mt-1 text-lg font-semibold text-gray-900">${{ number_format($factura->monto_total, 0, ',', '.') }}</p>
+                                <div class="mt-1 flex items-center space-x-2">
+                                    <p class="text-lg font-semibold text-gray-900">${{ number_format($factura->monto_total, 0, ',', '.') }}</p>
+                                    @if($factura->monto_total == 0)
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
+                                            Pendiente
+                                        </span>
+                                    @endif
+                                </div>
+                                @if($factura->monto_total == 0 && $factura->tieneArchivo())
+                                    <p class="mt-1 text-xs text-gray-500">Revisa el archivo y actualiza el monto desde la edición</p>
+                                @endif
                             </div>
 
                             <div>
@@ -56,13 +66,25 @@
                             @if($factura->tieneArchivo())
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Archivo</label>
-                                    <div class="mt-1 flex items-center space-x-2">
+                                    <div class="mt-1 flex items-center space-x-2 flex-wrap gap-2">
                                         <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
                                         <span class="text-sm text-gray-900">{{ $factura->archivo_nombre }}</span>
+                                        <a href="{{ route('facturas.view', $factura) }}" 
+                                           target="_blank"
+                                           class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                            Ver
+                                        </a>
                                         <a href="{{ route('facturas.download', $factura) }}" 
-                                           class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                           class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded-lg hover:bg-green-100">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                            </svg>
                                             Descargar
                                         </a>
                                     </div>
@@ -82,6 +104,40 @@
                             @endif
                         </div>
                     </div>
+
+                    <!-- Visor de PDF/DOC embebido -->
+                    @if($factura->tieneArchivo())
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Vista Previa del Archivo</h4>
+                            <div class="w-full bg-gray-100 rounded-lg overflow-hidden" style="height: 600px;">
+                                @php
+                                    $extension = strtolower(pathinfo($factura->archivo_path, PATHINFO_EXTENSION));
+                                @endphp
+                                @if($extension === 'pdf')
+                                    <iframe src="{{ route('facturas.view', $factura) }}" 
+                                            class="w-full h-full border-0"
+                                            style="height: 600px;">
+                                    </iframe>
+                                @else
+                                    <div class="flex flex-col items-center justify-center h-full p-8">
+                                        <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <p class="text-gray-600 mb-4">La vista previa no está disponible para archivos {{ strtoupper($extension) }}</p>
+                                        <a href="{{ route('facturas.view', $factura) }}" 
+                                           target="_blank"
+                                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                            Abrir Archivo
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

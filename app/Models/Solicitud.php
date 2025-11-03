@@ -89,16 +89,20 @@ class Solicitud extends Model
     }
     public function generarNumeroSolicitud(): string
     {
-        $fecha = now()->format('Ymd');
-        $ultimoNumero = self::whereDate('created_at', now()->toDateString())
-                           ->orderBy('id', 'desc')
-                           ->value('numero_solicitud');
-        if ($ultimoNumero) {
-            $numero = (int) substr($ultimoNumero, -4) + 1;
+        $ultimoSolicitud = self::orderBy('id', 'desc')->first();
+        if ($ultimoSolicitud && $ultimoSolicitud->numero_solicitud) {
+            // Extraer el número del último formato SOL-XXX
+            $parts = explode('-', $ultimoSolicitud->numero_solicitud);
+            if (count($parts) >= 2 && is_numeric($parts[1])) {
+                $numero = (int) $parts[1] + 1;
+            } else {
+                // Si no puede extraer, usar el ID + 1
+                $numero = $ultimoSolicitud->id + 1;
+            }
         } else {
             $numero = 1;
         }
-        return 'SOL-' . $fecha . '-' . str_pad($numero, 4, '0', STR_PAD_LEFT);
+        return 'SOL-' . $numero;
     }
     public function aprobar($userId): bool
     {
