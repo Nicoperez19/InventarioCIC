@@ -18,7 +18,7 @@ new class extends Component {}; ?>
             <div class="relative z-10 flex items-center">
                 <!-- Logo -->
                 <div class="bg-white/20 backdrop-blur-sm rounded-xl p-2 mr-3">
-                    <img src="{{ asset('storage/images/logo.png') }}" alt="Logo GestionCIC" class="h-10 w-auto">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo GestionCIC" class="h-10 w-auto">
                 </div>
                 
                 <!-- Nombre del sistema -->
