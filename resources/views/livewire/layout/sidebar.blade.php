@@ -90,10 +90,10 @@ new class extends Component {}; ?>
 
                 @canany(['manage-insumos', 'view-insumos'])
                 <!-- Menú desplegable de Insumos -->
-                <div x-data="{ insumosOpen: {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'true' : 'false' }} }">
+                <div x-data="{ insumosOpen: {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') ? 'true' : 'false' }} }">
                     <!-- Botón principal de Insumos -->
                     <button type="button" @click="insumosOpen = !insumosOpen"
-                        class="group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') || request()->routeIs('carga-masiva.*') ? 'bg-secondary-100 text-primary-800 border border-secondary-300' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
+                        class="group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') ? 'bg-secondary-100 text-primary-800 border border-secondary-300' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                         <div class="flex items-center">
                             <x-icons.package class="flex-shrink-0 w-5 h-5" />
                             <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
