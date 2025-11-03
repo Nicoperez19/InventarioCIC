@@ -125,4 +125,6 @@ Route::middleware(['auth', 'can:manage-requests'])->group(function () {
     Route::post('/solicitudes/{solicitud}/entregar', [SolicitudController::class, 'entregar'])->name('solicitudes.entregar');
     Route::get('/solicitudes/insumos/get', [SolicitudController::class, 'getInsumos'])->name('solicitudes.insumos.get');
     Route::get('/solicitudes/insumos/all', [SolicitudController::class, 'getAllInsumos'])->name('solicitudes.insumos.all');
+    Route::get('/solicitudes/{solicitud}/export/excel', [SolicitudController::class, 'exportExcel'])->name('solicitudes.export.excel');
+    Route::get('/solicitudes/{solicitud}/export/pdf', [SolicitudController::class, 'exportPdf'])->name('solicitudes.export.pdf');
 });

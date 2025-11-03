@@ -34,3 +34,4 @@ class RolePermissionSeeder extends Seeder
 
     }
 }
+

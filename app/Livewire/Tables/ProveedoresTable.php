@@ -23,3 +23,4 @@ class ProveedoresTable extends Component
     }
 }
 
+

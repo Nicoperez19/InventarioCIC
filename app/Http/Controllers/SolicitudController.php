@@ -8,6 +8,13 @@ use App\Models\TipoInsumo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 class SolicitudController extends Controller
 {
     public function __construct()
@@ -202,5 +209,207 @@ class SolicitudController extends Controller
             ->orderBy('nombre_insumo')
             ->get();
         return response()->json($insumos);
+    }
+
+    /**
+     * Exporta una solicitud a Excel
+     */
+    public function exportExcel(Solicitud $solicitud)
+    {
+        try {
+            $solicitud->load([
+                'user', 
+                'departamento', 
+                'tipoInsumo',
+                'items.insumo.unidadMedida',
+                'aprobadoPor',
+                'entregadoPor'
+            ]);
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Título
+            $sheet->setCellValue('A1', 'Solicitud de Insumos - GestionCIC');
+            $sheet->mergeCells('A1:E1');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $row = 3;
+
+            // Información de la solicitud
+            $sheet->setCellValue('A' . $row, 'N° Solicitud:');
+            $sheet->setCellValue('B' . $row, $solicitud->numero_solicitud);
+            $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+            $row++;
+
+            $sheet->setCellValue('A' . $row, 'Fecha:');
+            $sheet->setCellValue('B' . $row, $solicitud->fecha_solicitud->format('d/m/Y H:i'));
+            $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+            $row++;
+
+            $sheet->setCellValue('A' . $row, 'Solicitante:');
+            $sheet->setCellValue('B' . $row, $solicitud->user->nombre ?? 'N/A');
+            $sheet->setCellValue('C' . $row, 'RUN:');
+            $sheet->setCellValue('D' . $row, $solicitud->user->run ?? 'N/A');
+            $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+            $sheet->getStyle('C' . $row)->getFont()->setBold(true);
+            $row++;
+
+            $sheet->setCellValue('A' . $row, 'Departamento:');
+            $sheet->setCellValue('B' . $row, $solicitud->departamento->nombre_depto ?? 'N/A');
+            $sheet->setCellValue('C' . $row, 'Estado:');
+            $sheet->setCellValue('D' . $row, ucfirst($solicitud->estado));
+            $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+            $sheet->getStyle('C' . $row)->getFont()->setBold(true);
+            $row++;
+
+            $sheet->setCellValue('A' . $row, 'Tipo:');
+            $sheet->setCellValue('B' . $row, ucfirst($solicitud->tipo_solicitud));
+            $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+            $row++;
+
+            if ($solicitud->observaciones) {
+                $row++;
+                $sheet->setCellValue('A' . $row, 'Observaciones:');
+                $sheet->setCellValue('B' . $row, $solicitud->observaciones);
+                $sheet->mergeCells('B' . $row . ':E' . $row);
+                $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+                $sheet->getStyle('B' . $row)->getAlignment()->setWrapText(true);
+            }
+
+            $row += 2;
+
+            // Encabezados de items
+            $headers = ['Item', 'Insumo', 'ID Insumo', 'Unidad', 'Cant. Solicitada', 'Cant. Aprobada', 'Cant. Entregada', 'Estado'];
+            $col = 'A';
+            foreach ($headers as $header) {
+                $sheet->setCellValue($col . $row, $header);
+                $sheet->getStyle($col . $row)->getFont()->setBold(true);
+                $sheet->getStyle($col . $row)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('4472C4');
+                $sheet->getStyle($col . $row)->getFont()->getColor()->setRGB('FFFFFF');
+                $sheet->getStyle($col . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle($col . $row)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ],
+                    ],
+                ]);
+                $col++;
+            }
+            $row++;
+
+            // Datos de items
+            $itemNum = 1;
+            foreach ($solicitud->items as $item) {
+                $sheet->setCellValue('A' . $row, $itemNum);
+                $sheet->setCellValue('B' . $row, $item->insumo->nombre_insumo ?? 'N/A');
+                $sheet->setCellValue('C' . $row, $item->insumo->id_insumo ?? 'N/A');
+                $sheet->setCellValue('D' . $row, $item->insumo->unidadMedida->nombre_unidad_medida ?? 'N/A');
+                $sheet->setCellValue('E' . $row, $item->cantidad_solicitada);
+                $sheet->setCellValue('F' . $row, $item->cantidad_aprobada ?? '-');
+                $sheet->setCellValue('G' . $row, $item->cantidad_entregada ?? '-');
+                $sheet->setCellValue('H' . $row, ucfirst($item->estado_item ?? 'pendiente'));
+
+                // Estilos de fila
+                foreach (range('A', 'H') as $col) {
+                    $sheet->getStyle($col . $row)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => 'CCCCCC'],
+                            ],
+                        ],
+                    ]);
+                }
+                $row++;
+                $itemNum++;
+            }
+
+            // Totales
+            $row++;
+            $sheet->setCellValue('D' . $row, 'TOTALES:');
+            $sheet->setCellValue('E' . $row, $solicitud->items->sum('cantidad_solicitada'));
+            $sheet->setCellValue('F' . $row, $solicitud->items->sum('cantidad_aprobada') ?? 0);
+            $sheet->setCellValue('G' . $row, $solicitud->items->sum('cantidad_entregada') ?? 0);
+            $sheet->getStyle('D' . $row . ':H' . $row)->getFont()->setBold(true);
+            $sheet->getStyle('D' . $row . ':H' . $row)->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('E7E6E6');
+
+            // Autoajustar columnas
+            foreach (range('A', 'H') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // Generar nombre del archivo
+            $nombreArchivo = 'Solicitud_' . $solicitud->numero_solicitud . '_' . now()->format('Y-m-d') . '.xlsx';
+
+            // Guardar en memoria
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
+            header('Cache-Control: max-age=0');
+
+            $writer->save('php://output');
+            exit;
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al generar el archivo Excel: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Exporta una solicitud a PDF
+     */
+    public function exportPdf(Solicitud $solicitud)
+    {
+        try {
+            $solicitud->load([
+                'user', 
+                'departamento', 
+                'tipoInsumo',
+                'items.insumo.unidadMedida',
+                'aprobadoPor',
+                'entregadoPor'
+            ]);
+
+            // Configurar opciones de DomPDF
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true);
+            $options->set('defaultFont', 'Arial');
+
+            // Crear instancia de DomPDF
+            $dompdf = new Dompdf($options);
+
+            // Renderizar la vista del PDF
+            $html = view('pdf.solicitud-individual', [
+                'solicitud' => $solicitud,
+                'fecha' => now()->format('d/m/Y H:i:s')
+            ])->render();
+
+            // Cargar HTML en DomPDF
+            $dompdf->loadHtml($html);
+
+            // Configurar el tamaño del papel
+            $dompdf->setPaper('A4', 'portrait');
+
+            // Renderizar el PDF
+            $dompdf->render();
+
+            // Generar nombre del archivo
+            $nombreArchivo = 'Solicitud_' . $solicitud->numero_solicitud . '_' . now()->format('Y-m-d') . '.pdf';
+
+            // Retornar el PDF como descarga
+            return $dompdf->stream($nombreArchivo);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al generar el PDF: ' . $e->getMessage());
+        }
     }
 }
