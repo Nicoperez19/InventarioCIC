@@ -1,7 +1,9 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\Proveedor;
+use App\Rules\RunValidation;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 class ProveedorController extends Controller
@@ -59,7 +61,7 @@ class ProveedorController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'rut' => 'required|string|max:20|unique:proveedores,rut',
+                'rut' => ['required', 'string', new RunValidation(), 'unique:proveedores,rut'],
                 'nombre_proveedor' => 'required|string|max:255',
                 'telefono' => 'nullable|string|max:20'
             ]);
@@ -70,7 +72,9 @@ class ProveedorController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            $proveedor = Proveedor::create($request->all());
+            $data = $request->all();
+            $data['rut'] = \App\Helpers\RunFormatter::format($data['rut']);
+            $proveedor = Proveedor::create($data);
             return response()->json([
                 'success' => true,
                 'data' => $proveedor,
@@ -87,7 +91,7 @@ class ProveedorController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'rut' => 'sometimes|string|max:20|unique:proveedores,rut,' . $proveedor->id,
+                'rut' => ['sometimes', 'string', new RunValidation(), 'unique:proveedores,rut,' . $proveedor->id],
                 'nombre_proveedor' => 'sometimes|string|max:255',
                 'telefono' => 'nullable|string|max:20'
             ]);
@@ -98,7 +102,11 @@ class ProveedorController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            $proveedor->update($request->all());
+            $data = $request->all();
+            if (isset($data['rut'])) {
+                $data['rut'] = \App\Helpers\RunFormatter::format($data['rut']);
+            }
+            $proveedor->update($data);
             return response()->json([
                 'success' => true,
                 'data' => $proveedor,
@@ -111,25 +119,19 @@ class ProveedorController extends Controller
             ], 500);
         }
     }
-    public function destroy(Proveedor $proveedor): JsonResponse
+    public function destroy(Proveedor $proveedor): RedirectResponse
     {
         try {
             if ($proveedor->tieneFacturas()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se puede eliminar el proveedor porque tiene facturas asociadas'
-                ], 422);
+                return redirect()->route('proveedores.index')
+                    ->with('error', 'No se puede eliminar el proveedor porque tiene facturas asociadas');
             }
             $proveedor->delete();
-            return response()->json([
-                'success' => true,
-                'message' => 'Proveedor eliminado exitosamente'
-            ]);
+            return redirect()->route('proveedores.index')
+                ->with('success', 'Proveedor eliminado exitosamente');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al eliminar proveedor: ' . $e->getMessage()
-            ], 500);
+            return redirect()->route('proveedores.index')
+                ->with('error', 'Error al eliminar proveedor: ' . $e->getMessage());
         }
     }
 }
