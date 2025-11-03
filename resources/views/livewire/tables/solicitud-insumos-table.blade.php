@@ -1,4 +1,4 @@
-<div class="w-full bg-white shadow-sm rounded-lg border border-neutral-200 overflow-hidden">
+<div>
     <!-- Mensajes -->
     @if (session()->has('success'))
         <div class="bg-green-50 border-l-4 border-green-400 p-4">
@@ -45,14 +45,48 @@
         </div>
     @endif
 
-    <!-- Filtros y controles -->
-    <div class="p-4 border-b border-gray-200 bg-gray-50">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <!-- Filtro por tipo -->
-            <div class="flex items-center space-x-4">
-                <label for="tipo-filtro" class="text-sm font-medium text-gray-700">Filtrar por tipo:</label>
-                <select wire:model.live="tipoInsumoFiltro" id="tipo-filtro" 
-                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+    <!-- Barra de búsqueda y filtros -->
+    <div class="mb-6 overflow-hidden bg-white border rounded-lg shadow-sm border-neutral-200">
+        <!-- Header del panel de filtros -->
+        <div class="px-4 py-3 border-b bg-primary-50 border-neutral-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                    <h3 class="text-sm font-semibold text-primary-800">Filtros de Búsqueda</h3>
+                </div>
+                @if($tipoInsumoFiltro)
+                    <button 
+                        wire:click="$set('tipoInsumoFiltro', '')"
+                        class="flex items-center space-x-1 text-xs font-medium transition-colors duration-150 text-primary-600 hover:text-primary-800"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <span>Limpiar filtros</span>
+                    </button>
+                @endif
+            </div>
+        </div>
+
+        <!-- Contenido de los filtros -->
+        <div class="p-4 space-y-4">
+            <!-- Primera fila: Filtro por Tipo de Insumo -->
+            <div>
+                <label class="block mb-2 text-sm font-medium text-neutral-700">
+                    <div class="flex items-center space-x-1">
+                        <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        <span>Tipo de Insumo</span>
+                    </div>
+                </label>
+                <select 
+                    wire:model.live="tipoInsumoFiltro" 
+                    id="tipo-filtro"
+                    class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150"
+                >
                     <option value="">Todos los tipos</option>
                     @foreach($tiposDisponibles as $tipo)
                         <option value="{{ $tipo->id }}">{{ $tipo->nombre_tipo }}</option>
@@ -60,31 +94,25 @@
                 </select>
             </div>
 
-            <!-- Botones de acción -->
-            <div class="flex items-center space-x-3">
-                <button wire:click="limpiarSolicitud" 
-                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                    Limpiar
-                </button>
-                    <button wire:click="crearSolicitud" 
-                            wire:confirm="¿Crear la solicitud? El stock se reducirá automáticamente."
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            <!-- Indicador de filtros activos -->
+            @if($tipoInsumoFiltro)
+                <div class="flex items-center justify-end pt-2 border-t border-neutral-200">
+                    <div class="flex items-center space-x-2 text-sm text-neutral-600">
+                        <svg class="w-4 h-4 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        Crear Solicitud
-                    </button>
-            </div>
+                        <span>Filtros activos</span>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
-    <!-- Tabla de insumos -->
-    <div class="w-full overflow-x-auto">
+    <!-- Tabla -->
+    <div class="w-full overflow-hidden bg-white border rounded-lg shadow-sm border-neutral-200">
+        <div class="w-full overflow-x-auto">
         <table class="w-full divide-y divide-neutral-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-primary-100">
                 <tr>
                     <th class="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <div class="flex items-center space-x-1">
@@ -138,7 +166,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-neutral-200">
                 @forelse($insumos as $insumo)
-                    <tr class="hover:bg-blue-50/30 transition-colors duration-150">
+                    <tr class="hover:bg-secondary-50 transition-colors duration-150">
                         <!-- ID -->
                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-neutral-500">
@@ -213,6 +241,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     <!-- Resumen de solicitud -->
@@ -241,6 +270,16 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Escuchar eventos desde el header
+    window.addEventListener('limpiar-solicitud', function() {
+        @this.limpiarSolicitud();
+    });
+    
+    window.addEventListener('crear-solicitud', function() {
+        if (confirm('¿Crear la solicitud? El stock se reducirá automáticamente.')) {
+            @this.crearSolicitud();
+        }
+    });
     
     const timeouts = new Map(); // Usar un mapa para trackear timeouts por input
     

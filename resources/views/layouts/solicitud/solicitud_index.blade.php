@@ -1,19 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center space-x-3 sm:space-x-4">
                 <div class="flex-shrink-0">
-                    <div class="flex items-center justify-center w-8 h-8 rounded-lg sm:w-10 sm:h-10 bg-gradient-to-br from-blue-400 to-blue-500">
-                        <svg class="w-4 h-4 text-white sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-400 to-primary-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                         </svg>
                     </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <h2 class="text-lg font-semibold leading-tight text-gray-800 truncate sm:text-xl">
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-lg sm:text-xl font-semibold leading-tight text-gray-800 truncate">
                         {{ __('Solicitud de Insumos') }}
                     </h2>
-                    <p class="hidden mt-1 text-xs text-gray-600 sm:text-sm sm:block">
+                    <p class="text-xs sm:text-sm text-gray-600 mt-1 hidden sm:block">
                         @if(auth()->user()->hasRole('jefe-departamento'))
                             Solicita artículos de oficina disponibles
                         @elseif(auth()->user()->hasRole('auxiliar'))
@@ -24,15 +24,30 @@
                     </p>
                 </div>
             </div>
+            <div class="flex-shrink-0 w-full sm:w-auto flex items-center space-x-3">
+                <button onclick="window.dispatchEvent(new CustomEvent('limpiar-solicitud'))" 
+                        class="inline-flex items-center justify-center w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400 transition-all duration-150 shadow-sm">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span class="sm:hidden">Limpiar</span>
+                    <span class="hidden sm:inline">Limpiar Solicitud</span>
+                </button>
+                <button onclick="window.dispatchEvent(new CustomEvent('crear-solicitud'))" 
+                        class="inline-flex items-center justify-center w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-secondary-500 rounded-lg hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400 transition-all duration-150 shadow-sm">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span class="sm:hidden">Crear</span>
+                    <span class="hidden sm:inline">Crear Solicitud</span>
+                </button>
+            </div>
         </div>
     </x-slot>
 
     <div class="py-8">
         <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
-                      <!-- Tabla de solicitudes -->
-            <div class="p-4 bg-white shadow sm:p-8 sm:rounded-lg">
-                <livewire:tables.solicitud-insumos-table />
-            </div>
+            <livewire:tables.solicitud-insumos-table />
         </div>
     </div>
 </x-app-layout>

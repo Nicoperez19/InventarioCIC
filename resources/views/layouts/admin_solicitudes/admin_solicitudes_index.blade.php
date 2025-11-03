@@ -1,23 +1,21 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center space-x-3 sm:space-x-4">
                 <div class="flex-shrink-0">
-                    <div class="flex items-center justify-center w-8 h-8 rounded-lg sm:w-10 sm:h-10 bg-gradient-to-br from-primary-400 to-primary-500">
-                        <svg class="w-4 h-4 text-white sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-400 to-primary-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                     </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <h2 class="text-lg font-semibold leading-tight text-gray-800 truncate sm:text-xl">
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-lg sm:text-xl font-semibold leading-tight text-gray-800 truncate">
                         {{ __('Administración de Solicitudes') }}
                     </h2>
-                    <p class="hidden mt-1 text-xs text-gray-600 sm:text-sm sm:block">Gestiona todas las solicitudes de insumos del sistema</p>
+                    <p class="text-xs sm:text-sm text-gray-600 mt-1 hidden sm:block">Gestiona todas las solicitudes de insumos del sistema</p>
                 </div>
             </div>
-            
-            
         </div>
     </x-slot>
 
@@ -103,9 +101,7 @@
             </div>
 
             <!-- Tabla de solicitudes -->
-            <div class="p-4 bg-white shadow sm:p-8 sm:rounded-lg">
-                <livewire:tables.admin-solicitudes-table />
-            </div>
+            <livewire:tables.admin-solicitudes-table />
         </div>
     </div>
 
