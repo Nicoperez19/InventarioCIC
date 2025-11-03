@@ -21,7 +21,7 @@
             <div class="text-center mb-8">
                 <!-- Logo -->
                 <div class="flex justify-center mb-4">
-                    <img src="{{ asset('storage/images/logo.png') }}" alt="Logo GestionCIC" class="h-32 w-auto">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo GestionCIC" class="h-32 w-auto">
                 </div>
                 <h1 class="text-4xl font-bold text-white mb-2">GestionCIC</h1>
                 <p class="text-white/90 text-lg">Sistema de Gestión de Inventario</p>
