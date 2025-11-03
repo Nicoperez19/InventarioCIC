@@ -58,85 +58,31 @@
                 <form action="{{ route('carga-masiva.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                     @csrf
                     
-                    <!-- Grid con Instrucciones y Plantilla lado a lado -->
-                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                        <!-- Instrucciones -->
-                        <div class="p-4 border rounded-lg border-primary-200 bg-primary-50">
-                            <h3 class="flex items-center mb-3 text-base font-semibold text-gray-900">
-                                <svg class="w-5 h-5 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Instrucciones para la Carga Masiva
-                            </h3>
-                            <div class="space-y-3 text-xs text-gray-700">
-                                <div class="flex items-start">
-                                    <svg class="w-4 h-4 text-primary-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <!-- Descarga de plantilla -->
+                    <div class="p-5 transition-shadow duration-200 border rounded-lg shadow-sm border-secondary-300 bg-gradient-to-br from-secondary-50 to-secondary-100 hover:shadow-md">
+                        <div class="flex flex-col h-full">
+                            <div class="flex items-center mb-3">
+                                <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg bg-secondary-500">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
-                                    <div>
-                                        <p class="mb-1 font-semibold text-gray-900">Formato del archivo:</p>
-                                        <p class="text-gray-600">Excel (.xlsx, .xls) o CSV</p>
-                                    </div>
                                 </div>
-                                <div class="flex items-start">
-                                    <svg class="w-4 h-4 text-primary-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <div>
-                                        <p class="mb-1 font-semibold text-gray-900">Estructura requerida:</p>
-                                        <ul class="ml-0 space-y-1 text-gray-600 list-none">
-                                            <li class="flex items-start">
-                                                <span class="mr-1 text-primary-500">•</span>
-                                                <span>Los <strong class="text-gray-900">nombres de las hojas</strong> se convertirán en <strong class="text-gray-900">Tipos de Insumo</strong></span>
-                                            </li>
-                                            <li class="flex items-start">
-                                                <span class="mr-1 text-primary-500">•</span>
-                                                <span>Los datos de insumos deben comenzar desde la <strong class="text-gray-900">fila 4</strong></span>
-                                            </li>
-                                            <li class="flex items-start">
-                                                <span class="mr-1 text-primary-500">•</span>
-                                                <span><strong class="text-gray-900">Columna B:</strong> Código del insumo (opcional, se genera automáticamente si está vacío)</span>
-                                            </li>
-                                            <li class="flex items-start">
-                                                <span class="mr-1 text-primary-500">•</span>
-                                                <span><strong class="text-gray-900">Columna C:</strong> Nombre del insumo <strong class="text-red-600">(obligatorio)</strong></span>
-                                            </li>
-                                            <li class="flex items-start">
-                                                <span class="mr-1 text-primary-500">•</span>
-                                                <span><strong class="text-gray-900">Columna D:</strong> Unidad de medida (opcional, se crea automáticamente si no existe)</span>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                <div class="flex-1">
+                                    <h3 class="text-base font-semibold text-gray-900">Plantilla de Ejemplo</h3>
+                                    <p class="text-xs text-gray-600 mt-0.5">Estructura lista para usar</p>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Descarga de plantilla -->
-                        <div class="p-5 transition-shadow duration-200 border rounded-lg shadow-sm border-secondary-300 bg-gradient-to-br from-secondary-50 to-secondary-100 hover:shadow-md">
-                            <div class="flex flex-col h-full">
-                                <div class="flex items-center mb-3">
-                                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg bg-secondary-500">
-                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h3 class="text-base font-semibold text-gray-900">Plantilla de Ejemplo</h3>
-                                        <p class="text-xs text-gray-600 mt-0.5">Estructura lista para usar</p>
-                                    </div>
-                                </div>
-                                <div class="mt-auto">
-                                    <p class="mb-3 text-xs leading-relaxed text-gray-700">
-                                        Descarga la plantilla Excel con la estructura correcta y formato predefinido para facilitar tu carga masiva de insumos.
-                                    </p>
-                                    <a href="{{ route('carga-masiva.template') }}" 
-                                       class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-semibold text-white bg-secondary-500 rounded-lg hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400 transition-all duration-150 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                        </svg>
-                                        Descargar Plantilla Excel
-                                    </a>
-                                </div>
+                            <div class="mt-auto">
+                                <p class="mb-3 text-xs leading-relaxed text-gray-700">
+                                    Descarga la plantilla Excel con la estructura correcta y formato predefinido para facilitar tu carga masiva de insumos.
+                                </p>
+                                <a href="{{ route('carga-masiva.template') }}" 
+                                   class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-semibold text-white bg-secondary-500 rounded-lg hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400 transition-all duration-150 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    Descargar Plantilla Excel
+                                </a>
                             </div>
                         </div>
                     </div>
