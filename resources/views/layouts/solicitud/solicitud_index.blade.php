@@ -47,6 +47,22 @@
 
     <div class="py-8">
         <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
+            <!-- Mensaje explicativo breve sobre cómo hacer una solicitud -->
+            <div class="bg-gradient-to-r from-primary-50 to-primary-100 border-l-4 border-primary-500 rounded-lg shadow-sm p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-primary-900">
+                            Selecciona los insumos a pedir ingresando la cantidad deseada y luego haz clic en <strong>"Crear Solicitud"</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <livewire:tables.solicitud-insumos-table />
         </div>
     </div>

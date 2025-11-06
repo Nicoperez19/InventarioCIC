@@ -46,8 +46,15 @@
                 {{ $slot }}
             </main>
         </div>
+        
+        <!-- Sistema de notificaciones -->
+        <x-notification-system />
+        
+        <!-- Diálogo de confirmación -->
+        <x-confirm-dialog />
     </div>
     @livewireScripts
+    @stack('scripts')
 </body>
 
 </html>

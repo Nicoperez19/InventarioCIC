@@ -54,20 +54,14 @@
                                 </button>
                                 
                                 <!-- Botón Eliminar -->
-                                <form action="{{ route('unidades.destroy', $unidad->id_unidad) }}" 
-                                      method="POST" 
-                                      class="inline" 
-                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar la unidad \'{{ $unidad->nombre_unidad_medida }}\'? Esta acción no se puede deshacer.');">
-                            @csrf
-                            @method('DELETE')
-                                    <button type="submit" 
-                                            class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-2 border border-transparent text-xs font-medium rounded-md text-danger-600 bg-danger-50 hover:bg-danger-600 hover:text-white active:bg-danger-700 active:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger-500 transition-colors duration-150">
-                                        <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                        <span class="hidden sm:inline">Eliminar</span>
-                                    </button>
-                        </form>
+                                <button type="button" 
+                                        onclick="deleteUnidad('{{ $unidad->id_unidad }}', '{{ addslashes($unidad->nombre_unidad_medida) }}')"
+                                        class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-2 border border-transparent text-xs font-medium rounded-md text-danger-600 bg-danger-50 hover:bg-danger-600 hover:text-white active:bg-danger-700 active:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger-500 transition-colors duration-150">
+                                    <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    <span class="hidden sm:inline">Eliminar</span>
+                                </button>
                             </div>
                     </td>
                 </tr>
@@ -93,3 +87,92 @@
         {{ $unidades->links() }}
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function deleteUnidad(idUnidad, nombreUnidad) {
+        // Mostrar diálogo de confirmación
+        if (window.confirmDelete) {
+            window.confirmDelete(
+                `¿Estás seguro de que deseas eliminar la unidad "${nombreUnidad}"? Esta acción no se puede deshacer.`,
+                function() {
+                    // Usuario confirmó, proceder con la eliminación
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    
+                    if (!csrfToken) {
+                        console.error('Token CSRF no encontrado');
+                        if (window.notifyError) {
+                            window.notifyError('Error de seguridad. Por favor, recarga la página.');
+                        }
+                        return;
+                    }
+                    
+                    // Hacer petición DELETE
+                    fetch(`/unidades/${encodeURIComponent(idUnidad)}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Mostrar mensaje de éxito
+                            if (window.notifySuccess) {
+                                const nombre = data.nombre_unidad_medida || nombreUnidad;
+                                window.notifySuccess(`Unidad "${nombre}" eliminada.`);
+                            }
+                            
+                            // Recargar la página después de un breve delay para mostrar el mensaje
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        } else {
+                            // Mostrar error
+                            if (window.notifyError) {
+                                window.notifyError(data.message || 'Error al eliminar la unidad. Por favor, intenta nuevamente.');
+                            } else {
+                                alert(data.message || 'Error al eliminar la unidad.');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (window.notifyError) {
+                            window.notifyError('Error al eliminar la unidad. Por favor, intenta nuevamente.');
+                        } else {
+                            alert('Error al eliminar la unidad. Por favor, intenta nuevamente.');
+                        }
+                    });
+                }
+            );
+        } else {
+            // Fallback si no existe window.confirmDelete
+            if (confirm(`¿Estás seguro de que deseas eliminar la unidad "${nombreUnidad}"? Esta acción no se puede deshacer.`)) {
+                // Crear formulario y enviarlo
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/unidades/${encodeURIComponent(idUnidad)}`;
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                
+                form.appendChild(csrfInput);
+                form.appendChild(methodInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    }
+</script>
+@endpush

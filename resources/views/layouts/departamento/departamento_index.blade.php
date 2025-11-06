@@ -208,29 +208,55 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Cerrar modal
+                            // Primero cerrar el modal
                             window.dispatchEvent(new CustomEvent('close-modal'));
                             
                             // Limpiar formulario
                             createForm.reset();
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalText;
                             
-                            // Recargar la página para mostrar los cambios
-                            window.location.reload();
+                            // Esperar a que el modal se cierre completamente (animación dura ~300ms)
+                            setTimeout(() => {
+                                // Mostrar notificación de éxito después de cerrar el modal
+                                if (window.notifySuccess) {
+                                    const nombre = data.data?.nombre_depto || 'departamento';
+                                    window.notifySuccess(`Departamento "${nombre}" creado.`);
+                                }
+                                
+                                // Recargar la página para mostrar los cambios después de ver la notificación
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 2500);
+                            }, 400);
                         } else {
-                            // Mostrar errores
+                            // Mostrar errores con notificación
                             let errorMessage = data.message || 'Error al crear el departamento';
                             if (data.errors) {
-                                const errorList = Object.values(data.errors).flat().join('\n');
-                                errorMessage += '\n\n' + errorList;
+                                const errorList = Object.values(data.errors).flat().join(', ');
+                                errorMessage += ': ' + errorList;
                             }
-                            alert(errorMessage);
+                            
+                            if (window.notifyError) {
+                                window.notifyError(errorMessage);
+                            } else {
+                                alert(errorMessage);
+                            }
+                            
                             submitButton.disabled = false;
                             submitButton.innerHTML = originalText;
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Error al crear el departamento. Por favor, intenta nuevamente.');
+                        const errorMsg = 'Error al crear el departamento. Por favor, intenta nuevamente.';
+                        
+                        if (window.notifyError) {
+                            window.notifyError(errorMsg);
+                        } else {
+                            alert(errorMsg);
+                        }
+                        
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
                     });
@@ -245,49 +271,109 @@
                     
                     const formData = new FormData(editForm);
                     const idDepto = document.getElementById('edit-departamento-id').value;
+                    const nombreDeptoInput = document.getElementById('edit-nombre_depto');
+                    const nombreDepto = nombreDeptoInput ? nombreDeptoInput.value.trim() : '';
                     const submitButton = editForm.querySelector('button[type="submit"]');
                     const originalText = submitButton.innerHTML;
+                    
+                    // Validar que tengamos los datos necesarios
+                    if (!idDepto) {
+                        alert('Error: No se pudo identificar el departamento a editar.');
+                        return;
+                    }
+                    
+                    if (!nombreDepto) {
+                        alert('Por favor, ingresa el nombre del departamento.');
+                        nombreDeptoInput?.focus();
+                        return;
+                    }
+                    
+                    // Crear token CSRF
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                     formData.get('_token');
+                    
+                    // Preparar datos para enviar
+                    const updateData = {
+                        nombre_depto: nombreDepto
+                    };
+                    
+                    // Debug: verificar que los datos estén correctos
+                    console.log('Actualizando departamento:', { idDepto, nombreDepto, updateData });
                     
                     // Deshabilitar botón durante el envío
                     submitButton.disabled = true;
                     submitButton.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Actualizando...';
                     
-                    // Crear token CSRF si no existe
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                     formData.get('_token');
-                    
-                    fetch(`/departamentos/${idDepto}`, {
+                    fetch(`/departamentos/${encodeURIComponent(idDepto)}`, {
                         method: 'PUT',
                         headers: {
                             'X-CSRF-TOKEN': csrfToken,
                             'Accept': 'application/json',
+                            'Content-Type': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: formData
+                        body: JSON.stringify(updateData)
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Cerrar modal
+                            // Primero cerrar el modal
                             window.dispatchEvent(new CustomEvent('close-modal'));
                             
-                            // Recargar la página para mostrar los cambios
-                            window.location.reload();
+                            // Limpiar y restaurar botón
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalText;
+                            
+                            // Esperar a que el modal se cierre completamente
+                            setTimeout(() => {
+                                // Mostrar notificación de éxito después de cerrar el modal
+                                if (window.notifySuccess) {
+                                    const nombreAnterior = data.nombre_anterior || '';
+                                    const nombreNuevo = data.nombre_nuevo || data.data?.nombre_depto || '';
+                                    
+                                    let mensaje = '';
+                                    if (nombreAnterior && nombreAnterior !== nombreNuevo) {
+                                        mensaje = `El departamento "${nombreAnterior}" fue renombrado a "${nombreNuevo}".`;
+                                    } else {
+                                        mensaje = `Departamento "${nombreNuevo}" actualizado.`;
+                                    }
+                                    
+                                    window.notifySuccess(mensaje);
+                                }
+                                
+                                // Recargar la página para mostrar los cambios después de ver la notificación
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 2500);
+                            }, 400);
                         } else {
-                            // Mostrar errores
+                            // Mostrar errores con notificación
                             let errorMessage = data.message || 'Error al actualizar el departamento';
                             if (data.errors) {
-                                const errorList = Object.values(data.errors).flat().join('\n');
-                                errorMessage += '\n\n' + errorList;
+                                const errorList = Object.values(data.errors).flat().join(', ');
+                                errorMessage += ': ' + errorList;
                             }
-                            alert(errorMessage);
+                            
+                            if (window.notifyError) {
+                                window.notifyError(errorMessage);
+                            } else {
+                                alert(errorMessage);
+                            }
+                            
                             submitButton.disabled = false;
                             submitButton.innerHTML = originalText;
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Error al actualizar el departamento. Por favor, intenta nuevamente.');
+                        const errorMsg = 'Error al actualizar el departamento. Por favor, intenta nuevamente.';
+                        
+                        if (window.notifyError) {
+                            window.notifyError(errorMsg);
+                        } else {
+                            alert(errorMsg);
+                        }
+                        
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
                     });

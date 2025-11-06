@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Estilo para Alpine.js x-cloak - oculta elementos hasta que Alpine.js se inicialice */
+[x-cloak] {
+    display: none !important;
+}
+
 /* Variables CSS personalizadas - Nueva Paleta Principal */
 :root {
     /* Colores principales del sistema */

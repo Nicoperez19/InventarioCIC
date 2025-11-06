@@ -32,15 +32,15 @@ class UnidadMedidaController extends Controller
             ], 500);
         }
     }
-    public function show(UnidadMedida $unidadMedida): JsonResponse
+    public function show(UnidadMedida $unidad): JsonResponse
     {
         try {
             // No cargar relaciones innecesarias, solo devolver los datos básicos
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'id_unidad' => $unidadMedida->id_unidad,
-                    'nombre_unidad_medida' => $unidadMedida->nombre_unidad_medida,
+                    'id_unidad' => $unidad->id_unidad,
+                    'nombre_unidad_medida' => $unidad->nombre_unidad_medida,
                 ],
                 'message' => 'Unidad de medida obtenida exitosamente'
             ]);
@@ -78,13 +78,13 @@ class UnidadMedidaController extends Controller
             ], 500);
         }
     }
-    public function update(Request $request, UnidadMedida $unidadMedida): JsonResponse
+    public function update(Request $request, UnidadMedida $unidad): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
-                'id_unidad' => 'sometimes|string|max:20|unique:unidad_medidas,id_unidad,' . $unidadMedida->id_unidad,
                 'nombre_unidad_medida' => 'sometimes|string|max:255'
             ]);
+            
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
@@ -92,10 +92,23 @@ class UnidadMedidaController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            $unidadMedida->update($request->all());
+            
+            // Guardar el nombre anterior antes de actualizar
+            $nombreAnterior = $unidad->nombre_unidad_medida;
+            $nombreNuevo = trim($request->input('nombre_unidad_medida', $nombreAnterior));
+            
+            // Solo actualizar si es diferente
+            if ($nombreAnterior !== $nombreNuevo) {
+                $unidad->nombre_unidad_medida = $nombreNuevo;
+                $unidad->save();
+                $unidad->refresh();
+            }
+            
             return response()->json([
                 'success' => true,
-                'data' => $unidadMedida,
+                'data' => $unidad,
+                'nombre_anterior' => $nombreAnterior,
+                'nombre_nuevo' => $nombreNuevo,
                 'message' => 'Unidad de medida actualizada exitosamente'
             ]);
         } catch (\Exception $e) {
@@ -105,18 +118,24 @@ class UnidadMedidaController extends Controller
             ], 500);
         }
     }
-    public function destroy(UnidadMedida $unidadMedida): JsonResponse
+    public function destroy(UnidadMedida $unidad): JsonResponse
     {
         try {
-            if ($unidadMedida->hasActiveInsumos()) {
+            // Guardar el nombre antes de eliminar para el mensaje
+            $nombreUnidad = $unidad->nombre_unidad_medida;
+            
+            if ($unidad->hasActiveInsumos()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No se puede eliminar la unidad de medida porque tiene insumos asociados'
                 ], 422);
             }
-            $unidadMedida->delete();
+            
+            $unidad->delete();
+            
             return response()->json([
                 'success' => true,
+                'nombre_unidad_medida' => $nombreUnidad,
                 'message' => 'Unidad de medida eliminada exitosamente'
             ]);
         } catch (\Exception $e) {
