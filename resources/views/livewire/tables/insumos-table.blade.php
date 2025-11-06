@@ -74,27 +74,6 @@
                     </select>
                 </div>
 
-                <!-- Filtro por Tipo de Insumo -->
-                <div>
-                    <label class="block mb-2 text-sm font-medium text-neutral-700">
-                        <div class="flex items-center space-x-1">
-                            <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                            <span>Tipo de Insumo</span>
-                        </div>
-                    </label>
-                    <select 
-                        wire:model.live="tipoInsumoFilter" 
-                        class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150"
-                    >
-                        <option value="">Todos los tipos</option>
-                        @foreach($tiposInsumo as $tipo)
-                            <option value="{{ $tipo->id }}">{{ $tipo->nombre_tipo }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
                 <!-- Filtro por Estado de Stock -->
                 <div>
                     <label class="block mb-2 text-sm font-medium text-neutral-700">
@@ -117,17 +96,6 @@
                 </div>
             </div>
 
-            <!-- Indicador de filtros activos -->
-            @if($search || $unidadFilter || $tipoInsumoFilter || $stockFilter)
-                <div class="flex items-center justify-end pt-2 border-t border-neutral-200">
-                    <div class="flex items-center space-x-2 text-sm text-neutral-600">
-                        <svg class="w-4 h-4 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span>Filtros activos</span>
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 

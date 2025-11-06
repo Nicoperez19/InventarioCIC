@@ -6,6 +6,7 @@ use App\Models\TipoInsumo;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 #[Title('Insumos')]
 class InsumosTable extends Component
 {
@@ -13,6 +14,7 @@ class InsumosTable extends Component
     
     public $search = '';
     public $unidadFilter = '';
+    #[Url(as: 'tipoInsumoFilter')]
     public $tipoInsumoFilter = '';
     public $stockFilter = '';
     public $perPage = 10;
@@ -30,6 +32,8 @@ class InsumosTable extends Component
     public function updatingTipoInsumoFilter()
     {
         $this->resetPage();
+        // Resetear el filtro de unidad cuando cambia el tipo de insumo
+        $this->unidadFilter = '';
     }
 
     public function updatingStockFilter()
@@ -80,9 +84,19 @@ class InsumosTable extends Component
 
         $insumos = $query->orderBy('nombre_insumo')->paginate($this->perPage);
 
+        // Filtrar unidades de medida según el tipo de insumo seleccionado
+        $unidades = UnidadMedida::orderBy('nombre_unidad_medida');
+        if ($this->tipoInsumoFilter) {
+            // Obtener solo las unidades usadas por insumos del tipo seleccionado
+            $unidades = $unidades->whereHas('insumos', function($q) {
+                $q->where('tipo_insumo_id', $this->tipoInsumoFilter);
+            });
+        }
+        $unidades = $unidades->get();
+
         return view('livewire.tables.insumos-table', [
             'insumos' => $insumos,
-            'unidades' => UnidadMedida::orderBy('nombre_unidad_medida')->get(),
+            'unidades' => $unidades,
             'tiposInsumo' => TipoInsumo::orderBy('nombre_tipo')->get(),
         ]);
     }

@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -32,5 +33,47 @@ class PermissionController extends Controller
     {
         $permission->delete();
         return redirect()->back()->with('status', 'Permiso eliminado correctamente.');
+    }
+
+    // ==================== MÉTODOS API PARA APLICACIÓN MÓVIL ====================
+
+    /**
+     * API: Listar todos los permisos
+     */
+    public function apiIndex(): JsonResponse
+    {
+        try {
+            $permissions = Permission::orderBy('name')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $permissions,
+                'message' => 'Permisos obtenidos exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener permisos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Obtener un permiso específico
+     */
+    public function apiShow(Permission $permission): JsonResponse
+    {
+        try {
+            return response()->json([
+                'success' => true,
+                'data' => $permission,
+                'message' => 'Permiso obtenido exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener permiso: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

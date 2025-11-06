@@ -6,6 +6,7 @@ use App\Models\Insumo;
 use App\Models\Departamento;
 use App\Models\TipoInsumo;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -352,6 +353,332 @@ class SolicitudController extends Controller
 
         } catch (\Exception $e) {
             return back()->with('error', 'Error al generar el PDF: ' . $e->getMessage());
+        }
+    }
+
+    // ==================== MÉTODOS API PARA APLICACIÓN MÓVIL ====================
+
+    /**
+     * API: Listar todas las solicitudes
+     */
+    public function apiIndex(Request $request): JsonResponse
+    {
+        try {
+            $query = Solicitud::with(['user', 'departamento', 'tipoInsumo', 'items.insumo.unidadMedida', 'aprobadoPor', 'entregadoPor']);
+
+            // Filtros
+            if ($request->has('estado')) {
+                $query->where('estado', $request->get('estado'));
+            }
+            if ($request->has('departamento_id')) {
+                $query->where('departamento_id', $request->get('departamento_id'));
+            }
+            if ($request->has('tipo_insumo_id')) {
+                $query->where('tipo_insumo_id', $request->get('tipo_insumo_id'));
+            }
+            if ($request->has('user_id')) {
+                $query->where('user_id', $request->get('user_id'));
+            }
+            if ($request->has('tipo_solicitud')) {
+                $query->where('tipo_solicitud', $request->get('tipo_solicitud'));
+            }
+
+            $solicitudes = $query->orderBy('fecha_solicitud', 'desc')
+                ->paginate($request->get('per_page', 15));
+
+            return response()->json([
+                'success' => true,
+                'data' => $solicitudes,
+                'message' => 'Solicitudes obtenidas exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener solicitudes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Obtener una solicitud específica
+     */
+    public function apiShow(Solicitud $solicitud): JsonResponse
+    {
+        try {
+            $solicitud->load([
+                'user',
+                'departamento',
+                'tipoInsumo',
+                'items.insumo.unidadMedida',
+                'aprobadoPor',
+                'entregadoPor'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $solicitud,
+                'message' => 'Solicitud obtenida exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener solicitud: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Crear una nueva solicitud
+     */
+    public function apiStore(Request $request): JsonResponse
+    {
+        $request->validate([
+            'tipo_solicitud' => 'required|in:individual,masiva',
+            'departamento_id' => 'required|exists:departamentos,id_depto',
+            'tipo_insumo_id' => 'nullable|exists:tipo_insumos,id',
+            'observaciones' => 'nullable|string|max:1000',
+            'items' => 'required|array|min:1',
+            'items.*.insumo_id' => 'required|exists:insumos,id_insumo',
+            'items.*.cantidad_solicitada' => 'required|integer|min:1',
+            'items.*.observaciones_item' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+            $solicitud = Solicitud::create([
+                'tipo_solicitud' => $request->tipo_solicitud,
+                'observaciones' => $request->observaciones,
+                'user_id' => Auth::id(),
+                'departamento_id' => $request->departamento_id,
+                'tipo_insumo_id' => $request->tipo_insumo_id,
+                'fecha_solicitud' => now(),
+            ]);
+
+            foreach ($request->items as $item) {
+                SolicitudItem::create([
+                    'solicitud_id' => $solicitud->id,
+                    'insumo_id' => $item['insumo_id'],
+                    'cantidad_solicitada' => $item['cantidad_solicitada'],
+                    'observaciones_item' => $item['observaciones_item'] ?? null,
+                ]);
+            }
+
+            DB::commit();
+            $solicitud->load(['user', 'departamento', 'tipoInsumo', 'items.insumo.unidadMedida']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $solicitud,
+                'message' => 'Solicitud creada exitosamente'
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear la solicitud: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Actualizar una solicitud
+     */
+    public function apiUpdate(Request $request, Solicitud $solicitud): JsonResponse
+    {
+        if ($solicitud->estado !== 'pendiente') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede editar una solicitud que no está pendiente'
+            ], 400);
+        }
+
+        $request->validate([
+            'tipo_solicitud' => 'required|in:individual,masiva',
+            'departamento_id' => 'required|exists:departamentos,id_depto',
+            'tipo_insumo_id' => 'nullable|exists:tipo_insumos,id',
+            'observaciones' => 'nullable|string|max:1000',
+            'items' => 'required|array|min:1',
+            'items.*.insumo_id' => 'required|exists:insumos,id_insumo',
+            'items.*.cantidad_solicitada' => 'required|integer|min:1',
+            'items.*.observaciones_item' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+            $solicitud->update([
+                'tipo_solicitud' => $request->tipo_solicitud,
+                'observaciones' => $request->observaciones,
+                'departamento_id' => $request->departamento_id,
+                'tipo_insumo_id' => $request->tipo_insumo_id,
+            ]);
+
+            $solicitud->items()->delete();
+            foreach ($request->items as $item) {
+                SolicitudItem::create([
+                    'solicitud_id' => $solicitud->id,
+                    'insumo_id' => $item['insumo_id'],
+                    'cantidad_solicitada' => $item['cantidad_solicitada'],
+                    'observaciones_item' => $item['observaciones_item'] ?? null,
+                ]);
+            }
+
+            DB::commit();
+            $solicitud->load(['user', 'departamento', 'tipoInsumo', 'items.insumo.unidadMedida']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $solicitud,
+                'message' => 'Solicitud actualizada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la solicitud: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Eliminar una solicitud
+     */
+    public function apiDestroy(Solicitud $solicitud): JsonResponse
+    {
+        if ($solicitud->estado !== 'pendiente') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar una solicitud que no está pendiente'
+            ], 400);
+        }
+
+        try {
+            $solicitud->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Solicitud eliminada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la solicitud: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Aprobar una solicitud
+     */
+    public function apiAprobar(Solicitud $solicitud): JsonResponse
+    {
+        if ($solicitud->estado !== 'pendiente') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solo se pueden aprobar solicitudes pendientes'
+            ], 400);
+        }
+
+        try {
+            $solicitud->aprobar(Auth::id());
+            $solicitud->load(['user', 'departamento', 'tipoInsumo', 'items.insumo.unidadMedida', 'aprobadoPor']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $solicitud,
+                'message' => 'Solicitud aprobada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al aprobar la solicitud: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Rechazar una solicitud
+     */
+    public function apiRechazar(Solicitud $solicitud): JsonResponse
+    {
+        if ($solicitud->estado !== 'pendiente') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solo se pueden rechazar solicitudes pendientes'
+            ], 400);
+        }
+
+        try {
+            $solicitud->rechazar(Auth::id());
+            $solicitud->load(['user', 'departamento', 'tipoInsumo', 'items.insumo.unidadMedida', 'aprobadoPor']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $solicitud,
+                'message' => 'Solicitud rechazada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al rechazar la solicitud: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Entregar una solicitud
+     */
+    public function apiEntregar(Solicitud $solicitud): JsonResponse
+    {
+        if ($solicitud->estado !== 'aprobada') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solo se pueden entregar solicitudes aprobadas'
+            ], 400);
+        }
+
+        try {
+            $solicitud->entregar(Auth::id());
+            $solicitud->load(['user', 'departamento', 'tipoInsumo', 'items.insumo.unidadMedida', 'aprobadoPor', 'entregadoPor']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $solicitud,
+                'message' => 'Solicitud entregada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al entregar la solicitud: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Obtener insumos para solicitudes (ya existe, pero mejorado)
+     */
+    public function apiGetInsumos(Request $request): JsonResponse
+    {
+        try {
+            $query = Insumo::with(['unidadMedida', 'tipoInsumo', 'departamento']);
+            
+            if ($request->has('tipo_insumo_id')) {
+                $query->where('tipo_insumo_id', $request->get('tipo_insumo_id'));
+            }
+            if ($request->has('departamento_id')) {
+                $query->where('departamento_id', $request->get('departamento_id'));
+            }
+
+            $insumos = $query->orderBy('nombre_insumo')->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $insumos,
+                'message' => 'Insumos obtenidos exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener insumos: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

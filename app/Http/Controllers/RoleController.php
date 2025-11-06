@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -58,5 +59,49 @@ class RoleController extends Controller
     {
         $role->delete();
         return redirect()->back()->with('status', 'Rol eliminado correctamente.');
+    }
+
+    // ==================== MÉTODOS API PARA APLICACIÓN MÓVIL ====================
+
+    /**
+     * API: Listar todos los roles
+     */
+    public function apiIndex(): JsonResponse
+    {
+        try {
+            $roles = Role::with('permissions')->orderBy('name')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $roles,
+                'message' => 'Roles obtenidos exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener roles: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Obtener un rol específico
+     */
+    public function apiShow(Role $role): JsonResponse
+    {
+        try {
+            $role->load('permissions');
+            
+            return response()->json([
+                'success' => true,
+                'data' => $role,
+                'message' => 'Rol obtenido exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener rol: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

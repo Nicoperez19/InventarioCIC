@@ -1,8 +1,16 @@
 <?php
 
 use Livewire\Volt\Component;
+use App\Models\TipoInsumo;
 
-new class extends Component {}; ?>
+new class extends Component {
+    public function with()
+    {
+        return [
+            'tiposInsumo' => TipoInsumo::orderBy('nombre_tipo')->get(),
+        ];
+    }
+}; ?>
 
 <div>
     <aside
@@ -90,10 +98,10 @@ new class extends Component {}; ?>
 
                 @canany(['manage-insumos', 'view-insumos'])
                 <!-- Menú desplegable de Insumos -->
-                <div x-data="{ insumosOpen: {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') ? 'true' : 'false' }} }">
+                <div x-data="{ insumosOpen: {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') || request()->get('tipoInsumoFilter') ? 'true' : 'false' }} }">
                     <!-- Botón principal de Insumos -->
                     <button type="button" @click="insumosOpen = !insumosOpen"
-                        class="group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') ? 'bg-secondary-100 text-primary-800 border border-secondary-300' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
+                        class="group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') || request()->get('tipoInsumoFilter') ? 'bg-secondary-100 text-primary-800 border border-secondary-300' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                         <div class="flex items-center">
                             <x-icons.package class="flex-shrink-0 w-5 h-5" />
                             <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
@@ -118,7 +126,7 @@ new class extends Component {}; ?>
                         @can('view-insumos')
                         <!-- Todos los Insumos -->
                         <a href="{{ route('insumos.index') }}"
-                            class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('insumos.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
+                            class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('insumos.index') && !request()->get('tipoInsumoFilter') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                             <x-icons.package class="flex-shrink-0 w-4 h-4" />
                             <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
                                 :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
@@ -127,10 +135,11 @@ new class extends Component {}; ?>
                         </a>
                         @endcan
 
-                        @can('view-tipo-insumos')
-                        <!-- Tipos de Insumo -->
-                        <a href="{{ route('tipo-insumos.index') }}"
-                            class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('tipo-insumos.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
+                        @can('view-insumos')
+                        <!-- Tipos de Insumo Dinámicos -->
+                        @foreach($tiposInsumo as $tipo)
+                        <a href="{{ route('insumos.index', ['tipoInsumoFilter' => $tipo->id]) }}"
+                            class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('insumos.index') && (request()->get('tipoInsumoFilter') == $tipo->id || request()->get('tipoInsumoFilter') == (string)$tipo->id) ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                             <svg class="flex-shrink-0 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
@@ -138,7 +147,26 @@ new class extends Component {}; ?>
                             </svg>
                             <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
                                 :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
-                                Tipos de Insumo
+                                {{ $tipo->nombre_tipo }}
+                            </span>
+                        </a>
+                        @endforeach
+                        @endcan
+
+                        @can('view-tipo-insumos')
+                        <!-- Gestión de Tipos de Insumo -->
+                        <a href="{{ route('tipo-insumos.index') }}"
+                            class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('tipo-insumos.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
+                            <svg class="flex-shrink-0 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                                </path>
+                            </svg>
+                            <span class="ml-3 overflow-hidden transition-all duration-300 ease-in-out"
+                                :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
+                                Gestionar Tipos
                             </span>
                         </a>
                         @endcan
