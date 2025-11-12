@@ -22,37 +22,6 @@
     <div class="py-4">
         <div class="mx-auto space-y-4 max-w-7xl sm:px-6 lg:px-8">
             
-            <!-- Mensajes de éxito/error -->
-            @if (session('success'))
-                <div class="p-3 bg-white border-l-4 rounded-lg shadow-sm border-secondary-500">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="w-5 h-5 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-800">{{ session('success') }}</p>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="p-3 bg-white border-l-4 rounded-lg shadow-sm border-danger-500">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="w-5 h-5 text-danger-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-800">{{ session('error') }}</p>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
             <!-- Formulario de carga -->
             <div class="p-4 bg-white shadow sm:p-6 sm:rounded-lg">
                 <form action="{{ route('carga-masiva.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
@@ -146,11 +115,16 @@
                             Cancelar
                         </a>
                         <button type="submit" 
-                                class="inline-flex items-center justify-center px-6 py-2 text-sm font-medium text-white transition-all duration-150 rounded-lg shadow-sm bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                id="submit-btn"
+                                class="inline-flex items-center justify-center px-6 py-2 text-sm font-medium text-white transition-all duration-150 rounded-lg shadow-sm bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg id="submit-icon" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
                             </svg>
-                            Procesar Archivo
+                            <span id="submit-text">Procesar Archivo</span>
+                            <svg id="submit-spinner" class="hidden w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
                         </button>
                     </div>
                 </form>
@@ -164,6 +138,19 @@
             const dropZone = document.getElementById('drop-zone');
             const fileName = document.getElementById('file-name');
             const fileNameSpan = fileName.querySelector('span');
+            const submitBtn = document.getElementById('submit-btn');
+            const submitIcon = document.getElementById('submit-icon');
+            const submitSpinner = document.getElementById('submit-spinner');
+            const submitText = document.getElementById('submit-text');
+            const form = document.querySelector('form');
+            
+            // Mostrar indicador de carga al enviar el formulario
+            form.addEventListener('submit', function() {
+                submitBtn.disabled = true;
+                submitIcon.classList.add('hidden');
+                submitSpinner.classList.remove('hidden');
+                submitText.textContent = 'Procesando...';
+            });
 
             // Mostrar nombre del archivo cuando se selecciona
             fileInput.addEventListener('change', function(e) {

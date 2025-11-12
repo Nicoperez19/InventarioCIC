@@ -15,6 +15,7 @@ class SolicitudInsumosTable extends Component
     public $insumos;
     public $cantidades = [];
     public $tipoInsumoFiltro = null;
+    public $busqueda = '';
     public $errores = [];
 
     public function mount()
@@ -41,7 +42,15 @@ class SolicitudInsumosTable extends Component
             $query->where('tipo_insumo_id', $this->tipoInsumoFiltro);
         }
 
+        // Aplicar búsqueda por nombre si hay término de búsqueda
+        if (!empty($this->busqueda)) {
+            $query->where('nombre_insumo', 'like', '%' . $this->busqueda . '%');
+        }
+
         $this->insumos = $query->get();
+        
+        // Asegurar que las relaciones estén cargadas
+        $this->insumos->loadMissing(['unidadMedida', 'tipoInsumo']);
         
         // Inicializar cantidades en 0 solo para nuevos insumos
         foreach ($this->insumos as $insumo) {
@@ -80,6 +89,11 @@ class SolicitudInsumosTable extends Component
     }
 
     public function updatedTipoInsumoFiltro()
+    {
+        $this->cargarInsumos();
+    }
+
+    public function updatedBusqueda()
     {
         $this->cargarInsumos();
     }
@@ -222,14 +236,27 @@ class SolicitudInsumosTable extends Component
 
             DB::commit();
             
-            session()->flash('success', "Solicitud #{$solicitud->numero_solicitud} creada y aprobada exitosamente con {$itemsConCantidad->count()} insumo(s). El stock ha sido reducido automáticamente.");
-            
             // Limpiar cantidades y errores
             $this->cantidades = array_fill_keys(array_keys($this->cantidades), 0);
             $this->errores = [];
             
             // Recargar insumos para actualizar el stock
             $this->cargarInsumos();
+            
+            // Preparar datos para el mensaje de éxito claro y entendible
+            $totalUnidades = $itemsConCantidad->sum();
+            $numeroSolicitud = $solicitud->numero_solicitud;
+            $cantidadInsumos = $itemsConCantidad->count();
+            
+            // Mensaje claro y amigable para el usuario
+            if ($cantidadInsumos == 1) {
+                $mensaje = "¡Solicitud #{$numeroSolicitud} creada exitosamente! Tu pedido de {$totalUnidades} unidad(es) ha sido registrado y el stock fue actualizado.";
+            } else {
+                $mensaje = "¡Solicitud #{$numeroSolicitud} creada exitosamente! Tu pedido de {$cantidadInsumos} insumo(s) por un total de {$totalUnidades} unidad(es) ha sido registrado y el stock fue actualizado.";
+            }
+            
+            // Disparar evento para mostrar notificación modal centrada como en departamentos
+            $this->dispatch('solicitud-creada-exito', ['mensaje' => $mensaje]);
             
         } catch (\Exception $e) {
             DB::rollBack();
@@ -242,6 +269,46 @@ class SolicitudInsumosTable extends Component
         $this->cantidades = array_fill_keys(array_keys($this->cantidades), 0);
         $this->errores = [];
         session()->flash('info', 'Solicitud limpiada');
+    }
+
+    public function getResumenPedidoProperty()
+    {
+        $itemsConCantidad = collect($this->cantidades)->filter(function($cantidad) {
+            return $cantidad > 0;
+        });
+
+        // Asegurar que los insumos tienen las relaciones cargadas
+        $this->insumos->loadMissing(['unidadMedida']);
+
+        $detalle = [];
+        foreach ($itemsConCantidad as $insumoId => $cantidad) {
+            $insumo = $this->insumos->firstWhere('id_insumo', $insumoId);
+            if ($insumo) {
+                // Cargar la relación si no está cargada
+                if (!$insumo->relationLoaded('unidadMedida')) {
+                    $insumo->load('unidadMedida');
+                }
+                
+                $detalle[] = [
+                    'id' => $insumo->id_insumo,
+                    'nombre' => $insumo->nombre_insumo,
+                    'cantidad' => $cantidad,
+                    'unidad' => $insumo->unidadMedida ? $insumo->unidadMedida->nombre_unidad_medida : 'unidad',
+                    'stock_disponible' => $insumo->stock_actual
+                ];
+            }
+        }
+
+        return $detalle;
+    }
+
+    public function obtenerResumenPedido()
+    {
+        // Asegurar que los insumos tienen las relaciones cargadas antes de obtener el resumen
+        if ($this->insumos && $this->insumos->isNotEmpty()) {
+            $this->insumos->loadMissing(['unidadMedida']);
+        }
+        return $this->resumenPedido;
     }
 
     public function render()

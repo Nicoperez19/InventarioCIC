@@ -17,7 +17,7 @@
 @endphp
 
 <div x-data="modalComponent({ show: @js($show), focusable: {{ $attributes->has('focusable') ? 'true' : 'false' }} })"
-    x-init="init()" x-show="show" @open-modal.window="handleOpen($event, '{{ $name }}')" @close.stop="show = false"
+    x-init="init()" x-show="show" @open-modal.window="handleOpen($event, '{{ $name }}')" @close-modal.window="handleClose($event, '{{ $name }}')" @close.stop="show = false"
     @keydown.escape.window="show = false" @keydown.tab.prevent="navigateFocus($event)"
     class="fixed inset-0 z-[150] px-4 pt-8 overflow-y-auto sm:px-0" style="display: none;">
     <!-- Background overlay -->
@@ -75,6 +75,12 @@
             },
             handleOpen(event, name) {
                 if (event.detail === name) this.show = true;
+            },
+            handleClose(event, name) {
+                // Si no hay nombre específico o el evento es para este modal, cerrar
+                if (!event.detail || event.detail === name || this.show) {
+                    this.show = false;
+                }
             },
             focusables() {
                 return [...this.$el.querySelectorAll(

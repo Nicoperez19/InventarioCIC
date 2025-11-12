@@ -56,9 +56,82 @@
                     </svg>
                     <h3 class="text-sm font-semibold text-primary-800">Filtros de Búsqueda</h3>
                 </div>
-                @if($tipoInsumoFiltro)
+            </div>
+        </div>
+
+        <!-- Contenido de los filtros -->
+        <div class="p-4 space-y-4">
+            <!-- Primera fila: Buscador y Filtro por Tipo de Insumo -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Buscador -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-neutral-700">
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span>Buscar Insumo</span>
+                        </div>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="text"
+                            wire:model.live.debounce.300ms="busqueda"
+                            placeholder="Buscar por nombre de insumo..."
+                            class="w-full px-3 py-2.5 pl-10 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150"
+                        >
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        @if($busqueda)
+                            <button 
+                                wire:click="$set('busqueda', '')"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-neutral-600"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Filtro por Tipo de Insumo -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-neutral-700">
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            <span>Tipo de Insumo</span>
+                        </div>
+                    </label>
+                    <select 
+                        wire:model.live="tipoInsumoFiltro" 
+                        id="tipo-filtro"
+                        class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150"
+                    >
+                        <option value="">Todos los tipos</option>
+                        @foreach($tiposDisponibles as $tipo)
+                            <option value="{{ $tipo->id }}">{{ $tipo->nombre_tipo }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <!-- Indicador de filtros activos -->
+            @if($tipoInsumoFiltro || $busqueda)
+                <div class="flex items-center justify-between pt-2 border-t border-neutral-200">
+                    <div class="flex items-center space-x-2 text-sm text-neutral-600">
+                        <svg class="w-4 h-4 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Filtros activos</span>
+                    </div>
                     <button 
-                        wire:click="$set('tipoInsumoFiltro', '')"
+                        wire:click="$set('tipoInsumoFiltro', ''); $set('busqueda', '')"
                         class="flex items-center space-x-1 text-xs font-medium transition-colors duration-150 text-primary-600 hover:text-primary-800"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,43 +139,6 @@
                         </svg>
                         <span>Limpiar filtros</span>
                     </button>
-                @endif
-            </div>
-        </div>
-
-        <!-- Contenido de los filtros -->
-        <div class="p-4 space-y-4">
-            <!-- Primera fila: Filtro por Tipo de Insumo -->
-            <div>
-                <label class="block mb-2 text-sm font-medium text-neutral-700">
-                    <div class="flex items-center space-x-1">
-                        <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                        </svg>
-                        <span>Tipo de Insumo</span>
-                    </div>
-                </label>
-                <select 
-                    wire:model.live="tipoInsumoFiltro" 
-                    id="tipo-filtro"
-                    class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150"
-                >
-                    <option value="">Todos los tipos</option>
-                    @foreach($tiposDisponibles as $tipo)
-                        <option value="{{ $tipo->id }}">{{ $tipo->nombre_tipo }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Indicador de filtros activos -->
-            @if($tipoInsumoFiltro)
-                <div class="flex items-center justify-end pt-2 border-t border-neutral-200">
-                    <div class="flex items-center space-x-2 text-sm text-neutral-600">
-                        <svg class="w-4 h-4 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span>Filtros activos</span>
-                    </div>
                 </div>
             @endif
         </div>
@@ -246,22 +282,50 @@
 
     <!-- Resumen de solicitud -->
     @if(collect($cantidades)->filter(fn($cantidad) => $cantidad > 0)->count() > 0)
-        <div class="p-4 border-t border-gray-200 bg-blue-50">
-            <h4 class="text-sm font-medium text-blue-900 mb-2">Resumen de la solicitud:</h4>
-            <div class="text-sm text-blue-700">
-                @php
-                    $itemsConCantidad = collect($cantidades)->filter(fn($cantidad) => $cantidad > 0);
-                @endphp
-                <p>{{ $itemsConCantidad->count() }} insumo(s) seleccionado(s) con un total de {{ $itemsConCantidad->sum() }} unidades</p>
-                <div class="mt-2 p-2 bg-blue-100 rounded border border-blue-200">
-                    <div class="flex items-start">
-                        <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <div class="text-xs text-blue-800">
-                            <strong>Nota:</strong> Al crear la solicitud, el stock se reducirá automáticamente y la solicitud será aprobada inmediatamente.
+        @php
+            $itemsConCantidad = collect($cantidades)->filter(fn($cantidad) => $cantidad > 0);
+            $resumenPedido = $this->resumenPedido;
+        @endphp
+        <div class="p-4 bg-gradient-to-r from-secondary-50 to-secondary-100 border-l-4 border-secondary-500 rounded-lg shadow-sm">
+            <div class="flex items-center mb-3">
+                <svg class="w-5 h-5 text-secondary-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+                <h4 class="text-base font-semibold text-secondary-900">Detalle del Pedido</h4>
+            </div>
+            <div class="bg-white rounded-lg border border-secondary-200 p-4 mb-3">
+                <div class="space-y-2">
+                    @foreach($resumenPedido as $item)
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">{{ $item['nombre'] }}</p>
+                                <p class="text-xs text-gray-500">Stock disponible: {{ $item['stock_disponible'] }} {{ $item['unidad'] }}</p>
+                            </div>
+                            <div class="ml-4 text-right">
+                                <p class="text-sm font-bold text-secondary-600">{{ $item['cantidad'] }} {{ $item['unidad'] }}</p>
+                            </div>
                         </div>
+                    @endforeach
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Total de insumos:</span>
+                        <span class="text-sm font-bold text-secondary-700">{{ count($resumenPedido) }}</span>
                     </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-sm font-medium text-gray-700">Total de unidades:</span>
+                        <span class="text-sm font-bold text-secondary-700">{{ $itemsConCantidad->sum() }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 bg-secondary-100 rounded-lg border border-secondary-300">
+                <div class="flex items-start">
+                    <svg class="w-4 h-4 text-secondary-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-xs text-secondary-800">
+                        <strong>Nota:</strong> Al crear la solicitud, el stock se reducirá automáticamente y la solicitud será aprobada inmediatamente.
+                    </p>
                 </div>
             </div>
         </div>
@@ -276,9 +340,80 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     window.addEventListener('crear-solicitud', function() {
-        if (confirm('¿Crear la solicitud? El stock se reducirá automáticamente.')) {
-            @this.crearSolicitud();
-        }
+        // Obtener los insumos seleccionados desde Livewire
+        @this.call('obtenerResumenPedido').then(function(resumenPedido) {
+            if (!resumenPedido || resumenPedido.length === 0) {
+                alert('Debe seleccionar al menos un insumo con cantidad mayor a 0');
+                return;
+            }
+
+            // Construir el HTML del detalle del pedido
+            let detalleHTML = '<div class="text-left space-y-3 mb-4">';
+            let totalUnidades = 0;
+            
+            resumenPedido.forEach(function(item) {
+                detalleHTML += `
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">${item.nombre}</p>
+                            <p class="text-xs text-gray-500">Stock disponible: ${item.stock_disponible} ${item.unidad}</p>
+                        </div>
+                        <div class="ml-4 text-right">
+                            <p class="text-sm font-bold text-secondary-600">${item.cantidad} ${item.unidad}</p>
+                        </div>
+                    </div>
+                `;
+                totalUnidades += parseInt(item.cantidad);
+            });
+            
+            detalleHTML += '</div>';
+            detalleHTML += `
+                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700">Total de insumos:</span>
+                        <span class="text-sm font-bold text-secondary-700">${resumenPedido.length}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Total de unidades:</span>
+                        <span class="text-sm font-bold text-secondary-700">${totalUnidades}</span>
+                    </div>
+                </div>
+            `;
+            detalleHTML += '<p class="text-sm text-gray-600 text-center font-medium">¿Deseas confirmar esta solicitud?</p>';
+
+            // Mostrar modal de confirmación personalizado
+            window.confirmAction({
+                title: 'Confirmar Solicitud de Insumos',
+                message: detalleHTML,
+                confirmText: 'Sí, crear solicitud',
+                cancelText: 'Cancelar'
+            })
+            .then(function() {
+                @this.crearSolicitud();
+            })
+            .catch(function() {
+                // Usuario canceló
+            });
+        }).catch(function(error) {
+            console.error('Error al obtener resumen:', error);
+            // Fallback: crear directamente con confirmación simple
+            if (confirm('¿Crear la solicitud? El stock se reducirá automáticamente.')) {
+                @this.crearSolicitud();
+            }
+        });
+    });
+    
+    // Escuchar evento de Livewire para mostrar notificación modal centrada como en departamentos
+    document.addEventListener('livewire:init', function() {
+        Livewire.on('solicitud-creada-exito', function(data) {
+            // Esperar un poco para que se complete la transacción
+            setTimeout(function() {
+                const mensaje = data && data[0] ? data[0].mensaje : (data?.mensaje || data);
+                if (window.notifySuccess && mensaje) {
+                    window.notifySuccess(mensaje);
+                }
+            }, 100);
+        });
     });
     
     const timeouts = new Map(); // Usar un mapa para trackear timeouts por input
