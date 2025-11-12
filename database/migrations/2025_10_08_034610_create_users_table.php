@@ -13,12 +13,11 @@ return new class extends Migration
             $table->timestamp('correo_verificado_at')->nullable();
             $table->string('contrasena');
             $table->string('id_depto');
-            $table->softDeletes(); // Agregar soft deletes
             $table->rememberToken();
             $table->timestamps();
-            $table->foreign('id_depto')->references('id_depto')->on('departamentos')->onDelete('restrict');
-            $table->index(['correo', 'deleted_at']);
-            $table->index(['id_depto', 'deleted_at']);
+            $table->foreign('id_depto')->references('id_depto')->on('departamentos')->onDelete('cascade');
+            $table->index('correo');
+            $table->index('id_depto');
             $table->index('created_at');
         });
         Schema::create('password_reset_tokens', function (Blueprint $table) {

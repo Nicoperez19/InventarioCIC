@@ -4,10 +4,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 class Insumo extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
     protected $fillable = [
         'id_insumo',
         'codigo_barra',
@@ -15,7 +14,6 @@ class Insumo extends Model
         'stock_actual',
         'id_unidad',
         'tipo_insumo_id',
-        'departamento_id',
     ];
     protected $table = 'insumos';
     protected $primaryKey = 'id_insumo';
@@ -27,7 +25,6 @@ class Insumo extends Model
             'stock_actual' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'deleted_at' => 'datetime',
         ];
     }
     public function unidadMedida(): BelongsTo
@@ -42,10 +39,6 @@ class Insumo extends Model
     public function tipoInsumo(): BelongsTo
     {
         return $this->belongsTo(TipoInsumo::class, 'tipo_insumo_id');
-    }
-    public function departamento(): BelongsTo
-    {
-        return $this->belongsTo(Departamento::class, 'departamento_id');
     }
     public function getStockStatusAttribute(): string
     {

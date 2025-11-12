@@ -9,9 +9,8 @@ return new class extends Migration
         Schema::create('departamentos', function (Blueprint $table) {
             $table->string('id_depto')->primary();
             $table->string('nombre_depto');
-            $table->softDeletes(); // Agregar soft deletes
             $table->timestamps();
-            $table->index(['nombre_depto', 'deleted_at']);
+            $table->index('nombre_depto');
             $table->index('created_at');
         });
     }

@@ -9,9 +9,8 @@ return new class extends Migration
         Schema::create('unidad_medidas', function (Blueprint $table) {
             $table->string('id_unidad')->primary();
             $table->string('nombre_unidad_medida');
-            $table->softDeletes(); // Agregar soft deletes
             $table->timestamps();
-            $table->index(['nombre_unidad_medida', 'deleted_at']);
+            $table->index('nombre_unidad_medida');
             $table->index('created_at');
         });
     }

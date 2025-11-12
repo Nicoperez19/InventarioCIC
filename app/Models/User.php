@@ -3,14 +3,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable, SoftDeletes, HasApiTokens;
+    use HasFactory, HasRoles, Notifiable, HasApiTokens;
     protected $primaryKey = 'run';
     public $incrementing = false;
     protected $keyType = 'string';
@@ -32,7 +31,6 @@ class User extends Authenticatable
             'contrasena' => 'hashed',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'deleted_at' => 'datetime',
         ];
     }
     public function departamento(): BelongsTo
@@ -89,7 +87,7 @@ class User extends Authenticatable
     }
     public static function getActiveUsers()
     {
-        return static::whereNull('deleted_at')->with('departamento');
+        return static::with('departamento');
     }
     public static function getUsersByDepartment(string $departmentId)
     {
@@ -97,7 +95,7 @@ class User extends Authenticatable
     }
     public function isActive(): bool
     {
-        return $this->deleted_at === null;
+        return true;
     }
     public function getFullNameAttribute(): string
     {
@@ -146,11 +144,11 @@ class User extends Authenticatable
     }
     public function scopeActive($query)
     {
-        return $query->whereNull('deleted_at');
+        return $query;
     }
     public function scopeInactive($query)
     {
-        return $query->whereNotNull('deleted_at');
+        return $query->whereRaw('1 = 0'); // Siempre vacío ya que no hay soft deletes
     }
     public function scopeByDepartment($query, string $departmentId)
     {

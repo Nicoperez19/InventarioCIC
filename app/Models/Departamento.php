@@ -4,10 +4,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 class Departamento extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
     protected $table = 'departamentos';
     protected $fillable = [
         'id_depto',
@@ -21,7 +20,6 @@ class Departamento extends Model
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'deleted_at' => 'datetime',
         ];
     }
     public function users(): HasMany
@@ -39,11 +37,11 @@ class Departamento extends Model
     }
     public function getActiveUsersCountAttribute(): int
     {
-        return $this->users()->whereNull('deleted_at')->count();
+        return $this->users()->count();
     }
     public function getTotalUsersCountAttribute(): int
     {
-        return $this->users()->count();
+        return $this->active_users_count; // Alias para mantener compatibilidad
     }
     public function hasActiveUsers(): bool
     {
@@ -51,13 +49,12 @@ class Departamento extends Model
     }
     public function canBeDeleted(): bool
     {
-        return ! $this->hasActiveUsers();
+        // Con eliminación en cascada, siempre se puede eliminar
+        return true;
     }
     public function scopeWithActiveUsers($query)
     {
-        return $query->whereHas('users', function ($q) {
-            $q->whereNull('deleted_at');
-        });
+        return $query->whereHas('users');
     }
     public function scopeWithoutUsers($query)
     {

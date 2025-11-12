@@ -124,13 +124,7 @@ class UnidadMedidaController extends Controller
             // Guardar el nombre antes de eliminar para el mensaje
             $nombreUnidad = $unidad->nombre_unidad_medida;
             
-            if ($unidad->hasActiveInsumos()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se puede eliminar la unidad de medida porque tiene insumos asociados'
-                ], 422);
-            }
-            
+            // Con eliminación en cascada, los insumos se eliminarán automáticamente
             $unidad->delete();
             
             return response()->json([

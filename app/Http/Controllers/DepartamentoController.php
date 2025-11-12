@@ -13,7 +13,7 @@ class DepartamentoController extends Controller
     {
         $this->middleware('auth');
     }
-    
+
     /**
      * Mostrar formulario de creación
      */
@@ -21,7 +21,7 @@ class DepartamentoController extends Controller
     {
         return view('layouts.departamento.departamento_create');
     }
-    
+
     /**
      * Mostrar formulario de edición
      */
@@ -56,7 +56,7 @@ class DepartamentoController extends Controller
             // Cargar solo la relación users que siempre debería existir
             // No cargar insumos porque puede requerir una tabla pivot que no existe
             $departamento->loadMissing(['users']);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -71,7 +71,7 @@ class DepartamentoController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener departamento: ' . $e->getMessage()
@@ -85,7 +85,7 @@ class DepartamentoController extends Controller
                 'id_depto' => 'required|string|max:20|unique:departamentos,id_depto',
                 'nombre_depto' => 'required|string|max:255'
             ]);
-            
+
             if ($validator->fails()) {
                 // Si es una petición AJAX, retornar JSON
                 if ($request->expectsJson() || $request->ajax()) {
@@ -95,16 +95,16 @@ class DepartamentoController extends Controller
                         'errors' => $validator->errors()
                     ], 422);
                 }
-                
+
                 // Si es una petición web normal, redirigir con errores
                 return back()
                     ->withErrors($validator)
                     ->withInput()
                     ->with('error', 'Por favor, corrige los errores en el formulario.');
             }
-            
+
             $departamento = Departamento::create($request->all());
-            
+
             // Si es una petición AJAX, retornar JSON
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -113,14 +113,14 @@ class DepartamentoController extends Controller
                     'message' => 'Departamento creado exitosamente'
                 ], 201);
             }
-            
+
             // Si es una petición web normal, redirigir con mensaje de éxito
             return redirect()->route('departamentos')
                 ->with('success', "¡Excelente! El departamento '{$departamento->nombre_depto}' ha sido creado exitosamente.");
-                
+
         } catch (\Exception $e) {
             Log::error('Error al crear departamento: ' . $e->getMessage());
-            
+
             // Si es una petición AJAX, retornar JSON
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -128,7 +128,7 @@ class DepartamentoController extends Controller
                     'message' => 'Error al crear departamento: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             // Si es una petición web normal, redirigir con error
             return back()
                 ->withInput()
@@ -140,13 +140,13 @@ class DepartamentoController extends Controller
         try {
             // Obtener datos del request (puede ser JSON o FormData)
             $requestData = $request->all();
-            
+
             // Si es JSON, también intentar obtener del JSON
             if ($request->isJson() || $request->expectsJson()) {
                 $jsonData = $request->json()->all();
                 $requestData = array_merge($requestData, $jsonData);
             }
-            
+
             // Log para debug
             Log::info('Actualizando departamento', [
                 'departamento_id' => $departamento->id_depto,
@@ -156,10 +156,10 @@ class DepartamentoController extends Controller
                 'is_json' => $request->isJson(),
                 'content_type' => $request->header('Content-Type')
             ]);
-            
+
             // Obtener el nombre_depto del request
             $nombreDepto = $requestData['nombre_depto'] ?? $request->input('nombre_depto');
-            
+
             // Validar que nombre_depto esté presente y no sea vacío
             if (empty($nombreDepto) || trim($nombreDepto) === '') {
                 if ($request->expectsJson() || $request->ajax()) {
@@ -172,12 +172,12 @@ class DepartamentoController extends Controller
                     ->withInput()
                     ->with('error', 'El nombre del departamento es requerido.');
             }
-            
+
             // Validación completa
             $validator = Validator::make(['nombre_depto' => $nombreDepto], [
                 'nombre_depto' => 'required|string|max:255'
             ]);
-            
+
             if ($validator->fails()) {
                 if ($request->expectsJson() || $request->ajax()) {
                     return response()->json([
@@ -186,26 +186,26 @@ class DepartamentoController extends Controller
                         'errors' => $validator->errors()
                     ], 422);
                 }
-                
+
                 return back()
                     ->withErrors($validator)
                     ->withInput()
                     ->with('error', 'Por favor, corrige los errores en el formulario.');
             }
-            
+
             // Guardar el nombre anterior antes de actualizar
             $nombreAnterior = $departamento->nombre_depto;
             $nombreNuevo = trim($nombreDepto);
-            
+
             // Solo actualizar el nombre_depto si es diferente
             if ($nombreAnterior !== $nombreNuevo) {
                 $departamento->nombre_depto = $nombreNuevo;
                 $departamento->save();
-                
+
                 // Recargar el modelo para obtener los datos actualizados
                 $departamento->refresh();
             }
-            
+
             // Si es una petición AJAX, retornar JSON
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -216,20 +216,20 @@ class DepartamentoController extends Controller
                     'message' => 'Departamento actualizado exitosamente'
                 ]);
             }
-            
+
             // Si es una petición web normal, redirigir con mensaje de éxito
             if ($nombreAnterior !== $nombreNuevo) {
                 $mensaje = "El departamento \"{$nombreAnterior}\" fue renombrado a \"{$nombreNuevo}\".";
             } else {
                 $mensaje = "Departamento \"{$nombreNuevo}\" actualizado.";
             }
-            
+
             return redirect()->route('departamentos')
                 ->with('success', $mensaje);
-                
+
         } catch (\Exception $e) {
             Log::error('Error al actualizar departamento: ' . $e->getMessage());
-            
+
             // Si es una petición AJAX, retornar JSON
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -237,7 +237,7 @@ class DepartamentoController extends Controller
                     'message' => 'Error al actualizar departamento: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             // Si es una petición web normal, redirigir con error
             return back()
                 ->withInput()
@@ -249,16 +249,10 @@ class DepartamentoController extends Controller
         try {
             // Guardar el nombre antes de eliminar para el mensaje
             $nombreDepartamento = $departamento->nombre_depto;
-            
-            if ($departamento->hasActiveUsers()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se puede eliminar el departamento porque tiene usuarios activos'
-                ], 422);
-            }
-            
+
+            // Con eliminación en cascada, los usuarios y solicitudes se eliminarán automáticamente
             $departamento->delete();
-            
+
             return response()->json([
                 'success' => true,
                 'nombre_depto' => $nombreDepartamento,

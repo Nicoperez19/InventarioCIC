@@ -16,14 +16,14 @@ return new class extends Migration
             $table->foreign('user_id')->references('run')->on('users')->onDelete('cascade');
             $table->string('departamento_id');
             $table->foreign('departamento_id')->references('id_depto')->on('departamentos')->onDelete('cascade');
-            $table->foreignId('tipo_insumo_id')->nullable()->constrained('tipo_insumos')->onDelete('set null');
+            $table->foreignId('tipo_insumo_id')->nullable()->constrained('tipo_insumos')->onDelete('cascade');
             $table->timestamp('fecha_solicitud')->useCurrent();
             $table->timestamp('fecha_aprobacion')->nullable();
             $table->timestamp('fecha_entrega')->nullable();
             $table->string('aprobado_por')->nullable();
-            $table->foreign('aprobado_por')->references('run')->on('users')->onDelete('set null');
+            $table->foreign('aprobado_por')->references('run')->on('users')->onDelete('cascade');
             $table->string('entregado_por')->nullable();
-            $table->foreign('entregado_por')->references('run')->on('users')->onDelete('set null');
+            $table->foreign('entregado_por')->references('run')->on('users')->onDelete('cascade');
             $table->timestamps();
             $table->index(['estado', 'fecha_solicitud']);
             $table->index(['departamento_id', 'estado']);

@@ -221,7 +221,7 @@ class InsumoController extends Controller
     public function getLowStock(): JsonResponse
     {
         try {
-            $insumos = Insumo::lowStock()->with('unidadMedida')->get();
+            $insumos = Insumo::outOfStock()->with('unidadMedida')->get();
             return response()->json([
                 'success' => true,
                 'data' => $insumos,

@@ -3,10 +3,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 class UnidadMedida extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
     protected $fillable = [
         'id_unidad',
         'nombre_unidad_medida',
@@ -20,7 +19,6 @@ class UnidadMedida extends Model
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'deleted_at' => 'datetime',
         ];
     }
     public function insumos(): HasMany
@@ -29,7 +27,7 @@ class UnidadMedida extends Model
     }
     public function hasActiveInsumos(): bool
     {
-        return $this->insumos()->whereNull('deleted_at')->exists();
+        return $this->insumos()->exists();
     }
     public function scopeOrderByName($query, string $direction = 'asc')
     {

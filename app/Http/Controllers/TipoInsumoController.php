@@ -107,12 +107,7 @@ class TipoInsumoController extends Controller
     public function destroy(TipoInsumo $tipoInsumo): JsonResponse
     {
         try {
-            if ($tipoInsumo->insumos()->exists()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se puede eliminar el tipo de insumo porque tiene insumos asociados'
-                ], 422);
-            }
+            // Con eliminación en cascada, los insumos y solicitudes se eliminarán automáticamente
             $tipoInsumo->delete();
             return response()->json([
                 'success' => true,
