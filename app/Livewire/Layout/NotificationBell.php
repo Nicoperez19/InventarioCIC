@@ -21,7 +21,10 @@ class NotificationBell extends Component
 
     public function mount()
     {
-        $this->cargarNotificaciones();
+        // Solo cargar notificaciones si el usuario tiene el permiso
+        if (Auth::check() && Auth::user()->can('view-notifications')) {
+            $this->cargarNotificaciones();
+        }
     }
 
     public function cargarNotificaciones()
@@ -65,6 +68,11 @@ class NotificationBell extends Component
 
     public function render()
     {
+        // Solo renderizar si el usuario tiene el permiso view-notifications
+        if (!Auth::check() || !Auth::user()->can('view-notifications')) {
+            return view('livewire.layout.notification-bell-empty');
+        }
+        
         return view('livewire.layout.notification-bell');
     }
 }
