@@ -17,6 +17,7 @@ class SolicitudInsumosTable extends Component
     public $cantidades = [];
     public $tipoInsumoFiltro = null;
     public $busqueda = '';
+    public $ordenamiento = 'nombre_asc';
     public $errores = [];
 
     public function mount()
@@ -46,6 +47,24 @@ class SolicitudInsumosTable extends Component
         // Aplicar búsqueda por nombre si hay término de búsqueda
         if (!empty($this->busqueda)) {
             $query->where('nombre_insumo', 'like', '%' . $this->busqueda . '%');
+        }
+
+        // Aplicar ordenamiento
+        switch ($this->ordenamiento) {
+            case 'nombre_asc':
+                $query->orderBy('nombre_insumo', 'asc');
+                break;
+            case 'nombre_desc':
+                $query->orderBy('nombre_insumo', 'desc');
+                break;
+            case 'stock_asc':
+                $query->orderBy('stock_actual', 'asc');
+                break;
+            case 'stock_desc':
+                $query->orderBy('stock_actual', 'desc');
+                break;
+            default:
+                $query->orderBy('nombre_insumo', 'asc');
         }
 
         $this->insumos = $query->get();
@@ -99,6 +118,12 @@ class SolicitudInsumosTable extends Component
         $this->cargarInsumos();
     }
 
+    public function updatedOrdenamiento()
+    {
+        $this->cargarInsumos();
+    }
+
+
     public function actualizarCantidad($insumoId, $cantidad)
     {
         $cantidad = (int) $cantidad;
@@ -122,10 +147,10 @@ class SolicitudInsumosTable extends Component
             return;
         }
         
-        // Validar que no exceda el stock disponible - si excede, poner en 0
+        // Validar que no exceda el stock disponible - si excede, mostrar error y no permitir
         if ($cantidad > $insumo->stock_actual) {
             $this->cantidades[$insumoId] = 0;
-            $this->errores[$insumoId] = "No puedes solicitar más de {$insumo->stock_actual} unidades. El valor se ha restablecido a 0.";
+            $this->errores[$insumoId] = "No hay stock suficiente. Stock disponible: {$insumo->stock_actual} unidades.";
             return;
         }
         
