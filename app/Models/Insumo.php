@@ -12,6 +12,7 @@ class Insumo extends Model
         'codigo_barra',
         'nombre_insumo',
         'stock_actual',
+        'stock_minimo',
         'id_unidad',
         'tipo_insumo_id',
     ];
@@ -23,6 +24,7 @@ class Insumo extends Model
     {
         return [
             'stock_actual' => 'integer',
+            'stock_minimo' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
