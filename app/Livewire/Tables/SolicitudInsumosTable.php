@@ -6,6 +6,7 @@ use App\Models\Insumo;
 use App\Models\TipoInsumo;
 use App\Models\Solicitud;
 use App\Models\SolicitudItem;
+use App\Models\Notificacion;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -182,22 +183,20 @@ class SolicitudInsumosTable extends Component
 
             $user = Auth::user();
             
-            // Crear la solicitud
+            // Crear la solicitud en estado pendiente (requiere aprobación)
             $solicitud = Solicitud::create([
                 'tipo_solicitud' => 'individual',
-                'estado' => 'aprobada', // Auto-aprobar ya que se reduce el stock inmediatamente
+                'estado' => 'pendiente', // Cambiar a pendiente para requerir aprobación
                 'user_id' => $user->run,
                 'departamento_id' => $user->id_depto,
                 'fecha_solicitud' => now(),
-                'fecha_aprobacion' => now(),
-                'aprobado_por' => $user->run,
-                'observaciones' => 'Solicitud creada y aprobada automáticamente desde el sistema'
+                'observaciones' => null
             ]);
 
-            // Crear los items de la solicitud y reducir stock
+            // Crear los items de la solicitud (sin reducir stock todavía)
             foreach ($itemsConCantidad as $insumoId => $cantidad) {
-                // Obtener el insumo con bloqueo para evitar condiciones de carrera
-                $insumo = Insumo::lockForUpdate()->find($insumoId);
+                // Obtener el insumo
+                $insumo = Insumo::find($insumoId);
                 
                 if (!$insumo) {
                     DB::rollBack();
@@ -205,33 +204,77 @@ class SolicitudInsumosTable extends Component
                     return;
                 }
                 
-                // Verificar nuevamente el stock (doble verificación)
+                // Verificar que hay stock disponible
                 if ($insumo->stock_actual < $cantidad) {
                     DB::rollBack();
                     session()->flash('error', "No hay suficiente stock para el insumo {$insumo->nombre_insumo}. Stock disponible: {$insumo->stock_actual}, solicitado: {$cantidad}");
                     return;
                 }
                 
-                // Validar que la cantidad no sea negativa (segunda verificación)
+                // Validar que la cantidad no sea negativa
                 if ($cantidad < 0) {
                     DB::rollBack();
                     session()->flash('error', "No se pueden solicitar valores negativos para el insumo {$insumo->nombre_insumo}");
                     return;
                 }
 
-                // Crear el item de la solicitud
+                // Crear el item de la solicitud (sin aprobar todavía)
                 SolicitudItem::create([
                     'solicitud_id' => $solicitud->id,
                     'insumo_id' => $insumoId,
                     'cantidad_solicitada' => $cantidad,
-                    'cantidad_aprobada' => $cantidad, // Auto-aprobar la cantidad solicitada
+                    'cantidad_aprobada' => 0, // No aprobar todavía
                     'cantidad_entregada' => 0,
-                    'estado_item' => 'aprobado', // Marcar como aprobado automáticamente
+                    'estado_item' => 'pendiente', // Estado pendiente
                     'observaciones_item' => null
                 ]);
+            }
 
-                // Reducir el stock del insumo
-                $insumo->decrement('stock_actual', $cantidad);
+            // Crear notificaciones para administradores
+            try {
+                // Buscar usuarios con rol Administrador
+                $adminsPorRol = \App\Models\User::role('Administrador')->get();
+                
+                // Buscar usuarios con permiso manage-requests o approve-requests
+                $adminsPorPermiso = \App\Models\User::permission(['manage-requests', 'approve-requests'])->get();
+                
+                // Combinar y eliminar duplicados
+                $administradores = $adminsPorRol->merge($adminsPorPermiso)->unique('run');
+                
+                // Si no hay administradores, notificar a todos los usuarios (fallback)
+                if ($administradores->isEmpty()) {
+                    \Illuminate\Support\Facades\Log::warning('No se encontraron administradores para notificar. Notificando a todos los usuarios.');
+                    $administradores = \App\Models\User::all();
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Creando notificaciones (Livewire)', [
+                    'solicitud_id' => $solicitud->id,
+                    'numero_solicitud' => $solicitud->numero_solicitud,
+                    'administradores_count' => $administradores->count()
+                ]);
+
+                foreach ($administradores as $admin) {
+                    Notificacion::create([
+                        'tipo' => 'solicitud',
+                        'titulo' => 'Nueva Solicitud de Insumos',
+                        'mensaje' => "Se ha creado una nueva solicitud #{$solicitud->numero_solicitud} por " . $user->nombre,
+                        'user_id' => $admin->run,
+                        'solicitud_id' => $solicitud->id,
+                    ]);
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Notificaciones creadas exitosamente (Livewire)', [
+                    'count' => $administradores->count()
+                ]);
+                
+                // Disparar evento Livewire para actualizar notificaciones en tiempo real
+                $this->dispatch('notificacionCreada');
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error al crear notificaciones (Livewire)', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // No fallar la creación de la solicitud si falla la notificación
             }
 
             DB::commit();
@@ -250,9 +293,9 @@ class SolicitudInsumosTable extends Component
             
             // Mensaje claro y amigable para el usuario
             if ($cantidadInsumos == 1) {
-                $mensaje = "¡Solicitud #{$numeroSolicitud} creada exitosamente! Tu pedido de {$totalUnidades} unidad(es) ha sido registrado y el stock fue actualizado.";
+                $mensaje = "¡Solicitud #{$numeroSolicitud} creada exitosamente! Tu pedido de {$totalUnidades} unidad(es) ha sido registrado y está pendiente de aprobación.";
             } else {
-                $mensaje = "¡Solicitud #{$numeroSolicitud} creada exitosamente! Tu pedido de {$cantidadInsumos} insumo(s) por un total de {$totalUnidades} unidad(es) ha sido registrado y el stock fue actualizado.";
+                $mensaje = "¡Solicitud #{$numeroSolicitud} creada exitosamente! Tu pedido de {$cantidadInsumos} insumo(s) por un total de {$totalUnidades} unidad(es) ha sido registrado y está pendiente de aprobación.";
             }
             
             // Disparar evento para mostrar notificación modal centrada como en departamentos

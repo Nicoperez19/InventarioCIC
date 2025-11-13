@@ -5,6 +5,7 @@ use App\Models\SolicitudItem;
 use App\Models\Insumo;
 use App\Models\Departamento;
 use App\Models\TipoInsumo;
+use App\Models\Notificacion;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -52,6 +53,7 @@ class SolicitudController extends Controller
             $solicitud = Solicitud::create([
                 'tipo_solicitud' => $request->tipo_solicitud,
                 'observaciones' => $request->observaciones,
+                'estado' => 'pendiente', // Asegurar que siempre sea pendiente
                 'user_id' => Auth::id(),
                 'departamento_id' => $request->departamento_id,
                 'tipo_insumo_id' => $request->tipo_insumo_id,
@@ -65,6 +67,51 @@ class SolicitudController extends Controller
                     'observaciones_item' => $item['observaciones_item'] ?? null,
                 ]);
             }
+
+            // Crear notificaciones para administradores
+            try {
+                // Buscar usuarios con rol Administrador
+                $adminsPorRol = \App\Models\User::role('Administrador')->get();
+                
+                // Buscar usuarios con permiso manage-requests o approve-requests
+                $adminsPorPermiso = \App\Models\User::permission(['manage-requests', 'approve-requests'])->get();
+                
+                // Combinar y eliminar duplicados
+                $administradores = $adminsPorRol->merge($adminsPorPermiso)->unique('run');
+                
+                // Si no hay administradores, notificar a todos los usuarios (fallback)
+                if ($administradores->isEmpty()) {
+                    \Illuminate\Support\Facades\Log::warning('No se encontraron administradores para notificar. Notificando a todos los usuarios.');
+                    $administradores = \App\Models\User::all();
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Creando notificaciones', [
+                    'solicitud_id' => $solicitud->id,
+                    'numero_solicitud' => $solicitud->numero_solicitud,
+                    'administradores_count' => $administradores->count()
+                ]);
+
+                foreach ($administradores as $admin) {
+                    Notificacion::create([
+                        'tipo' => 'solicitud',
+                        'titulo' => 'Nueva Solicitud de Insumos',
+                        'mensaje' => "Se ha creado una nueva solicitud #{$solicitud->numero_solicitud} por " . Auth::user()->nombre,
+                        'user_id' => $admin->run,
+                        'solicitud_id' => $solicitud->id,
+                    ]);
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Notificaciones creadas exitosamente', [
+                    'count' => $administradores->count()
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error al crear notificaciones', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // No fallar la creación de la solicitud si falla la notificación
+            }
+
             DB::commit();
             return redirect()->route('solicitudes.index')
                 ->with('success', 'Solicitud creada exitosamente.');
@@ -448,6 +495,7 @@ class SolicitudController extends Controller
             $solicitud = Solicitud::create([
                 'tipo_solicitud' => $request->tipo_solicitud,
                 'observaciones' => $request->observaciones,
+                'estado' => 'pendiente', // Asegurar que siempre sea pendiente
                 'user_id' => Auth::id(),
                 'departamento_id' => $request->departamento_id,
                 'tipo_insumo_id' => $request->tipo_insumo_id,
@@ -461,6 +509,50 @@ class SolicitudController extends Controller
                     'cantidad_solicitada' => $item['cantidad_solicitada'],
                     'observaciones_item' => $item['observaciones_item'] ?? null,
                 ]);
+            }
+
+            // Crear notificaciones para administradores
+            try {
+                // Buscar usuarios con rol Administrador
+                $adminsPorRol = \App\Models\User::role('Administrador')->get();
+                
+                // Buscar usuarios con permiso manage-requests o approve-requests
+                $adminsPorPermiso = \App\Models\User::permission(['manage-requests', 'approve-requests'])->get();
+                
+                // Combinar y eliminar duplicados
+                $administradores = $adminsPorRol->merge($adminsPorPermiso)->unique('run');
+                
+                // Si no hay administradores, notificar a todos los usuarios (fallback)
+                if ($administradores->isEmpty()) {
+                    \Illuminate\Support\Facades\Log::warning('No se encontraron administradores para notificar. Notificando a todos los usuarios.');
+                    $administradores = \App\Models\User::all();
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Creando notificaciones (API)', [
+                    'solicitud_id' => $solicitud->id,
+                    'numero_solicitud' => $solicitud->numero_solicitud,
+                    'administradores_count' => $administradores->count()
+                ]);
+
+                foreach ($administradores as $admin) {
+                    Notificacion::create([
+                        'tipo' => 'solicitud',
+                        'titulo' => 'Nueva Solicitud de Insumos',
+                        'mensaje' => "Se ha creado una nueva solicitud #{$solicitud->numero_solicitud} por " . Auth::user()->nombre,
+                        'user_id' => $admin->run,
+                        'solicitud_id' => $solicitud->id,
+                    ]);
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Notificaciones creadas exitosamente (API)', [
+                    'count' => $administradores->count()
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error al crear notificaciones (API)', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // No fallar la creación de la solicitud si falla la notificación
             }
 
             DB::commit();

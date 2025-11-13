@@ -29,7 +29,10 @@ new class extends Component { }; ?>
                 </div>
             </div>
 
-            <div class="hidden md:flex md:items-center">
+            <div class="hidden md:flex md:items-center md:space-x-4">
+                <!-- Notificaciones -->
+                <livewire:layout.notification-bell />
+                
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button

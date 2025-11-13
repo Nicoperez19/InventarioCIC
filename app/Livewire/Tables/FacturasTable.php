@@ -13,7 +13,7 @@ class FacturasTable extends Component
     {
         return view('livewire.tables.facturas-table', [
             'facturas' => Factura::where('run', Auth::user()->run)
-                ->with('proveedor')
+                ->with(['proveedor', 'user'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(10),
         ]);
@@ -23,5 +23,6 @@ class FacturasTable extends Component
         return 'vendor.livewire.tailwind';
     }
 }
+
 
 

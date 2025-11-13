@@ -311,6 +311,7 @@ class FacturaController extends Controller
             $ruta = $archivo->storeAs($carpetaFacturas, $nombreArchivo, 'public');
             $rutaCompleta = Storage::disk('public')->path($ruta);
 
+            $fechaEmision = null;
             $montoTotal = 0;
             $textoExtraido = null;
             $infoDebug = null;
@@ -321,6 +322,10 @@ class FacturaController extends Controller
                     $muestraTexto = mb_substr($textoExtraido, 0, 500);
                     $resultado = $this->extraerMontoTotal($textoExtraido);
                     $montoTotal = $resultado['monto'];
+                    
+                    // Extraer fecha de emisión
+                    $fechaEmision = $this->extraerFechaEmision($textoExtraido);
+                    
                     $infoDebug = "Muestra del texto extraído (primeros 500 caracteres): " . $muestraTexto . " | " . $resultado['debug'];
                 } else {
                     $infoDebug = "No se pudo extraer texto del archivo.";
@@ -341,7 +346,7 @@ class FacturaController extends Controller
                 'numero_factura' => $numeroFactura,
                 'proveedor_id' => $request->proveedor_id,
                 'monto_total' => $montoTotal,
-                'fecha_factura' => now(),
+                'fecha_factura' => $fechaEmision ?? now(),
                 'archivo_path' => $ruta,
                 'archivo_nombre' => $archivo->getClientOriginalName(),
                 'observaciones' => $request->observaciones ?? null,
@@ -679,6 +684,97 @@ class FacturaController extends Controller
 
         $monto = floatval($montoString);
         return $monto > 0 ? $monto : 0;
+    }
+
+    private function extraerFechaEmision(string $texto): ?\Carbon\Carbon
+    {
+        if (empty($texto)) {
+            return null;
+        }
+
+        // Nombres de meses en español
+        $meses = [
+            'enero' => 1, 'febrero' => 2, 'marzo' => 3, 'abril' => 4,
+            'mayo' => 5, 'junio' => 6, 'julio' => 7, 'agosto' => 8,
+            'septiembre' => 9, 'octubre' => 10, 'noviembre' => 11, 'diciembre' => 12
+        ];
+
+        // Patrones para buscar la fecha de emisión
+        $patrones = [
+            // Fecha Emisión: 22 Septiembre 2025
+            '/fecha\s+emisi[oó]n\s*:?\s*(\d{1,2})\s+([a-záéíóúñ]+)\s+(\d{4})/i',
+            // Fecha Emisión: 22/09/2025
+            '/fecha\s+emisi[oó]n\s*:?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/i',
+            // Fecha Emisión: 22-09-2025
+            '/fecha\s+emisi[oó]n\s*:?\s*(\d{1,2})-(\d{1,2})-(\d{4})/i',
+            // Fecha de Emisión: 22 Septiembre 2025
+            '/fecha\s+de\s+emisi[oó]n\s*:?\s*(\d{1,2})\s+([a-záéíóúñ]+)\s+(\d{4})/i',
+            // Emisión: 22 Septiembre 2025
+            '/emisi[oó]n\s*:?\s*(\d{1,2})\s+([a-záéíóúñ]+)\s+(\d{4})/i',
+            // Fecha: 22 Septiembre 2025
+            '/fecha\s*:?\s*(\d{1,2})\s+([a-záéíóúñ]+)\s+(\d{4})/i',
+        ];
+
+        foreach ($patrones as $patron) {
+            if (preg_match($patron, $texto, $matches)) {
+                try {
+                    // Si el patrón tiene formato con nombre de mes
+                    if (isset($matches[2]) && !is_numeric($matches[2])) {
+                        $dia = (int)$matches[1];
+                        $mesNombre = mb_strtolower(trim($matches[2]), 'UTF-8');
+                        $anio = (int)$matches[3];
+
+                        // Buscar el mes en el array
+                        $mes = null;
+                        foreach ($meses as $nombreMes => $numeroMes) {
+                            if (mb_stripos($mesNombre, $nombreMes) !== false || mb_stripos($nombreMes, $mesNombre) !== false) {
+                                $mes = $numeroMes;
+                                break;
+                            }
+                        }
+
+                        if ($mes && $dia >= 1 && $dia <= 31 && $anio >= 1900 && $anio <= 2100) {
+                            return \Carbon\Carbon::create($anio, $mes, $dia);
+                        }
+                    }
+                    // Si el patrón tiene formato numérico (DD/MM/YYYY o DD-MM-YYYY)
+                    elseif (isset($matches[2]) && is_numeric($matches[2])) {
+                        $dia = (int)$matches[1];
+                        $mes = (int)$matches[2];
+                        $anio = (int)$matches[3];
+
+                        if ($dia >= 1 && $dia <= 31 && $mes >= 1 && $mes <= 12 && $anio >= 1900 && $anio <= 2100) {
+                            return \Carbon\Carbon::create($anio, $mes, $dia);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+        }
+
+        // Si no se encontró con los patrones específicos, buscar fechas en formato común cerca de "emisión"
+        $lineas = explode("\n", $texto);
+        foreach ($lineas as $linea) {
+            if (preg_match('/emisi[oó]n/i', $linea)) {
+                // Buscar fecha en formato DD/MM/YYYY o DD-MM-YYYY en la misma línea o siguiente
+                if (preg_match('/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/', $linea, $matches)) {
+                    try {
+                        $dia = (int)$matches[1];
+                        $mes = (int)$matches[2];
+                        $anio = (int)$matches[3];
+                        
+                        if ($dia >= 1 && $dia <= 31 && $mes >= 1 && $mes <= 12 && $anio >= 1900 && $anio <= 2100) {
+                            return \Carbon\Carbon::create($anio, $mes, $dia);
+                        }
+                    } catch (\Exception $e) {
+                        continue;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
 }
