@@ -24,18 +24,10 @@
                     </p>
                 </div>
             </div>
-            <div class="flex-shrink-0 w-full sm:w-auto flex items-center space-x-3">
-                <button onclick="window.dispatchEvent(new CustomEvent('limpiar-solicitud'))" 
-                        class="inline-flex items-center justify-center w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400 transition-all duration-150 shadow-sm">
-                    <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                    <span class="sm:hidden">Limpiar</span>
-                    <span class="hidden sm:inline">Limpiar Solicitud</span>
-                </button>
+            <div class="flex-shrink-0 w-full sm:w-auto flex items-center justify-end space-x-3">
                 <button onclick="window.dispatchEvent(new CustomEvent('crear-solicitud'))" 
-                        class="inline-flex items-center justify-center w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-secondary-500 rounded-lg hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400 transition-all duration-150 shadow-sm">
-                    <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-5 py-2.5 text-sm font-semibold text-white bg-secondary-500 rounded-lg hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400 transition-all duration-150 shadow-md hover:shadow-lg">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                     <span class="sm:hidden">Crear</span>
@@ -45,26 +37,60 @@
         </div>
     </x-slot>
 
-    <div class="py-8">
-        <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
-            <!-- Mensaje explicativo breve sobre cómo hacer una solicitud -->
-            <div class="bg-gradient-to-r from-primary-50 to-primary-100 border-l-4 border-primary-500 rounded-lg shadow-sm p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-primary-900">
-                            Selecciona los insumos a pedir ingresando la cantidad deseada y luego haz clic en <strong>"Crear Solicitud"</strong>.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
+    <div class="py-8" id="solicitud-wrapper">
+        <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8" id="solicitud-container">
             <livewire:tables.solicitud-insumos-table />
         </div>
     </div>
+    
+    <script>
+        function updateContentMargin() {
+            const header = document.querySelector('header');
+            const container = document.getElementById('solicitud-container');
+            const panel = document.querySelector('[class*="fixed"][class*="lg:right-0"]');
+            
+            if (panel && window.innerWidth >= 1024) {
+                const marginRight = '24rem';
+                
+                // Ajustar header
+                if (header) {
+                    const headerContent = header.querySelector('.max-w-7xl');
+                    if (headerContent) {
+                        headerContent.style.marginRight = marginRight;
+                        headerContent.style.transition = 'margin-right 0.3s ease';
+                    }
+                }
+                
+                // Ajustar contenido principal
+                if (container) {
+                    container.style.marginRight = marginRight;
+                    container.style.transition = 'margin-right 0.3s ease';
+                }
+            } else {
+                // Restaurar valores por defecto
+                if (header) {
+                    const headerContent = header.querySelector('.max-w-7xl');
+                    if (headerContent) {
+                        headerContent.style.marginRight = '';
+                    }
+                }
+                
+                if (container) {
+                    container.style.marginRight = '';
+                }
+            }
+        }
+        
+        // Observar cambios en el DOM
+        const observer = new MutationObserver(updateContentMargin);
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        // Verificar al cargar y al redimensionar
+        window.addEventListener('load', updateContentMargin);
+        window.addEventListener('resize', updateContentMargin);
+        
+        // Verificar periódicamente (fallback)
+        setInterval(updateContentMargin, 500);
+    </script>
 </x-app-layout>
 
