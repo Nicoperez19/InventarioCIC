@@ -255,41 +255,37 @@ class SolicitudInsumosTable extends Component
                 ]);
             }
 
-            // Crear notificaciones para administradores
+            // Crear notificaciones solo para usuarios con permiso receive-notifications
             try {
-                // Buscar usuarios con rol Administrador
-                $adminsPorRol = \App\Models\User::role('Administrador')->get();
-                
-                // Buscar usuarios con permiso manage-requests o approve-requests
-                $adminsPorPermiso = \App\Models\User::permission(['manage-requests', 'approve-requests'])->get();
-                
-                // Combinar y eliminar duplicados
-                $administradores = $adminsPorRol->merge($adminsPorPermiso)->unique('run');
-                
-                // Si no hay administradores, notificar a todos los usuarios (fallback)
-                if ($administradores->isEmpty()) {
-                    \Illuminate\Support\Facades\Log::warning('No se encontraron administradores para notificar. Notificando a todos los usuarios.');
-                    $administradores = \App\Models\User::all();
-                }
+                // Buscar usuarios que pueden recibir notificaciones (tienen el permiso receive-notifications)
+                // y además tienen permiso para gestionar solicitudes
+                $usuariosNotificables = \App\Models\User::permission('receive-notifications')
+                    ->where(function($query) {
+                        $query->role('Administrador')
+                            ->orWhereHas('permissions', function($q) {
+                                $q->whereIn('name', ['manage-requests', 'approve-requests']);
+                            });
+                    })
+                    ->get();
                 
                 \Illuminate\Support\Facades\Log::info('Creando notificaciones (Livewire)', [
                     'solicitud_id' => $solicitud->id,
                     'numero_solicitud' => $solicitud->numero_solicitud,
-                    'administradores_count' => $administradores->count()
+                    'usuarios_notificables_count' => $usuariosNotificables->count()
                 ]);
 
-                foreach ($administradores as $admin) {
+                foreach ($usuariosNotificables as $usuario) {
                     Notificacion::create([
                         'tipo' => 'solicitud',
                         'titulo' => 'Nueva Solicitud de Insumos',
                         'mensaje' => "Se ha creado una nueva solicitud #{$solicitud->numero_solicitud} por " . $user->nombre,
-                        'user_id' => $admin->run,
+                        'user_id' => $usuario->run,
                         'solicitud_id' => $solicitud->id,
                     ]);
                 }
                 
                 \Illuminate\Support\Facades\Log::info('Notificaciones creadas exitosamente (Livewire)', [
-                    'count' => $administradores->count()
+                    'count' => $usuariosNotificables->count()
                 ]);
                 
                 // Disparar evento Livewire para actualizar notificaciones en tiempo real

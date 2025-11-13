@@ -106,7 +106,7 @@
                         <select id="id_depto" name="id_depto" required
                                 class="w-full px-3 py-2 transition-colors border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400">
                             <option value="">Seleccionar departamento</option>
-                            @foreach(\App\Models\Departamento::whereNull('deleted_at')->orderByName()->get() as $departamento)
+                            @foreach(\App\Models\Departamento::orderByName()->get() as $departamento)
                                 <option value="{{ $departamento->id_depto }}">{{ $departamento->nombre_depto }}</option>
                             @endforeach
                         </select>
@@ -334,7 +334,7 @@
                         <select id="edit-id_depto" name="id_depto" required
                                 class="w-full px-3 py-2 transition-colors border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400">
                             <option value="">Seleccionar departamento</option>
-                            @foreach(\App\Models\Departamento::whereNull('deleted_at')->orderByName()->get() as $departamento)
+                            @foreach(\App\Models\Departamento::orderByName()->get() as $departamento)
                                 <option value="{{ $departamento->id_depto }}">{{ $departamento->nombre_depto }}</option>
                             @endforeach
                         </select>
@@ -579,12 +579,41 @@
                     const submitButton = editForm.querySelector('button[type="submit"]');
                     const originalText = submitButton.innerHTML;
                     
+                    // Asegurar que todos los campos necesarios estén presentes
+                    const formDataObj = {
+                        run: formData.get('run'),
+                        nombre: formData.get('nombre'),
+                        correo: formData.get('correo'),
+                        id_depto: formData.get('id_depto'),
+                        contrasena: formData.get('contrasena') ? '***' : 'vacía'
+                    };
+                    console.log('Datos del formulario ANTES de enviar:', formDataObj);
+                    
+                    // Verificar que id_depto esté presente
+                    if (!formDataObj.id_depto || formDataObj.id_depto === '') {
+                        console.warn('⚠️ ADVERTENCIA: id_depto está vacío o no está presente');
+                        alert('Por favor, selecciona un departamento');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        return;
+                    }
+                    
                     // Si la contraseña está vacía, eliminarla del FormData
                     const contrasena = formData.get('contrasena');
                     if (!contrasena || contrasena.trim() === '') {
                         formData.delete('contrasena');
                         formData.delete('contrasena_confirmation');
                     }
+                    
+                    // Recopilar permisos seleccionados
+                    const permissions = [];
+                    document.querySelectorAll('.edit-permission-checkbox:checked').forEach(cb => {
+                        permissions.push(cb.value);
+                    });
+                    formData.delete('permissions[]'); // Eliminar cualquier permiso previo
+                    permissions.forEach(perm => {
+                        formData.append('permissions[]', perm);
+                    });
                     
                     // Deshabilitar botón durante el envío
                     submitButton.disabled = true;
@@ -594,23 +623,80 @@
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
                                      formData.get('_token');
                     
+                    // Convertir FormData a objeto JSON
+                    const dataObj = {};
+                    for (let [key, value] of formData.entries()) {
+                        // Manejar arrays (como permissions[])
+                        if (key.endsWith('[]')) {
+                            const baseKey = key.replace('[]', '');
+                            if (!dataObj[baseKey]) {
+                                dataObj[baseKey] = [];
+                            }
+                            dataObj[baseKey].push(value);
+                        } else {
+                            dataObj[key] = value;
+                        }
+                    }
+                    
+                    console.log('Datos a enviar:', dataObj);
+                    
                     fetch(`/users/${run}`, {
                         method: 'PUT',
                         headers: {
                             'X-CSRF-TOKEN': csrfToken,
                             'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
                         },
-                        body: formData
+                        body: JSON.stringify(dataObj)
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw new Error(data.message || 'Error en la respuesta del servidor');
+                            });
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('Respuesta del servidor:', data);
                         if (data.success) {
                             // Cerrar modal
                             window.dispatchEvent(new CustomEvent('close-modal'));
                             
-                            // Recargar la página para mostrar los cambios
-                            window.location.reload();
+                            // Actualizar la tabla Livewire sin recargar toda la página
+                            if (window.Livewire) {
+                                // Buscar el componente Livewire de la tabla
+                                const livewireComponent = Livewire.find('tables.users-table');
+                                if (livewireComponent) {
+                                    livewireComponent.$wire.$refresh();
+                                }
+                            }
+                            
+                            // Mostrar mensaje de éxito visual
+                            const notification = document.createElement('div');
+                            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2 animate-fade-in';
+                            notification.style.cssText = 'animation: slideInRight 0.3s ease-out;';
+                            notification.innerHTML = `
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="font-medium">${data.message || 'Usuario actualizado exitosamente'}</span>
+                            `;
+                            document.body.appendChild(notification);
+                            
+                            // Remover la notificación después de 3 segundos
+                            setTimeout(() => {
+                                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                                setTimeout(() => {
+                                    notification.remove();
+                                }, 300);
+                            }, 3000);
+                            
+                            // Recargar la página después de mostrar la notificación
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
                         } else {
                             // Mostrar errores
                             let errorMessage = data.message || 'Error al actualizar el usuario';
@@ -666,12 +752,28 @@
                     if (data.success && data.data) {
                         const user = data.data;
                         
+                        console.log('Datos del usuario cargados:', {
+                            run: user.run,
+                            nombre: user.nombre,
+                            correo: user.correo,
+                            id_depto: user.id_depto,
+                            departamento: user.departamento
+                        });
+                        
                         // Llenar campos del formulario
                         document.getElementById('edit-user-run').value = user.run;
                         runInput.value = user.run;
                         nombreInput.value = user.nombre || '';
                         correoInput.value = user.correo || '';
-                        deptoSelect.value = user.id_depto || '';
+                        
+                        // Establecer departamento
+                        if (user.id_depto) {
+                            deptoSelect.value = user.id_depto;
+                            console.log('Departamento establecido:', user.id_depto);
+                        } else {
+                            console.warn('⚠️ Usuario no tiene departamento asignado');
+                            deptoSelect.value = '';
+                        }
                         
                         // Marcar permisos del usuario
                         if (user.permissions && user.permissions.length > 0) {

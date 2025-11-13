@@ -15,6 +15,9 @@ class Departamento extends Model
     protected $primaryKey = 'id_depto';
     public $incrementing = false;
     protected $keyType = 'string';
+    
+    // Asegurar que no se use soft deletes
+    // Si algún paquete o configuración intenta agregar deleted_at, lo ignoramos
     protected function casts(): array
     {
         return [

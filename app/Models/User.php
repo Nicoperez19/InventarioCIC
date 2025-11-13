@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
@@ -20,6 +21,22 @@ class User extends Authenticatable
         'contrasena',
         'id_depto',
     ];
+    
+    /**
+     * Obtener el nombre de la columna que se usa para el route model binding
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'run';
+    }
+    
+    /**
+     * Resolver el modelo desde la ruta usando el RUN
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('run', $value)->firstOrFail();
+    }
     protected $hidden = [
         'contrasena',
         'remember_token',
@@ -28,10 +45,19 @@ class User extends Authenticatable
     {
         return [
             'correo_verificado_at' => 'datetime',
-            'contrasena' => 'hashed',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+    
+    /**
+     * Hash de la contraseña al establecerla
+     */
+    public function setContrasenaAttribute($value)
+    {
+        if (!empty($value)) {
+            $this->attributes['contrasena'] = Hash::make($value);
+        }
     }
     public function departamento(): BelongsTo
     {

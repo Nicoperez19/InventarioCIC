@@ -32,6 +32,18 @@ class RolePermissionSeeder extends Seeder
             Permission::where('name', 'solicitar-insumos')->first(),
         ]);
 
+  
+        $permisoReceiveNotifications = Permission::where('name', 'receive-notifications')->first();
+        $permisoViewNotifications = Permission::where('name', 'view-notifications')->first();
+        
+        if ($permisoReceiveNotifications && !$roleAdmin->hasPermissionTo('receive-notifications')) {
+            $roleAdmin->givePermissionTo($permisoReceiveNotifications);
+        }
+        
+        if ($permisoViewNotifications && !$roleAdmin->hasPermissionTo('view-notifications')) {
+            $roleAdmin->givePermissionTo($permisoViewNotifications);
+        }
+
     }
 }
 
