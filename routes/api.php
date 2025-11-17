@@ -1,61 +1,106 @@
 <?php
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CargaMasivaController;
-use App\Http\Controllers\DepartamentoController;
-use App\Http\Controllers\FacturaController;
-use App\Http\Controllers\InsumoController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\ProveedorController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SolicitudController;
-use App\Http\Controllers\TipoInsumoController;
-use App\Http\Controllers\UnidadMedidaController;
-use App\Http\Controllers\UsersController;
+
+use App\Http\Controllers\Api\ApiAuthController;
+use App\Http\Controllers\Api\ApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+// ============================================
+// API DE AUTENTICACIÓN Y USUARIOS
+// ============================================
+Route::prefix('auth')->group(function () {
+    // Rutas públicas
+    Route::post('/login', [ApiAuthController::class, 'login'])->name('api.auth.login');
+    
+    // Rutas protegidas
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [ApiAuthController::class, 'logout'])->name('api.auth.logout');
+        Route::get('/me', [ApiAuthController::class, 'me'])->name('api.auth.me');
+        
+        // CRUD de usuarios
+        Route::get('/users', [ApiAuthController::class, 'users'])->name('api.auth.users.index');
+        Route::get('/users/{run}', [ApiAuthController::class, 'showUser'])->name('api.auth.users.show');
+        Route::post('/users', [ApiAuthController::class, 'createUser'])->name('api.auth.users.store');
+        Route::put('/users/{run}', [ApiAuthController::class, 'updateUser'])->name('api.auth.users.update');
+        Route::delete('/users/{run}', [ApiAuthController::class, 'deleteUser'])->name('api.auth.users.destroy');
+        
+        // Helpers para formularios de usuarios
+        Route::get('/departamentos', [ApiAuthController::class, 'getDepartamentos'])->name('api.auth.departamentos');
+        Route::get('/permissions', [ApiAuthController::class, 'getPermissions'])->name('api.auth.permissions');
+    });
+});
+
+// ============================================
+// API GENERAL (todos los demás recursos)
+// ============================================
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('users', UsersController::class)->names('api.users');
-    Route::get('users/departamentos', [UsersController::class, 'getDepartamentos'])->name('api.users.departamentos');
-    Route::get('users/permissions', [UsersController::class, 'getPermissions'])->name('api.users.permissions');
-    Route::apiResource('departamentos', DepartamentoController::class)->names('api.departamentos');
-    Route::apiResource('unidades-medida', UnidadMedidaController::class)->names('api.unidades-medida');
-    Route::apiResource('insumos', InsumoController::class)->names('api.insumos');
-    Route::post('insumos/{insumo}/adjust-stock', [InsumoController::class, 'adjustStock'])->name('api.insumos.adjust-stock');
-    Route::get('insumos/unidades-medida', [InsumoController::class, 'getUnidadesMedida'])->name('api.insumos.unidades-medida');
-    Route::get('insumos/low-stock', [InsumoController::class, 'getLowStock'])->name('api.insumos.low-stock');
-    Route::apiResource('proveedores', ProveedorController::class)->names('api.proveedores');
-    Route::get('proveedores/select', [ProveedorController::class, 'getProveedores'])->name('api.proveedores.select');
-    Route::apiResource('facturas', FacturaController::class)->names('api.facturas');
-    Route::get('facturas/{factura}/download', [FacturaController::class, 'download'])->name('api.facturas.download');
-    Route::get('facturas/proveedores', [FacturaController::class, 'getProveedores'])->name('api.facturas.proveedores');
-
-    // Rutas de Solicitudes
-    Route::get('solicitudes', [SolicitudController::class, 'apiIndex'])->name('api.solicitudes.index');
-    Route::get('solicitudes/{solicitud}', [SolicitudController::class, 'apiShow'])->name('api.solicitudes.show');
-    Route::post('solicitudes', [SolicitudController::class, 'apiStore'])->name('api.solicitudes.store');
-    Route::put('solicitudes/{solicitud}', [SolicitudController::class, 'apiUpdate'])->name('api.solicitudes.update');
-    Route::delete('solicitudes/{solicitud}', [SolicitudController::class, 'apiDestroy'])->name('api.solicitudes.destroy');
-    Route::post('solicitudes/{solicitud}/aprobar', [SolicitudController::class, 'apiAprobar'])->name('api.solicitudes.aprobar');
-    Route::post('solicitudes/{solicitud}/rechazar', [SolicitudController::class, 'apiRechazar'])->name('api.solicitudes.rechazar');
-    Route::post('solicitudes/{solicitud}/entregar', [SolicitudController::class, 'apiEntregar'])->name('api.solicitudes.entregar');
-    Route::get('solicitudes/insumos/get', [SolicitudController::class, 'apiGetInsumos'])->name('api.solicitudes.insumos.get');
-
-    // Rutas de Tipos de Insumo
-    Route::apiResource('tipo-insumos', TipoInsumoController::class)->names('api.tipo-insumos');
-    Route::get('tipo-insumos/get/all', [TipoInsumoController::class, 'getAll'])->name('api.tipo-insumos.all');
-
-    // Rutas de Carga Masiva
-    Route::post('carga-masiva/upload', [CargaMasivaController::class, 'apiUpload'])->name('api.carga-masiva.upload');
-    Route::get('carga-masiva/template', [CargaMasivaController::class, 'apiDownloadTemplate'])->name('api.carga-masiva.template');
-
-    // Rutas de Roles y Permisos (solo lectura para móvil)
-    Route::get('roles', [RoleController::class, 'apiIndex'])->name('api.roles.index');
-    Route::get('roles/{role}', [RoleController::class, 'apiShow'])->name('api.roles.show');
-    Route::get('permissions', [PermissionController::class, 'apiIndex'])->name('api.permissions.index');
-    Route::get('permissions/{permission}', [PermissionController::class, 'apiShow'])->name('api.permissions.show');
+    // Departamentos
+    Route::get('/departamentos', [ApiController::class, 'departamentos'])->name('api.departamentos.index');
+    Route::get('/departamentos/{id}', [ApiController::class, 'showDepartamento'])->name('api.departamentos.show');
+    Route::post('/departamentos', [ApiController::class, 'createDepartamento'])->name('api.departamentos.store');
+    Route::put('/departamentos/{id}', [ApiController::class, 'updateDepartamento'])->name('api.departamentos.update');
+    Route::delete('/departamentos/{id}', [ApiController::class, 'deleteDepartamento'])->name('api.departamentos.destroy');
+    
+    // Unidades de Medida
+    Route::get('/unidades-medida', [ApiController::class, 'unidades'])->name('api.unidades-medida.index');
+    Route::get('/unidades-medida/{id}', [ApiController::class, 'showUnidad'])->name('api.unidades-medida.show');
+    Route::post('/unidades-medida', [ApiController::class, 'createUnidad'])->name('api.unidades-medida.store');
+    Route::put('/unidades-medida/{id}', [ApiController::class, 'updateUnidad'])->name('api.unidades-medida.update');
+    Route::delete('/unidades-medida/{id}', [ApiController::class, 'deleteUnidad'])->name('api.unidades-medida.destroy');
+    
+    // Tipos de Insumo
+    Route::get('/tipo-insumos', [ApiController::class, 'tipoInsumos'])->name('api.tipo-insumos.index');
+    Route::get('/tipo-insumos/all', [ApiController::class, 'getAllTipoInsumos'])->name('api.tipo-insumos.all');
+    Route::get('/tipo-insumos/{id}', [ApiController::class, 'showTipoInsumo'])->name('api.tipo-insumos.show');
+    Route::post('/tipo-insumos', [ApiController::class, 'createTipoInsumo'])->name('api.tipo-insumos.store');
+    Route::put('/tipo-insumos/{id}', [ApiController::class, 'updateTipoInsumo'])->name('api.tipo-insumos.update');
+    Route::delete('/tipo-insumos/{id}', [ApiController::class, 'deleteTipoInsumo'])->name('api.tipo-insumos.destroy');
+    
+    // Insumos
+    Route::get('/insumos', [ApiController::class, 'insumos'])->name('api.insumos.index');
+    Route::get('/insumos/{id}', [ApiController::class, 'showInsumo'])->name('api.insumos.show');
+    Route::post('/insumos', [ApiController::class, 'createInsumo'])->name('api.insumos.store');
+    Route::put('/insumos/{id}', [ApiController::class, 'updateInsumo'])->name('api.insumos.update');
+    Route::delete('/insumos/{id}', [ApiController::class, 'deleteInsumo'])->name('api.insumos.destroy');
+    Route::post('/insumos/{id}/adjust-stock', [ApiController::class, 'adjustStock'])->name('api.insumos.adjust-stock');
+    Route::get('/insumos/unidades-medida', [ApiController::class, 'getUnidadesMedida'])->name('api.insumos.unidades-medida');
+    Route::get('/insumos/low-stock', [ApiController::class, 'getLowStock'])->name('api.insumos.low-stock');
+    
+    // Proveedores
+    Route::get('/proveedores', [ApiController::class, 'proveedores'])->name('api.proveedores.index');
+    Route::get('/proveedores/select', [ApiController::class, 'getProveedoresSelect'])->name('api.proveedores.select');
+    Route::get('/proveedores/{id}', [ApiController::class, 'showProveedor'])->name('api.proveedores.show');
+    Route::post('/proveedores', [ApiController::class, 'createProveedor'])->name('api.proveedores.store');
+    Route::put('/proveedores/{id}', [ApiController::class, 'updateProveedor'])->name('api.proveedores.update');
+    Route::delete('/proveedores/{id}', [ApiController::class, 'deleteProveedor'])->name('api.proveedores.destroy');
+    
+    // Facturas
+    Route::get('/facturas', [ApiController::class, 'facturas'])->name('api.facturas.index');
+    Route::get('/facturas/{id}', [ApiController::class, 'showFactura'])->name('api.facturas.show');
+    Route::post('/facturas', [ApiController::class, 'createFactura'])->name('api.facturas.store');
+    Route::put('/facturas/{id}', [ApiController::class, 'updateFactura'])->name('api.facturas.update');
+    Route::delete('/facturas/{id}', [ApiController::class, 'deleteFactura'])->name('api.facturas.destroy');
+    Route::get('/facturas/{id}/download', [ApiController::class, 'downloadFactura'])->name('api.facturas.download');
+    Route::get('/facturas/proveedores', [ApiController::class, 'getProveedoresForFacturas'])->name('api.facturas.proveedores');
+    
+    // Solicitudes
+    Route::get('/solicitudes', [ApiController::class, 'solicitudes'])->name('api.solicitudes.index');
+    Route::get('/solicitudes/{id}', [ApiController::class, 'showSolicitud'])->name('api.solicitudes.show');
+    Route::post('/solicitudes', [ApiController::class, 'createSolicitud'])->name('api.solicitudes.store');
+    Route::put('/solicitudes/{id}', [ApiController::class, 'updateSolicitud'])->name('api.solicitudes.update');
+    Route::delete('/solicitudes/{id}', [ApiController::class, 'deleteSolicitud'])->name('api.solicitudes.destroy');
+    Route::post('/solicitudes/{id}/aprobar', [ApiController::class, 'aprobarSolicitud'])->name('api.solicitudes.aprobar');
+    Route::post('/solicitudes/{id}/rechazar', [ApiController::class, 'rechazarSolicitud'])->name('api.solicitudes.rechazar');
+    Route::post('/solicitudes/{id}/entregar', [ApiController::class, 'entregarSolicitud'])->name('api.solicitudes.entregar');
+    Route::get('/solicitudes/insumos/get', [ApiController::class, 'getInsumosForSolicitudes'])->name('api.solicitudes.insumos.get');
+    
+    // Carga Masiva
+    Route::post('/carga-masiva/upload', [ApiController::class, 'cargaMasivaUpload'])->name('api.carga-masiva.upload');
+    Route::get('/carga-masiva/template', [ApiController::class, 'cargaMasivaTemplate'])->name('api.carga-masiva.template');
+    
+    // Roles y Permisos (solo lectura)
+    Route::get('/roles', [ApiController::class, 'roles'])->name('api.roles.index');
+    Route::get('/roles/{id}', [ApiController::class, 'showRole'])->name('api.roles.show');
+    Route::get('/permissions', [ApiController::class, 'permissions'])->name('api.permissions.index');
+    Route::get('/permissions/{id}', [ApiController::class, 'showPermission'])->name('api.permissions.show');
 });

@@ -66,12 +66,7 @@ class DepartamentoController extends Controller
                 'message' => 'Departamento obtenido exitosamente'
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error al obtener departamento', [
-                'departamento_id' => $departamento->id_depto ?? null,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
+        
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener departamento: ' . $e->getMessage()
