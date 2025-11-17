@@ -3,6 +3,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UserRoleSeeder extends Seeder
 {
@@ -13,11 +14,15 @@ class UserRoleSeeder extends Seeder
         $jefeRole = Role::where('name', 'jefe-departamento')->first();
         $auxiliarRole = Role::where('name', 'auxiliar')->first();
 
+        // Obtener todos los permisos en español
+        $allPermissions = Permission::all();
     
         // Asignar roles a usuarios principales
-        $admin = User::where('correo', 'admin@empresa.com')->first();
+        $admin = User::where('correo', 'admin@empresa.com')->orWhere('run', '11111111-1')->first();
         if ($admin) {
             $admin->assignRole($roleAdmin);
+            // Asignar directamente todos los permisos en español al administrador
+            $admin->syncPermissions($allPermissions);
         }
 
         $jefe = User::where('correo', 'jefe@empresa.com')->first();
@@ -34,6 +39,8 @@ class UserRoleSeeder extends Seeder
         $adminOld = User::where('correo', 'admin@ucsc.cl')->first();
         if ($adminOld) {
             $adminOld->assignRole($roleAdmin);
+            // Asignar directamente todos los permisos en español
+            $adminOld->syncPermissions($allPermissions);
         }
 
         $worker = User::where('correo', 'worker@ucsc.cl')->first();
@@ -44,5 +51,6 @@ class UserRoleSeeder extends Seeder
 
     }
 }
+
 
 

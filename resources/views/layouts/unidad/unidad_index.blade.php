@@ -192,9 +192,21 @@
                     submitButton.disabled = true;
                     submitButton.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Creando...';
                     
-                    // Crear token CSRF si no existe
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                     formData.get('_token');
+                    // Obtener token CSRF del meta tag (siempre actualizado)
+                    let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    
+                    // Si no hay token en el meta tag, intentar obtenerlo del formulario
+                    if (!csrfToken) {
+                        csrfToken = formData.get('_token');
+                    }
+                    
+                    // Si aún no hay token, mostrar error
+                    if (!csrfToken) {
+                        alert('Error: No se pudo obtener el token de seguridad. Por favor, recarga la página.');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        return;
+                    }
                     
                     fetch('{{ route("unidades.store") }}', {
                         method: 'POST',
@@ -205,32 +217,57 @@
                         },
                         body: formData
                     })
+                    .then(response => {
+                        // Si el token CSRF expiró (419), actualizar el token y reintentar
+                        if (response.status === 419) {
+                            const newToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            if (newToken) {
+                                return fetch('{{ route("unidades.store") }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': newToken,
+                                        'Accept': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    },
+                                    body: formData
+                                });
+                            } else {
+                                alert('La sesión expiró. Por favor, recarga la página.');
+                                window.location.reload();
+                                return Promise.reject(new Error('Sesión expirada'));
+                            }
+                        }
+                        return response;
+                    })
                     .then(response => response.json())
                     .then(data => {
+                        // SIEMPRE restaurar el botón primero
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        
                         if (data.success) {
-                            // Primero cerrar el modal
+                            // Cerrar modal
                             window.dispatchEvent(new CustomEvent('close-modal'));
                             
                             // Limpiar formulario
                             createForm.reset();
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = originalText;
                             
-                            // Esperar a que el modal se cierre completamente (animación dura ~300ms)
+                            // Actualizar tabla Livewire en lugar de recargar página
+                            if (window.Livewire) {
+                                const tableComponent = Livewire.find('tables.unidades-table');
+                                if (tableComponent) {
+                                    tableComponent.$wire.$refresh();
+                                }
+                            }
+                            
+                            // Mostrar notificación de éxito
                             setTimeout(() => {
-                                // Mostrar notificación de éxito después de cerrar el modal
                                 if (window.notifySuccess) {
                                     const nombre = data.data?.nombre_unidad_medida || 'unidad';
                                     window.notifySuccess(`Unidad "${nombre}" creada.`);
                                 }
-                                
-                                // Recargar la página para mostrar los cambios después de ver la notificación
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 2500);
                             }, 400);
                         } else {
-                            
                             let errorMessage = data.message || 'Error al crear la unidad';
                             if (data.errors) {
                                 const errorList = Object.values(data.errors).flat().join(', ');
@@ -242,23 +279,22 @@
                             } else {
                                 alert(errorMessage);
                             }
-                            
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = originalText;
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        const errorMsg = 'Error al crear la unidad. Por favor, intenta nuevamente.';
-                        
-                        if (window.notifyError) {
-                            window.notifyError(errorMsg);
-                        } else {
-                            alert(errorMsg);
-                        }
-                        
+                        // SIEMPRE restaurar el botón en caso de error
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
+                        
+                        if (error.message !== 'Sesión expirada') {
+                            const errorMsg = 'Error al crear la unidad. Por favor, intenta nuevamente.\n\n' + error.message;
+                            if (window.notifyError) {
+                                window.notifyError(errorMsg);
+                            } else {
+                                alert(errorMsg);
+                            }
+                        }
                     });
                 });
             }
@@ -288,9 +324,21 @@
                         return;
                     }
                     
-                    // Crear token CSRF
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                     formData.get('_token');
+                    // Obtener token CSRF del meta tag (siempre actualizado)
+                    let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    
+                    // Si no hay token en el meta tag, intentar obtenerlo del formulario
+                    if (!csrfToken) {
+                        csrfToken = formData.get('_token');
+                    }
+                    
+                    // Si aún no hay token, mostrar error
+                    if (!csrfToken) {
+                        alert('Error: No se pudo obtener el token de seguridad. Por favor, recarga la página.');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        return;
+                    }
                     
                     // Preparar datos para enviar
                     const updateData = {
@@ -311,19 +359,49 @@
                         },
                         body: JSON.stringify(updateData)
                     })
+                    .then(response => {
+                        // Si el token CSRF expiró (419), actualizar el token y reintentar
+                        if (response.status === 419) {
+                            const newToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            if (newToken) {
+                                return fetch(`/unidades/${encodeURIComponent(idUnidad)}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'X-CSRF-TOKEN': newToken,
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    },
+                                    body: JSON.stringify(updateData)
+                                });
+                            } else {
+                                alert('La sesión expiró. Por favor, recarga la página.');
+                                window.location.reload();
+                                return Promise.reject(new Error('Sesión expirada'));
+                            }
+                        }
+                        return response;
+                    })
                     .then(response => response.json())
                     .then(data => {
+                        // SIEMPRE restaurar el botón primero
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        
                         if (data.success) {
-                            // Primero cerrar el modal
+                            // Cerrar modal
                             window.dispatchEvent(new CustomEvent('close-modal'));
                             
-                            // Limpiar y restaurar botón
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = originalText;
+                            // Actualizar tabla Livewire en lugar de recargar página
+                            if (window.Livewire) {
+                                const tableComponent = Livewire.find('tables.unidades-table');
+                                if (tableComponent) {
+                                    tableComponent.$wire.$refresh();
+                                }
+                            }
                             
-                            // Esperar a que el modal se cierre completamente
+                            // Mostrar notificación de éxito
                             setTimeout(() => {
-                                // Mostrar notificación de éxito después de cerrar el modal
                                 if (window.notifySuccess) {
                                     const nombreAnterior = data.nombre_anterior || '';
                                     const nombreNuevo = data.nombre_nuevo || data.data?.nombre_unidad_medida || '';
@@ -337,11 +415,6 @@
                                     
                                     window.notifySuccess(mensaje);
                                 }
-                                
-                                // Recargar la página para mostrar los cambios después de ver la notificación
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 2500);
                             }, 400);
                         } else {
                             // Mostrar errores con notificación
@@ -356,23 +429,22 @@
                             } else {
                                 alert(errorMessage);
                             }
-                            
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = originalText;
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        const errorMsg = 'Error al actualizar la unidad. Por favor, intenta nuevamente.';
-                        
-                        if (window.notifyError) {
-                            window.notifyError(errorMsg);
-                        } else {
-                            alert(errorMsg);
-                        }
-                        
+                        // SIEMPRE restaurar el botón en caso de error
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
+                        
+                        if (error.message !== 'Sesión expirada') {
+                            const errorMsg = 'Error al actualizar la unidad. Por favor, intenta nuevamente.\n\n' + error.message;
+                            if (window.notifyError) {
+                                window.notifyError(errorMsg);
+                            } else {
+                                alert(errorMsg);
+                            }
+                        }
                     });
                 });
             }

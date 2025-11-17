@@ -18,8 +18,9 @@ class RolePermissionSeeder extends Seeder
             return;
         }
 
-        // Asignar TODOS los permisos al Administrador
-        $roleAdmin->syncPermissions(Permission::all());
+        // Asignar TODOS los permisos en español al Administrador
+        $allPermissions = Permission::all();
+        $roleAdmin->syncPermissions($allPermissions);
 
         // Permisos específicos para Jefe Departamento
         $jefeRole->syncPermissions([

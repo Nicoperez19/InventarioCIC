@@ -15,23 +15,19 @@ class PermissionSeeder extends Seeder
             // Ignorar errores si las columnas ya están modificadas
         }
 
-        // Crear todos los permisos
+        // Crear todos los permisos en español (basados en los can: de las rutas)
         $permissions = [
-            'manage-users', 'create-users', 'edit-users', 'delete-users', 'view-users',
-            'manage-inventory', 'create-products', 'edit-products', 'delete-products', 'view-products',
-            'manage-requests', 'view-requests', 'create-requests', 'approve-requests', 'reject-requests', 'deliver-requests',
-            'view-pending-requests',
-            'manage-departments', 'create-departments', 'edit-departments', 'delete-departments', 'view-departments',
-            'manage-units', 'create-units', 'edit-units', 'delete-units', 'view-units',
-            'manage-tipo-insumos', 'create-tipo-insumos', 'edit-tipo-insumos', 'delete-tipo-insumos', 'view-tipo-insumos',
-            'manage-insumos', 'create-insumos', 'edit-insumos', 'delete-insumos', 'view-insumos',
-            'manage-bulk-upload', 'create-bulk-upload', 'view-bulk-upload',
-            'manage-providers', 'create-providers', 'edit-providers', 'delete-providers', 'view-providers',
-            'manage-invoices', 'create-invoices', 'edit-invoices', 'delete-invoices', 'view-invoices', 'download-invoices',
-            'manage-roles', 'create-roles', 'edit-roles', 'delete-roles', 'view-roles',
-            'manage-permissions', 'create-permissions', 'edit-permissions', 'delete-permissions', 'view-permissions',
-            'solicitar-insumos', 'ver-solicitudes',
-            'receive-notifications', 'view-notifications',
+            // Permisos principales (los que están en los can: de las rutas)
+            'administrar-usuarios',
+            'administrar-departamentos',
+            'administrar-unidades',
+            'administrar-tipo-insumos',
+            'administrar-insumos',
+            'solicitar-insumos',
+            'administrar-roles',
+            'administrar-proveedores',
+            'administrar-facturas',
+            'administrar-solicitudes',
         ];
 
         foreach ($permissions as $name) {

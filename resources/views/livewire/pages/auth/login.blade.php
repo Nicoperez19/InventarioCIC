@@ -88,19 +88,71 @@ new #[Layout('layouts.guest')] class extends Component
 </div>
 
 <script>
+// Bandera para prevenir recursión infinita
+let isFormatting = false;
+
 function formatRun(input) {
-    let value = input.value.replace(/[^0-9kK]/g, '').toUpperCase();
-    
-    if (value.length <= 7) {
-        input.value = value;
-    } else if (value.length === 8) {
-        input.value = value.substring(0, 7) + '-' + value.substring(7, 8);
-    } else if (value.length === 9) {
-        input.value = value.substring(0, 8) + '-' + value.substring(8, 9);
-    } else {
-        input.value = value.substring(0, 8) + '-' + value.substring(8, 9);
+    // Si ya estamos formateando, salir para evitar recursión
+    if (isFormatting) {
+        return;
     }
     
-    input.dispatchEvent(new Event('input', { bubbles: true }));
+    // Marcar que estamos formateando
+    isFormatting = true;
+    
+    try {
+        // Guardar la posición del cursor
+        const cursorPosition = input.selectionStart;
+        const oldValue = input.value;
+        
+        // Limpiar y formatear el valor
+        let value = input.value.replace(/[^0-9kK]/g, '').toUpperCase();
+        
+        // Formatear según la longitud
+        let formattedValue;
+        if (value.length <= 7) {
+            formattedValue = value;
+        } else if (value.length === 8) {
+            formattedValue = value.substring(0, 7) + '-' + value.substring(7, 8);
+        } else if (value.length === 9) {
+            formattedValue = value.substring(0, 8) + '-' + value.substring(8, 9);
+        } else {
+            formattedValue = value.substring(0, 8) + '-' + value.substring(8, 9);
+        }
+        
+        // Solo actualizar si el valor cambió
+        if (formattedValue !== oldValue) {
+            input.value = formattedValue;
+            
+            // Ajustar la posición del cursor
+            const newCursorPosition = Math.min(cursorPosition, formattedValue.length);
+            input.setSelectionRange(newCursorPosition, newCursorPosition);
+            
+            // Notificar a Livewire del cambio
+            // Buscar el componente Livewire más cercano y actualizar el valor directamente
+            setTimeout(() => {
+                if (window.Livewire) {
+                    // Buscar el componente Livewire que contiene este input
+                    const wireId = input.closest('[wire\\:id]')?.getAttribute('wire:id');
+                    if (wireId) {
+                        const component = Livewire.find(wireId);
+                        if (component && component.$wire) {
+                            // Actualizar el valor directamente en Livewire
+                            component.$wire.set('form.run', formattedValue);
+                        }
+                    }
+                    
+                    // También disparar evento 'input' para que Livewire lo detecte
+                    // pero solo después de que se haya actualizado el valor
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }, 0);
+        }
+    } finally {
+        // Siempre liberar la bandera después de un breve delay para asegurar que termine el formateo
+        setTimeout(() => {
+            isFormatting = false;
+        }, 10);
+    }
 }
 </script>

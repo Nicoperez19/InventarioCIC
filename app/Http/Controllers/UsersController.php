@@ -250,14 +250,50 @@ class UsersController extends Controller
             
             // Sincronizar permisos si se proporcionan
             if ($request->has('permissions') && is_array($request->permissions)) {
+                // Sincronizar permisos en la base de datos
                 $user->syncPermissions($request->permissions);
+                
+                // LIMPIAR TODA LA CACHÉ DE PERMISOS - CRÍTICO
+                app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+                
+                // Limpiar caché específica del usuario
+                $user->forgetCachedPermissions();
+                \Illuminate\Support\Facades\Cache::forget("spatie.permission.cache.user.{$user->run}");
+                
+                // Si el usuario actualizado es el usuario autenticado, actualizar su sesión
+                if (Auth::check() && Auth::user()->run === $user->run) {
+                    // Recargar el usuario desde la BD con permisos frescos
+                    $freshUser = User::with(['permissions', 'roles'])
+                        ->where('run', $user->run)
+                        ->first();
+                    
+                    if ($freshUser) {
+                        // Actualizar la sesión con el usuario fresco
+                        // NO regenerar la sesión para evitar invalidar el token CSRF
+                        // Solo actualizar el usuario en la sesión actual
+                        Auth::setUser($freshUser);
+                        
+                        // Recargar las relaciones del usuario en la sesión
+                        $freshUser->load(['permissions', 'roles']);
+                        
+                        // La sesión se guarda automáticamente, no necesitamos hacer nada más
+                        // Esto preserva el token CSRF actual
+                    }
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Permisos actualizados', [
+                    'user_run' => $user->run,
+                    'permissions' => $request->permissions,
+                    'permissions_count' => count($request->permissions),
+                    'is_current_user' => Auth::check() && Auth::user()->run === $user->run
+                ]);
             }
             
             DB::commit();
             
             // Recargar el modelo con relaciones
             $user->refresh();
-            $user->load(['departamento', 'permissions']);
+            $user->load(['departamento', 'permissions', 'roles']);
             
             // Log de cambios realizados
             $cambios = [];

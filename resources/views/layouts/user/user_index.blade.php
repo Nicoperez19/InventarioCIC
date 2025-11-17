@@ -145,100 +145,61 @@
                 <div class="flex items-center mb-4 pb-3 border-b border-neutral-200">
                     <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-secondary-100">
                         <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                    </svg>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
                     </div>
                     <div class="ml-3">
-                        <h3 class="text-lg font-semibold text-gray-900">Permisos del Usuario</h3>
+                        <h3 class="text-lg font-semibold text-gray-900">Permisos en el Sistema</h3>
                         <p class="text-sm text-gray-500">Selecciona los permisos que tendrá el usuario</p>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto max-h-64 overflow-y-auto border border-gray-200 rounded-lg bg-secondary-50">
+                <div class="overflow-x-auto max-h-96 overflow-y-auto border border-gray-200 rounded-lg bg-white">
                     <table class="w-full border-collapse">
-                        <thead class="sticky top-0 bg-secondary-100 z-10">
-                            <tr class="bg-secondary-100">
-                                <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Módulo</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Ver</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Agregar</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Editar</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Eliminar</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Todas</th>
+                        <thead class="sticky top-0 bg-gray-100 z-10">
+                            <tr>
+                                <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b border-gray-300">#</th>
+                                <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b border-gray-300">Permiso</th>
+                                <th class="text-center p-2 text-xs font-semibold text-gray-700 border-b border-gray-300 w-20">Activo</th>
                             </tr>
                         </thead>
                         <tbody>
                             @php
-                                $permissions = \Spatie\Permission\Models\Permission::all();
-                                $groupedPermissions = [];
-                                
-                                // Agrupar permisos por módulo
-                                foreach($permissions as $permission) {
-                                    $parts = explode('.', $permission->name);
-                                    if(count($parts) >= 2) {
-                                        $module = $parts[0];
-                                        $action = $parts[1];
-                                        
-                                        if(!isset($groupedPermissions[$module])) {
-                                            $groupedPermissions[$module] = [];
-                                        }
-                                        
-                                        $groupedPermissions[$module][$action] = $permission;
-                                    }
-                                }
-                                
-                                // Traducir nombres de módulos
-                                $moduleTranslations = [
-                                    'usuarios' => 'Usuarios',
-                                    'departamentos' => 'Departamentos', 
-                                    'insumos' => 'Insumos',
-                                    'tipos_insumos' => 'Tipos de Insumos',
-                                    'unidades_medida' => 'Unidades de Medida',
-                                    'proveedores' => 'Proveedores',
-                                    'facturas' => 'Facturas',
-                                    'solicitudes' => 'Solicitudes',
-                                    'roles' => 'Roles',
-                                    'permisos' => 'Permisos',
-                                    'reportes' => 'Reportes'
+                                // Permisos principales basados en los can: de las rutas
+                                $mainPermissions = [
+                                    ['number' => '1', 'name' => 'Solicitar Insumos', 'permission' => 'solicitar-insumos'],
+                                    ['number' => '2', 'name' => 'Administrar Usuarios', 'permission' => 'administrar-usuarios'],
+                                    ['number' => '3', 'name' => 'Administrar Departamentos', 'permission' => 'administrar-departamentos'],
+                                    ['number' => '4', 'name' => 'Administrar Unidades', 'permission' => 'administrar-unidades'],
+                                    ['number' => '5', 'name' => 'Administrar Tipo de Insumos', 'permission' => 'administrar-tipo-insumos'],
+                                    ['number' => '6', 'name' => 'Administrar Insumos', 'permission' => 'administrar-insumos'],
+                                    ['number' => '7', 'name' => 'Administrar Roles', 'permission' => 'administrar-roles'],
+                                    ['number' => '8', 'name' => 'Administrar Proveedores', 'permission' => 'administrar-proveedores'],
+                                    ['number' => '9', 'name' => 'Administrar Facturas', 'permission' => 'administrar-facturas'],
+                                    ['number' => '10', 'name' => 'Administrar Solicitudes', 'permission' => 'administrar-solicitudes'],
                                 ];
                                 
-                                // Definir acciones en orden
-                                $actions = ['ver', 'crear', 'editar', 'eliminar'];
-                                $actionLabels = [
-                                    'ver' => 'Ver',
-                                    'crear' => 'Agregar',
-                                    'editar' => 'Editar', 
-                                    'eliminar' => 'Eliminar'
-                                ];
+                                $permissions = \Spatie\Permission\Models\Permission::orderBy('name')->get();
                             @endphp
                             
-                            @foreach($groupedPermissions as $moduleKey => $modulePermissions)
-                                <tr class="hover:bg-white transition-colors bg-secondary-50">
-                                    <td class="p-3 text-sm font-medium text-gray-800 border-b border-gray-200">
-                                        {{ $moduleTranslations[$moduleKey] ?? ucfirst($moduleKey) }}
-                                    </td>
-                                    
-                                    @foreach($actions as $action)
-                                        <td class="text-center p-3 border-b border-gray-200">
-                                            @if(isset($modulePermissions[$action]))
-                                                <input type="checkbox" 
-                                                       id="permission_{{ $modulePermissions[$action]->name }}" 
-                                                       name="permissions[]" 
-                                                       value="{{ $modulePermissions[$action]->name }}"
-                                                       class="permission-checkbox w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500"
-                                                       data-module="{{ $moduleKey }}">
-                                            @else
-                                                <span class="text-gray-300">-</span>
-                                            @endif
-                                        </td>
-                                    @endforeach
-                                    
-                                    <td class="text-center p-3 border-b border-gray-200">
+                            @foreach($mainPermissions as $item)
+                                @php
+                                    $permission = $permissions->firstWhere('name', $item['permission']);
+                                @endphp
+                                @if($permission)
+                                <tr class="hover:bg-gray-50 transition-colors bg-white">
+                                    <td class="p-3 text-sm text-gray-600 border-b border-gray-200">{{ $item['number'] }}</td>
+                                    <td class="p-3 text-sm font-medium text-gray-800 border-b border-gray-200">{{ $item['name'] }}</td>
+                                    <td class="text-center p-2 border-b border-gray-200">
                                         <input type="checkbox" 
-                                               class="module-select-all w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500"
-                                               data-module="{{ $moduleKey }}">
+                                               id="permission_{{ $permission->id }}" 
+                                               name="permissions[]" 
+                                               value="{{ $permission->name }}" 
+                                               class="permission-checkbox w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500">
                                     </td>
                                 </tr>
-                    @endforeach
+                                @endif
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -374,100 +335,61 @@
                 <div class="flex items-center mb-4 pb-3 border-b border-neutral-200">
                     <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-secondary-100">
                         <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                    </svg>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
                     </div>
                     <div class="ml-3">
-                        <h3 class="text-lg font-semibold text-gray-900">Permisos del Usuario</h3>
+                        <h3 class="text-lg font-semibold text-gray-900">Permisos en el Sistema</h3>
                         <p class="text-sm text-gray-500">Selecciona los permisos que tendrá el usuario</p>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto max-h-64 overflow-y-auto border border-gray-200 rounded-lg bg-secondary-50">
+                <div class="overflow-x-auto max-h-96 overflow-y-auto border border-gray-200 rounded-lg bg-white">
                     <table class="w-full border-collapse">
-                        <thead class="sticky top-0 bg-secondary-100 z-10">
-                            <tr class="bg-secondary-100">
-                                <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Módulo</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Ver</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Agregar</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Editar</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Eliminar</th>
-                                <th class="text-center p-3 text-sm font-semibold text-gray-700 border-b border-gray-200">Todas</th>
+                        <thead class="sticky top-0 bg-gray-100 z-10">
+                            <tr>
+                                <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b border-gray-300">#</th>
+                                <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b border-gray-300">Permiso</th>
+                                <th class="text-center p-2 text-xs font-semibold text-gray-700 border-b border-gray-300 w-20">Activo</th>
                             </tr>
                         </thead>
                         <tbody id="edit-permissions-body">
                             @php
-                                $permissions = \Spatie\Permission\Models\Permission::all();
-                                $groupedPermissions = [];
-                                
-                                // Agrupar permisos por módulo
-                                foreach($permissions as $permission) {
-                                    $parts = explode('.', $permission->name);
-                                    if(count($parts) >= 2) {
-                                        $module = $parts[0];
-                                        $action = $parts[1];
-                                        
-                                        if(!isset($groupedPermissions[$module])) {
-                                            $groupedPermissions[$module] = [];
-                                        }
-                                        
-                                        $groupedPermissions[$module][$action] = $permission;
-                                    }
-                                }
-                                
-                                // Traducir nombres de módulos
-                                $moduleTranslations = [
-                                    'usuarios' => 'Usuarios',
-                                    'departamentos' => 'Departamentos', 
-                                    'insumos' => 'Insumos',
-                                    'tipos_insumos' => 'Tipos de Insumos',
-                                    'unidades_medida' => 'Unidades de Medida',
-                                    'proveedores' => 'Proveedores',
-                                    'facturas' => 'Facturas',
-                                    'solicitudes' => 'Solicitudes',
-                                    'roles' => 'Roles',
-                                    'permisos' => 'Permisos',
-                                    'reportes' => 'Reportes'
+                                // Permisos principales basados en los can: de las rutas
+                                $mainPermissions = [
+                                    ['number' => '1', 'name' => 'Solicitar Insumos', 'permission' => 'solicitar-insumos'],
+                                    ['number' => '2', 'name' => 'Administrar Usuarios', 'permission' => 'administrar-usuarios'],
+                                    ['number' => '3', 'name' => 'Administrar Departamentos', 'permission' => 'administrar-departamentos'],
+                                    ['number' => '4', 'name' => 'Administrar Unidades', 'permission' => 'administrar-unidades'],
+                                    ['number' => '5', 'name' => 'Administrar Tipo de Insumos', 'permission' => 'administrar-tipo-insumos'],
+                                    ['number' => '6', 'name' => 'Administrar Insumos', 'permission' => 'administrar-insumos'],
+                                    ['number' => '7', 'name' => 'Administrar Roles', 'permission' => 'administrar-roles'],
+                                    ['number' => '8', 'name' => 'Administrar Proveedores', 'permission' => 'administrar-proveedores'],
+                                    ['number' => '9', 'name' => 'Administrar Facturas', 'permission' => 'administrar-facturas'],
+                                    ['number' => '10', 'name' => 'Administrar Solicitudes', 'permission' => 'administrar-solicitudes'],
                                 ];
                                 
-                                // Definir acciones en orden
-                                $actions = ['ver', 'crear', 'editar', 'eliminar'];
-                                $actionLabels = [
-                                    'ver' => 'Ver',
-                                    'crear' => 'Agregar',
-                                    'editar' => 'Editar', 
-                                    'eliminar' => 'Eliminar'
-                                ];
+                                $permissions = \Spatie\Permission\Models\Permission::orderBy('name')->get();
                             @endphp
                             
-                            @foreach($groupedPermissions as $moduleKey => $modulePermissions)
-                                <tr class="hover:bg-white transition-colors bg-secondary-50">
-                                    <td class="p-3 text-sm font-medium text-gray-800 border-b border-gray-200">
-                                        {{ $moduleTranslations[$moduleKey] ?? ucfirst($moduleKey) }}
-                                    </td>
-                                    
-                                    @foreach($actions as $action)
-                                        <td class="text-center p-3 border-b border-gray-200">
-                                            @if(isset($modulePermissions[$action]))
-                                                <input type="checkbox" 
-                                                       id="edit_permission_{{ $modulePermissions[$action]->name }}" 
-                                                       name="permissions[]" 
-                                                       value="{{ $modulePermissions[$action]->name }}"
-                                                       class="edit-permission-checkbox w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500"
-                                                       data-module="{{ $moduleKey }}">
-                                            @else
-                                                <span class="text-gray-300">-</span>
-                                            @endif
-                                        </td>
-                                    @endforeach
-                                    
-                                    <td class="text-center p-3 border-b border-gray-200">
+                            @foreach($mainPermissions as $item)
+                                @php
+                                    $permission = $permissions->firstWhere('name', $item['permission']);
+                                @endphp
+                                @if($permission)
+                                <tr class="hover:bg-gray-50 transition-colors bg-white">
+                                    <td class="p-3 text-sm text-gray-600 border-b border-gray-200">{{ $item['number'] }}</td>
+                                    <td class="p-3 text-sm font-medium text-gray-800 border-b border-gray-200">{{ $item['name'] }}</td>
+                                    <td class="text-center p-2 border-b border-gray-200">
                                         <input type="checkbox" 
-                                               class="edit-module-select-all w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500"
-                                               data-module="{{ $moduleKey }}">
+                                               id="edit_permission_{{ $permission->id }}" 
+                                               name="permissions[]" 
+                                               value="{{ $permission->name }}" 
+                                               class="edit-permission-checkbox w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500">
                                     </td>
                                 </tr>
-                    @endforeach
+                                @endif
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -619,9 +541,21 @@
                     submitButton.disabled = true;
                     submitButton.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Actualizando...';
                     
-                    // Crear token CSRF si no existe
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                     formData.get('_token');
+                    // Obtener token CSRF del meta tag (siempre actualizado)
+                    let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    
+                    // Si no hay token en el meta tag, intentar obtenerlo del formulario
+                    if (!csrfToken) {
+                        csrfToken = formData.get('_token');
+                    }
+                    
+                    // Si aún no hay token, mostrar error
+                    if (!csrfToken) {
+                        alert('Error: No se pudo obtener el token de seguridad. Por favor, recarga la página.');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        return;
+                    }
                     
                     // Convertir FormData a objeto JSON
                     const dataObj = {};
@@ -651,6 +585,40 @@
                         body: JSON.stringify(dataObj)
                     })
                     .then(response => {
+                        // Si el token CSRF expiró (419), actualizar el token y reintentar
+                        if (response.status === 419) {
+                            // Obtener el nuevo token del meta tag
+                            const newToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            if (newToken) {
+                                // Actualizar el token en el objeto de datos
+                                dataObj._token = newToken;
+                                
+                                // Reintentar la petición con el nuevo token
+                                return fetch(`/users/${run}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'X-CSRF-TOKEN': newToken,
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                    },
+                                    body: JSON.stringify(dataObj)
+                                }).then(retryResponse => {
+                                    if (!retryResponse.ok) {
+                                        return retryResponse.json().then(data => {
+                                            throw new Error(data.message || 'Error en la respuesta del servidor');
+                                        });
+                                    }
+                                    return retryResponse.json();
+                                });
+                            } else {
+                                // Si no hay token, recargar la página
+                                alert('La sesión expiró. Por favor, recarga la página.');
+                                window.location.reload();
+                                return Promise.reject(new Error('Sesión expirada'));
+                            }
+                        }
+                        
                         if (!response.ok) {
                             return response.json().then(data => {
                                 throw new Error(data.message || 'Error en la respuesta del servidor');
@@ -660,6 +628,11 @@
                     })
                     .then(data => {
                         console.log('Respuesta del servidor:', data);
+                        
+                        // SIEMPRE restaurar el botón primero, antes de cualquier otra operación
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        
                         if (data.success) {
                             // Cerrar modal
                             window.dispatchEvent(new CustomEvent('close-modal'));
@@ -671,6 +644,22 @@
                                 if (livewireComponent) {
                                     livewireComponent.$wire.$refresh();
                                 }
+                                
+                                // Forzar actualización del sidebar para que se re-evalúen los permisos
+                                const sidebarComponent = Livewire.find('layout.sidebar');
+                                if (sidebarComponent) {
+                                    // Limpiar caché de permisos y refrescar
+                                    sidebarComponent.$wire.$refresh();
+                                    // También disparar un evento personalizado para forzar actualización
+                                    window.dispatchEvent(new CustomEvent('permissions-updated'));
+                                }
+                                
+                                // También intentar actualizar todos los componentes Livewire
+                                Livewire.all().forEach(component => {
+                                    if (component.$wire) {
+                                        component.$wire.$refresh();
+                                    }
+                                });
                             }
                             
                             // Mostrar mensaje de éxito visual
@@ -693,10 +682,43 @@
                                 }, 300);
                             }, 3000);
                             
-                            // Recargar la página después de mostrar la notificación
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 500);
+                            // Verificar si el usuario editado es el usuario actual
+                            const currentUserRun = '{{ auth()->user()->run ?? "" }}';
+                            const editedUserRun = data.data?.run || run;
+                            const isCurrentUser = currentUserRun === editedUserRun;
+                            
+                            console.log('Permisos actualizados', {
+                                isCurrentUser: isCurrentUser,
+                                editedUser: editedUserRun
+                            });
+                            
+                            // Actualizar el sidebar de Livewire sin recargar la página
+                            if (window.Livewire) {
+                                const sidebarComponent = Livewire.find('layout.sidebar');
+                                if (sidebarComponent) {
+                                    // Forzar actualización completa del componente
+                                    sidebarComponent.$wire.$refresh();
+                                    
+                                    // Si es el usuario actual, también actualizar la sesión
+                                    if (isCurrentUser) {
+                                        // Disparar evento para que el sidebar recargue permisos
+                                        window.dispatchEvent(new CustomEvent('user-permissions-updated', {
+                                            detail: { run: editedUserRun }
+                                        }));
+                                    }
+                                }
+                                
+                                // Actualizar la tabla de usuarios también
+                                const usersTableComponent = Livewire.find('tables.users-table');
+                                if (usersTableComponent) {
+                                    usersTableComponent.$wire.$refresh();
+                                }
+                            }
+                            
+                            // NO recargar la página automáticamente
+                            // El sidebar se actualizará mediante Livewire sin necesidad de recargar
+                            // Esto evita problemas con tokens CSRF expirados
+                            console.log('Permisos actualizados. El sidebar se actualizará automáticamente.');
                         } else {
                             // Mostrar errores
                             let errorMessage = data.message || 'Error al actualizar el usuario';
@@ -705,15 +727,17 @@
                                 errorMessage += '\n\n' + errorList;
                             }
                             alert(errorMessage);
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = originalText;
+                            // El botón ya fue restaurado arriba
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Error al actualizar el usuario. Por favor, intenta nuevamente.');
+                        // SIEMPRE restaurar el botón en caso de error
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
+                        
+                        // Mostrar error al usuario
+                        alert('Error al actualizar el usuario. Por favor, intenta nuevamente.\n\n' + error.message);
                     });
                 });
             }
@@ -775,34 +799,96 @@
                             deptoSelect.value = '';
                         }
                         
-                        // Marcar permisos del usuario
-                        if (user.permissions && user.permissions.length > 0) {
-                            user.permissions.forEach(permission => {
-                                const checkbox = document.getElementById(`edit_permission_${permission.name}`);
-                                if (checkbox) {
+                        // Función para marcar permisos del usuario
+                        const markUserPermissions = () => {
+                            if (!user.permissions || user.permissions.length === 0) {
+                                console.log('El usuario no tiene permisos asignados');
+                                return;
+                            }
+                            
+                            console.log('=== MARCADO DE PERMISOS ===');
+                            console.log('Permisos del usuario:', user.permissions);
+                            
+                            // Extraer nombres de permisos (manejar diferentes formatos)
+                            const permissionNames = user.permissions.map(p => {
+                                if (typeof p === 'string') return p;
+                                if (p && p.name) return p.name;
+                                if (p && p.id) {
+                                    // Si solo tenemos el ID, buscar el checkbox por el nombre del permiso
+                                    // Necesitamos buscar todos los checkboxes y comparar valores
+                                    return null;
+                                }
+                                return null;
+                            }).filter(p => p !== null && p !== undefined);
+                            
+                            console.log('Nombres de permisos a marcar:', permissionNames);
+                            
+                            // Buscar todos los checkboxes de permisos
+                            const checkboxes = document.querySelectorAll('.edit-permission-checkbox');
+                            console.log('Checkboxes encontrados:', checkboxes.length);
+                            
+                            if (checkboxes.length === 0) {
+                                console.warn('⚠️ No hay checkboxes en el DOM aún');
+                                return false;
+                            }
+                            
+                            // Crear un Set para búsqueda rápida
+                            const permissionSet = new Set(permissionNames);
+                            
+                            let markedCount = 0;
+                            checkboxes.forEach(checkbox => {
+                                const checkboxValue = checkbox.value.trim();
+                                if (permissionSet.has(checkboxValue)) {
                                     checkbox.checked = true;
+                                    markedCount++;
+                                    console.log(`✓ Marcado: ${checkboxValue}`);
                                 }
                             });
                             
-                            // Actualizar estado de checkboxes "Todas"
-                            document.querySelectorAll('.edit-module-select-all').forEach(function(selectAllCheckbox) {
-                                const moduleName = selectAllCheckbox.dataset.module;
-                                const moduleCheckboxes = document.querySelectorAll(`.edit-permission-checkbox[data-module="${moduleName}"]`);
-                                const checkedCount = Array.from(moduleCheckboxes).filter(cb => cb.checked).length;
-                                const totalCount = moduleCheckboxes.length;
-                                
-                                if (checkedCount === 0) {
-                                    selectAllCheckbox.checked = false;
-                                    selectAllCheckbox.indeterminate = false;
-                                } else if (checkedCount === totalCount) {
-                                    selectAllCheckbox.checked = true;
-                                    selectAllCheckbox.indeterminate = false;
-                                } else {
-                                    selectAllCheckbox.checked = false;
-                                    selectAllCheckbox.indeterminate = true;
-                                }
+                            console.log(`✓ Total marcados: ${markedCount} de ${permissionNames.length}`);
+                            
+                            // Si no se marcó ninguno, mostrar debug
+                            if (markedCount === 0 && permissionNames.length > 0) {
+                                console.warn('⚠️ PROBLEMA: No se marcó ningún permiso');
+                                console.warn('Permisos esperados:', permissionNames);
+                                const sampleValues = Array.from(checkboxes).slice(0, 10).map(cb => cb.value);
+                                console.warn('Valores de checkboxes (primeros 10):', sampleValues);
+                            }
+                            
+                            return markedCount > 0;
+                        };
+                        
+                        // Usar MutationObserver para detectar cuando se agregan los checkboxes
+                        const observer = new MutationObserver(() => {
+                            const checkboxes = document.querySelectorAll('.edit-permission-checkbox');
+                            if (checkboxes.length > 0) {
+                                console.log('MutationObserver: Checkboxes detectados');
+                                markUserPermissions();
+                            }
+                        });
+                        
+                        // Observar el contenedor de permisos
+                        const permissionsBody = document.getElementById('edit-permissions-body');
+                        if (permissionsBody) {
+                            observer.observe(permissionsBody, {
+                                childList: true,
+                                subtree: true
                             });
                         }
+                        
+                        // Intentar marcar con diferentes delays
+                        const attempts = [0, 100, 300, 600, 1000];
+                        attempts.forEach(delay => {
+                            setTimeout(() => {
+                                const success = markUserPermissions();
+                                if (success && delay > 0) {
+                                    observer.disconnect();
+                                }
+                            }, delay);
+                        });
+                        
+                        // Desconectar observer después de 2 segundos
+                        setTimeout(() => observer.disconnect(), 2000);
                     } else {
                         alert('Error al cargar los datos del usuario');
                         window.dispatchEvent(new CustomEvent('close-modal'));
