@@ -25,34 +25,34 @@
         </div>
 
         <!-- Contenido de los filtros -->
-        <div class="p-4 space-y-4">
-            <!-- Primera fila: Búsqueda principal -->
-            <div>
-                <label class="block mb-2 text-sm font-medium text-neutral-700">
-                    <div class="flex items-center space-x-1">
-                        <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <span>Buscar</span>
-                    </div>
-                </label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                    <input 
-                        type="text" 
-                        wire:model.live="search" 
-                        placeholder="Buscar por nombre, código de barras o ID..." 
-                        class="block w-full pl-10 pr-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150"
-                    >
-                </div>
-            </div>
-
-            <!-- Segunda fila: Filtros principales -->
+        <div class="p-4">
+            <!-- Filtros alineados en una sola fila -->
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Búsqueda principal -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-neutral-700">
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span>Buscar</span>
+                        </div>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input 
+                            type="text" 
+                            wire:model.live="search" 
+                            placeholder="Nombre, código o ID..." 
+                            class="block w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150 text-sm"
+                        >
+                    </div>
+                </div>
+
                 <!-- Filtro por Unidad de Medida -->
                 <div>
                     <label class="block mb-2 text-sm font-medium text-neutral-700">
@@ -65,7 +65,7 @@
                     </label>
                     <select 
                         wire:model.live="unidadFilter" 
-                        class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150"
+                        class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150 text-sm"
                     >
                         <option value="">Todas las unidades</option>
                         @foreach($unidades as $unidad)
@@ -86,7 +86,7 @@
                     </label>
                     <select 
                         wire:model.live="stockFilter" 
-                        class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150"
+                        class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-150 text-sm"
                     >
                         <option value="">Todos los estados</option>
                         <option value="normal">Stock Normal</option>
@@ -114,12 +114,27 @@
                         </div>
                     </th>
                     <th class="w-3/12 px-3 py-4 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase sm:px-6">
-                        <div class="flex items-center pl-6 space-x-1">
+                        <button wire:click="sortBy('nombre_insumo')" class="flex items-center pl-6 space-x-1 hover:text-primary-600 transition-colors duration-150 cursor-pointer">
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                             </svg>
                             <span class="hidden sm:inline">Insumo</span>
-                        </div>
+                            @if($sortField === 'nombre_insumo')
+                                @if($sortDirection === 'asc')
+                                    <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                    </svg>
+                                @else
+                                    <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                @endif
+                            @else
+                                <svg class="w-4 h-4 text-gray-400 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                </svg>
+                            @endif
+                        </button>
                     </th>
                     <th class="w-2/12 px-3 py-4 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase sm:px-6">
                         <div class="flex items-center pl-6 space-x-1">
@@ -130,12 +145,27 @@
                         </div>
                     </th>
                     <th class="w-1/12 px-3 py-4 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase sm:px-6">
-                        <div class="flex items-center pl-6 space-x-1">
+                        <button wire:click="sortBy('stock_actual')" class="flex items-center pl-6 space-x-1 hover:text-primary-600 transition-colors duration-150 cursor-pointer">
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             <span class="hidden sm:inline">Stock</span>
-                        </div>
+                            @if($sortField === 'stock_actual')
+                                @if($sortDirection === 'asc')
+                                    <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                    </svg>
+                                @else
+                                    <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                @endif
+                            @else
+                                <svg class="w-4 h-4 text-gray-400 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                </svg>
+                            @endif
+                        </button>
                     </th>
                     <th class="w-2/12 px-3 py-4 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase sm:px-6">
                         <div class="flex items-center pl-6 space-x-1">
@@ -178,9 +208,19 @@
                         <!-- Stock Actual -->
                         <td class="w-1/12 px-3 py-4 sm:px-6 whitespace-nowrap">
                             <div class="pl-6 text-sm font-medium">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    {{ $insumo->stock_actual }}
-                                </span>
+                                @if($insumo->stock_actual <= 0)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        {{ $insumo->stock_actual }}
+                                    </span>
+                                @elseif($insumo->stock_actual <= ($insumo->stock_minimo ?? 0))
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        {{ $insumo->stock_actual }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        {{ $insumo->stock_actual }}
+                                    </span>
+                                @endif
                             </div>
                         </td>
                         

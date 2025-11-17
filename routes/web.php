@@ -5,6 +5,10 @@ use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\InsumoController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\Reportes\ReporteInsumosController;
+use App\Http\Controllers\Reportes\ReporteStockController;
+use App\Http\Controllers\Reportes\ReporteConsumoDepartamentoController;
+use App\Http\Controllers\Reportes\ReporteRotacionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\TipoInsumoController;
@@ -129,4 +133,34 @@ Route::middleware(['auth', 'can:administrar-solicitudes'])->group(function () {
     Route::get('/solicitudes/insumos/all', [SolicitudController::class, 'getAllInsumos'])->name('solicitudes.insumos.all');
     Route::get('/solicitudes/{solicitud}/export/excel', [SolicitudController::class, 'exportExcel'])->name('solicitudes.export.excel');
     Route::get('/solicitudes/{solicitud}/export/pdf', [SolicitudController::class, 'exportPdf'])->name('solicitudes.export.pdf');
+});
+// Módulo de Reportes
+Route::middleware(['auth'])->prefix('reportes')->name('reportes.')->group(function () {
+    // Reportes de Insumos
+    Route::prefix('insumos')->name('insumos.')->group(function () {
+        Route::get('/', [ReporteInsumosController::class, 'index'])->name('index');
+        Route::post('/exportar/excel', [ReporteInsumosController::class, 'exportarExcel'])->name('exportar.excel');
+        Route::post('/exportar/pdf', [ReporteInsumosController::class, 'exportarPdf'])->name('exportar.pdf');
+    });
+
+    // Reporte de Stock Crítico
+    Route::prefix('stock')->name('stock.')->group(function () {
+        Route::get('/', [ReporteStockController::class, 'index'])->name('index');
+        Route::post('/exportar/excel', [ReporteStockController::class, 'exportarExcel'])->name('exportar.excel');
+        Route::post('/exportar/pdf', [ReporteStockController::class, 'exportarPdf'])->name('exportar.pdf');
+    });
+
+    // Reporte de Consumo por Departamento
+    Route::prefix('consumo-departamento')->name('consumo-departamento.')->group(function () {
+        Route::get('/', [ReporteConsumoDepartamentoController::class, 'index'])->name('index');
+        Route::post('/exportar/excel', [ReporteConsumoDepartamentoController::class, 'exportarExcel'])->name('exportar.excel');
+        Route::post('/exportar/pdf', [ReporteConsumoDepartamentoController::class, 'exportarPdf'])->name('exportar.pdf');
+    });
+
+    // Reporte de Rotación de Inventario
+    Route::prefix('rotacion')->name('rotacion.')->group(function () {
+        Route::get('/', [ReporteRotacionController::class, 'index'])->name('index');
+        Route::post('/exportar/excel', [ReporteRotacionController::class, 'exportarExcel'])->name('exportar.excel');
+        Route::post('/exportar/pdf', [ReporteRotacionController::class, 'exportarPdf'])->name('exportar.pdf');
+    });
 });

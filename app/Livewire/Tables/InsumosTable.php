@@ -18,6 +18,8 @@ class InsumosTable extends Component
     public $tipoInsumoFilter = '';
     public $stockFilter = '';
     public $perPage = 10;
+    public $sortField = 'nombre_insumo';
+    public $sortDirection = 'asc';
 
     public function updatingSearch()
     {
@@ -43,6 +45,19 @@ class InsumosTable extends Component
 
     public function updatingPerPage()
     {
+        $this->resetPage();
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            // Si ya está ordenando por este campo, alternar la dirección
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Si es un campo nuevo, ordenar ascendente por defecto
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
         $this->resetPage();
     }
 
@@ -82,7 +97,8 @@ class InsumosTable extends Component
             };
         }
 
-        $insumos = $query->orderBy('nombre_insumo')->paginate($this->perPage);
+        // Aplicar ordenamiento
+        $insumos = $query->orderBy($this->sortField, $this->sortDirection)->paginate($this->perPage);
 
         // Filtrar unidades de medida según el tipo de insumo seleccionado
         $unidades = UnidadMedida::orderBy('nombre_unidad_medida');
