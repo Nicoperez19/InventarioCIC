@@ -2,59 +2,68 @@
 
 use Livewire\Volt\Component;
 use App\Models\TipoInsumo;
-use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 
 new class extends Component {
     public function with()
     {
-        // CRÍTICO: Limpiar caché y forzar recarga de permisos desde BD
-        $permissions = [];
-        
-        if (auth()->check()) {
-            // Limpiar TODA la caché de permisos
+        // Asegurar que el usuario esté disponible y sus permisos cargados
+        $user = Auth::user();
+        if ($user) {
+            // Limpiar caché de permisos para asegurar que estén actualizados
+            $user->forgetCachedPermissions();
             app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-            
-            // Limpiar caché del usuario
-            Cache::forget("spatie.permission.cache.user." . auth()->user()->run);
-            
-            // Obtener usuario fresco desde BD (sin caché)
-            $freshUser = \App\Models\User::with(['permissions', 'roles'])
-                ->where('run', auth()->user()->run)
-                ->first();
-            
-            // Actualizar el usuario en la sesión con datos frescos
-            if ($freshUser) {
-                Auth::setUser($freshUser);
-                
-                // Verificar TODOS los permisos en tiempo de ejecución
-                $permissions = [
-                    'solicitar-insumos' => $freshUser->can('solicitar-insumos'),
-                    'administrar-usuarios' => $freshUser->can('administrar-usuarios'),
-                    'administrar-departamentos' => $freshUser->can('administrar-departamentos'),
-                    'administrar-unidades' => $freshUser->can('administrar-unidades'),
-                    'administrar-tipo-insumos' => $freshUser->can('administrar-tipo-insumos'),
-                    'administrar-insumos' => $freshUser->can('administrar-insumos'),
-                    'administrar-roles' => $freshUser->can('administrar-roles'),
-                    'administrar-proveedores' => $freshUser->can('administrar-proveedores'),
-                    'administrar-facturas' => $freshUser->can('administrar-facturas'),
-                    'administrar-solicitudes' => $freshUser->can('administrar-solicitudes'),
-                ];
-            }
+            // Recargar el usuario con permisos frescos
+            $user->refresh();
+            $user->load('permissions', 'roles');
         }
         
         return [
             'tiposInsumo' => TipoInsumo::orderBy('nombre_tipo')->get(),
-            'permissions' => $permissions,
+            'user' => $user,
         ];
     }
     
-    public function mount()
+    // Función helper para verificar permisos con prioridad a permisos directos
+    public function hasPermission($permission)
     {
-        // Limpiar caché al montar el componente
-        if (auth()->check()) {
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+        
+        // Obtener permisos directos
+        $directPermissions = $user->getDirectPermissions()->pluck('name')->toArray();
+        
+        // Si el permiso está asignado directamente, ese controla la visibilidad
+        if (in_array($permission, $directPermissions)) {
+            return true;
+        }
+        
+        // Si no está asignado directamente, verificar si lo tiene por rol
+        // Pero solo si NO tiene ningún permiso directo asignado (para evitar conflictos)
+        // Si tiene permisos directos, solo esos controlan
+        if (empty($directPermissions)) {
+            // Si no tiene permisos directos, usar los de roles
+            return $user->can($permission);
+        }
+        
+        // Si tiene permisos directos pero este no está en la lista, no mostrarlo
+        return false;
+    }
+    
+    // Escuchar evento de actualización de permisos y refrescar
+    #[On('user-permissions-updated')]
+    public function refreshPermissions()
+    {
+        // Limpiar caché de permisos
+        if (Auth::check()) {
+            Auth::user()->forgetCachedPermissions();
             app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         }
+        // Forzar refresco del componente para que los @can() se re-evalúen
+        $this->dispatch('$refresh');
     }
 }; ?>
 
@@ -84,8 +93,8 @@ new class extends Component {
         </div>
 
         <nav class="px-3 mt-6">
-
             <div class="space-y-2">
+                @if($this->hasPermission('dashboard'))
                 <a href="{{ route('dashboard') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('dashboard') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.dashboard class="flex-shrink-0 w-5 h-5" />
@@ -94,8 +103,9 @@ new class extends Component {
                         Dashboard
                     </span>
                 </a>
+                @endif
 
-                @if($permissions['solicitar-insumos'] ?? false)
+                @if($this->hasPermission('solicitudes'))
                 <a href="{{ route('solicitudes') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('solicitudes') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <svg class="flex-shrink-0 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +118,7 @@ new class extends Component {
                 </a>
                 @endif
 
-                @if($permissions['administrar-usuarios'] ?? false)
+                @if($this->hasPermission('mantenedor de usuarios'))
                 <a href="{{ route('users') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('users') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.users class="flex-shrink-0 w-5 h-5" />
@@ -119,7 +129,7 @@ new class extends Component {
                 </a>
                 @endif
 
-                @if($permissions['administrar-departamentos'] ?? false)
+                @if($this->hasPermission('mantenedor de departamentos'))
                 <a href="{{ route('departamentos') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('departamentos') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.building class="flex-shrink-0 w-5 h-5" />
@@ -130,7 +140,7 @@ new class extends Component {
                 </a>
                 @endif
 
-                @if($permissions['administrar-unidades'] ?? false)
+                @if($this->hasPermission('mantenedor de unidades'))
                 <a href="{{ route('unidades') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('unidades') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.cube class="flex-shrink-0 w-5 h-5" />
@@ -139,11 +149,10 @@ new class extends Component {
                         Unidades
                     </span>
                 </a>
-                @endif
+                @endcan
 
-
-                @if($permissions['administrar-insumos'] ?? false)
                 <!-- Menú desplegable de Insumos -->
+                @if($this->hasPermission('insumos'))
                 <div x-data="{ insumosOpen: {{ request()->routeIs('insumos.*') || request()->routeIs('tipo-insumos.*') || request()->get('tipoInsumoFilter') ? 'true' : 'false' }} }">
                     <!-- Botón principal de Insumos -->
                     <button type="button" @click="insumosOpen = !insumosOpen"
@@ -169,7 +178,6 @@ new class extends Component {
                         x-transition:leave="transition ease-in duration-75"
                         x-transition:leave-start="transform opacity-100 scale-100"
                         x-transition:leave-end="transform opacity-0 scale-95" class="mt-2 ml-6 space-y-1">
-                        @if($permissions['administrar-insumos'] ?? false)
                         <!-- Todos los Insumos -->
                         <a href="{{ route('insumos.index') }}"
                             class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('insumos.index') && !request()->get('tipoInsumoFilter') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
@@ -179,9 +187,7 @@ new class extends Component {
                                 Todos los Insumos
                             </span>
                         </a>
-                        @endif
 
-                        @if($permissions['administrar-insumos'] ?? false)
                         <!-- Tipos de Insumo Dinámicos -->
                         @foreach($tiposInsumo as $tipo)
                         <a href="{{ route('insumos.index', ['tipoInsumoFilter' => $tipo->id]) }}"
@@ -197,10 +203,9 @@ new class extends Component {
                             </span>
                         </a>
                         @endforeach
-                        @endif
 
-                        @if($permissions['administrar-tipo-insumos'] ?? false)
                         <!-- Gestión de Tipos de Insumo -->
+                        @if($this->hasPermission('mantenedor de tipos de insumo'))
                         <a href="{{ route('tipo-insumos.index') }}"
                             class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('tipo-insumos.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                             <svg class="flex-shrink-0 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,8 +225,7 @@ new class extends Component {
                 </div>
                 @endif
 
-
-                @if($permissions['administrar-insumos'] ?? false)
+                @if($this->hasPermission('carga masiva'))
                 <a href="{{ route('carga-masiva.index') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('carga-masiva.index') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.upload class="flex-shrink-0 w-5 h-5" />
@@ -232,7 +236,7 @@ new class extends Component {
                 </a>
                 @endif
 
-                @if($permissions['administrar-proveedores'] ?? false)
+                @if($this->hasPermission('mantenedor de proveedores'))
                 <a href="{{ route('proveedores.index') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('proveedores.index') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.truck class="flex-shrink-0 w-5 h-5" />
@@ -243,7 +247,7 @@ new class extends Component {
                 </a>
                 @endif
 
-                @if($permissions['administrar-facturas'] ?? false)
+                @if($this->hasPermission('mantenedor de facturas'))
                 <a href="{{ route('facturas.index') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('facturas.index') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <x-icons.document class="flex-shrink-0 w-5 h-5" />
@@ -254,7 +258,7 @@ new class extends Component {
                 </a>
                 @endif
 
-                @if($permissions['administrar-solicitudes'] ?? false)
+                @if($this->hasPermission('admin solicitudes'))
                 <a href="{{ route('admin-solicitudes') }}"
                     class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('admin-solicitudes') ? 'bg-secondary-500 text-white shadow-lg transform scale-105' : 'text-primary-800 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                     <svg class="flex-shrink-0 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,6 +272,7 @@ new class extends Component {
                 @endif
 
                 <!-- Menú desplegable de Reportes -->
+                @if($this->hasPermission('reportes'))
                 <div x-data="{ reportesOpen: {{ request()->routeIs('reportes.*') ? 'true' : 'false' }} }">
                     <!-- Botón principal de Reportes -->
                     <button type="button" @click="reportesOpen = !reportesOpen"
@@ -297,6 +302,7 @@ new class extends Component {
                         x-transition:leave-end="transform opacity-0 scale-95" class="mt-2 ml-6 space-y-1">
                         
                         <!-- Reporte de Insumos -->
+                        @if($this->hasPermission('reportes insumos'))
                         <a href="{{ route('reportes.insumos.index') }}"
                             class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('reportes.insumos.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                             <svg class="flex-shrink-0 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,8 +313,10 @@ new class extends Component {
                                 Insumos
                             </span>
                         </a>
+                        @endif
 
                         <!-- Reporte de Stock Crítico -->
+                        @if($this->hasPermission('reportes stock'))
                         <a href="{{ route('reportes.stock.index') }}"
                             class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('reportes.stock.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                             <svg class="flex-shrink-0 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,8 +327,10 @@ new class extends Component {
                                 Stock Crítico
                             </span>
                         </a>
+                        @endif
 
                         <!-- Reporte de Consumo por Departamento -->
+                        @if($this->hasPermission('reportes consumo departamento'))
                         <a href="{{ route('reportes.consumo-departamento.index') }}"
                             class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('reportes.consumo-departamento.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                             <svg class="flex-shrink-0 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,8 +341,10 @@ new class extends Component {
                                 Consumo por Depto.
                             </span>
                         </a>
+                        @endif
 
                         <!-- Reporte de Rotación -->
+                        @if($this->hasPermission('reportes rotacion'))
                         <a href="{{ route('reportes.rotacion.index') }}"
                             class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 {{ request()->routeIs('reportes.rotacion.*') ? 'bg-secondary-500 text-white shadow-md transform scale-105' : 'text-primary-700 hover:bg-white/60 hover:text-primary-900 hover:shadow-sm hover:scale-105' }}">
                             <svg class="flex-shrink-0 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -343,9 +355,10 @@ new class extends Component {
                                 Rotación de Inventario
                             </span>
                         </a>
+                        @endif
                     </div>
                 </div>
-
+                @endif
             </div>
         </nav>
 
@@ -394,32 +407,3 @@ new class extends Component {
         </div>
     </aside>
 </div>
-
-<script>
-    // Escuchar eventos de actualización de permisos y forzar recarga del sidebar
-    document.addEventListener('permissions-updated', function() {
-        // Si hay un componente Livewire del sidebar, forzar su actualización
-        if (window.Livewire) {
-            const sidebarComponent = Livewire.find('layout.sidebar');
-            if (sidebarComponent) {
-                sidebarComponent.$wire.$refresh();
-            }
-        }
-    });
-    
-    // Escuchar cuando se actualiza el usuario actual
-    window.addEventListener('user-permissions-updated', function(event) {
-        console.log('Permisos del usuario actual actualizados', event.detail);
-        
-        // Actualizar el sidebar sin recargar la página
-        if (window.Livewire) {
-            const sidebarComponent = Livewire.find('layout.sidebar');
-            if (sidebarComponent) {
-                // Forzar actualización del componente
-                // Esto recargará los permisos desde la base de datos
-                sidebarComponent.$wire.$refresh();
-                console.log('Sidebar actualizado sin recargar la página');
-            }
-        }
-    });
-</script>

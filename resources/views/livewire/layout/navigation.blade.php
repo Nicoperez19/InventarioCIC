@@ -30,9 +30,9 @@ new class extends Component { }; ?>
             </div>
 
             <div class="hidden md:flex md:items-center md:space-x-4">
-                <!-- Notificaciones (solo si tiene permiso) -->
-                @can('view-notifications')
-                    <livewire:layout.notification-bell />
+                <!-- Notificaciones -->
+                @can('notificaciones')
+                <livewire:layout.notification-bell />
                 @endcan
                 
                 <x-dropdown align="right" width="48">

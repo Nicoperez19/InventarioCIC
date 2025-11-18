@@ -3,13 +3,11 @@ use App\Http\Controllers\CargaMasivaController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\InsumoController;
-use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\Reportes\ReporteInsumosController;
 use App\Http\Controllers\Reportes\ReporteStockController;
 use App\Http\Controllers\Reportes\ReporteConsumoDepartamentoController;
 use App\Http\Controllers\Reportes\ReporteRotacionController;
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\TipoInsumoController;
 use App\Http\Controllers\UnidadMedidaController;
@@ -30,15 +28,16 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('login');
     })->name('logout');
 });
-Route::middleware(['auth', 'can:administrar-usuarios'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('users', 'layouts.user.user_index')->name('users');
+    Route::get('/users/permissions', [UsersController::class, 'getPermissions'])->name('users.permissions');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
     Route::get('/users/{user}', [UsersController::class, 'show'])->name('users.show');
     Route::get('/users/{user}/edit', [UsersController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
 });
-Route::middleware(['auth', 'can:administrar-departamentos'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('departamentos', 'layouts.departamento.departamento_index')->name('departamentos');
     Route::get('/departamentos/create', [DepartamentoController::class, 'create'])->name('departamentos.create');
     Route::post('/departamentos', [DepartamentoController::class, 'store'])->name('departamentos.store');
@@ -47,7 +46,7 @@ Route::middleware(['auth', 'can:administrar-departamentos'])->group(function () 
     Route::put('/departamentos/{departamento}', [DepartamentoController::class, 'update'])->name('departamentos.update');
     Route::delete('/departamentos/{departamento}', [DepartamentoController::class, 'destroy'])->name('departamentos.destroy');
 });
-Route::middleware(['auth', 'can:administrar-unidades'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('unidades', 'layouts.unidad.unidad_index')->name('unidades');
     Route::get('/unidades/create', [UnidadMedidaController::class, 'create'])->name('unidades.create');
     Route::post('/unidades', [UnidadMedidaController::class, 'store'])->name('unidades.store');
@@ -56,7 +55,7 @@ Route::middleware(['auth', 'can:administrar-unidades'])->group(function () {
     Route::put('/unidades/{unidad}', [UnidadMedidaController::class, 'update'])->name('unidades.update');
     Route::delete('/unidades/{unidad}', [UnidadMedidaController::class, 'destroy'])->name('unidades.destroy');
 });
-Route::middleware(['auth', 'can:administrar-tipo-insumos'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('tipo-insumos', 'layouts.tipo_insumo.tipo_insumo_index')->name('tipo-insumos.index');
     Route::get('/tipo-insumos/create', [TipoInsumoController::class, 'create'])->name('tipo-insumos.create');
     Route::post('/tipo-insumos', [TipoInsumoController::class, 'store'])->name('tipo-insumos.store');
@@ -66,7 +65,7 @@ Route::middleware(['auth', 'can:administrar-tipo-insumos'])->group(function () {
     Route::delete('/tipo-insumos/{tipoInsumo}', [TipoInsumoController::class, 'destroy'])->name('tipo-insumos.destroy');
     Route::get('/tipo-insumos/{tipoInsumo}/pdf', [TipoInsumoController::class, 'generatePdf'])->name('tipo-insumos.pdf');
 });
-Route::middleware(['auth', 'can:administrar-insumos'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('insumos', 'layouts.insumo.insumo_index')->name('insumos.index');
     Route::get('/insumos/create', [InsumoController::class, 'create'])->name('insumos.create');
     Route::post('/insumos', [InsumoController::class, 'store'])->name('insumos.store');
@@ -81,23 +80,11 @@ Route::middleware(['auth', 'can:administrar-insumos'])->group(function () {
     Route::get('/carga-masiva/template', [CargaMasivaController::class, 'downloadTemplate'])->name('carga-masiva.template');
 });
 
-Route::middleware(['auth', 'can:solicitar-insumos'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('solicitudes', 'layouts.solicitud.solicitud_index')->name('solicitudes');
 });
 
-Route::middleware(['auth', 'can:administrar-roles'])->group(function () {
-    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-    Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
-    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-    Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
-    Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
-    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
-    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
-    Route::get('/permissions/{permission}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
-    Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
-    Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
-});
-Route::middleware(['auth', 'can:administrar-proveedores'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('proveedores', 'layouts.proveedor.proveedor_index')->name('proveedores.index');
     Route::get('/proveedores/create', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
@@ -106,7 +93,7 @@ Route::middleware(['auth', 'can:administrar-proveedores'])->group(function () {
     Route::put('/proveedores/{proveedor}', [ProveedorController::class, 'update'])->name('proveedores.update');
     Route::delete('/proveedores/{proveedor}', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
 });
-Route::middleware(['auth', 'can:administrar-facturas'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('facturas', 'layouts.factura.factura_index')->name('facturas.index');
     Route::get('/facturas/create', [FacturaController::class, 'create'])->name('facturas.create');
     Route::post('/facturas', [FacturaController::class, 'store'])->name('facturas.store');
@@ -118,7 +105,7 @@ Route::middleware(['auth', 'can:administrar-facturas'])->group(function () {
     Route::get('/facturas/{factura}/download', [FacturaController::class, 'download'])->name('facturas.download');
     Route::get('/facturas/{factura}/view', [FacturaController::class, 'view'])->name('facturas.view');
 });
-Route::middleware(['auth', 'can:administrar-solicitudes'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::view('admin-solicitudes', 'layouts.admin_solicitudes.admin_solicitudes_index')->name('admin-solicitudes');
     Route::get('/solicitudes/create', [SolicitudController::class, 'create'])->name('solicitudes.create');
     Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');

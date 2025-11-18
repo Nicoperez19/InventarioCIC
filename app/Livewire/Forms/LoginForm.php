@@ -48,11 +48,19 @@ class LoginForm extends Form
         ]);
         
         // Verificar credenciales manualmente
-        $passwordValid = \Illuminate\Support\Facades\Hash::check($this->password, $user->contrasena);
+        // Limpiar espacios en la contraseña
+        $cleanPassword = trim($this->password);
+        $passwordValid = \Illuminate\Support\Facades\Hash::check($cleanPassword, $user->contrasena);
         
         \Log::info('Verificación de contraseña', [
             'password_valid' => $passwordValid,
+            'password_provided' => $this->password,
             'password_provided_length' => strlen($this->password),
+            'password_clean' => $cleanPassword,
+            'password_clean_length' => strlen($cleanPassword),
+            'password_has_spaces' => $this->password !== $cleanPassword,
+            'hash_preview' => substr($user->contrasena, 0, 30),
+            'hash_length' => strlen($user->contrasena),
         ]);
         
         if (!$passwordValid) {

@@ -1,6 +1,9 @@
 <?php
+
 namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
+
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
@@ -11,14 +14,9 @@ class DatabaseSeeder extends Seeder
         $this->call(ProveedorSeeder::class);
         
         // 2. Crear sistema de permisos y roles
-        $this->call(PermissionSeeder::class);
         $this->call(RoleSeeder::class);
-        $this->call(RolePermissionSeeder::class);
         
-        // 3. Crear usuarios
+        // 3. Crear usuarios (los roles se asignan en UserSeeder)
         $this->call(UserSeeder::class);
-        
-        // 4. Asignar roles a usuarios
-        $this->call(UserRoleSeeder::class);
     }
 }

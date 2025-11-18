@@ -3,7 +3,6 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Departamento;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -13,7 +12,7 @@ class UserService
     {
         try {
             return DB::transaction(function () use ($data) {
-                $data['contrasena'] = Hash::make($data['contrasena']);
+                // No hashear aquí, el mutator setContrasenaAttribute del modelo se encarga
                 $user = User::create($data);
                 if (isset($data['permissions'])) {
                     $this->syncUserPermissions($user, $data['permissions']);
@@ -37,9 +36,8 @@ class UserService
     {
         try {
             return DB::transaction(function () use ($user, $data) {
-                if (!empty($data['contrasena'])) {
-                    $data['contrasena'] = Hash::make($data['contrasena']);
-                } else {
+                // No hashear aquí, el mutator setContrasenaAttribute del modelo se encarga
+                if (empty($data['contrasena'])) {
                     unset($data['contrasena']);
                 }
                 $user->update($data);
@@ -156,8 +154,9 @@ class UserService
     public function changePassword(User $user, string $newPassword): bool
     {
         try {
+            // No hashear aquí, el mutator setContrasenaAttribute del modelo se encarga
             $user->update([
-                'contrasena' => Hash::make($newPassword)
+                'contrasena' => $newPassword
             ]);
             Log::info('Contraseña cambiada exitosamente', [
                 'user_run' => $user->run,

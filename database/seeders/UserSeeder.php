@@ -1,63 +1,42 @@
 <?php
+
 namespace Database\Seeders;
-use App\Models\User;
+
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        // Crear usuarios principales (asumiendo que los departamentos ya existen)
-        $admin = User::firstOrCreate(
-            ['run' => '11111111-1'],
-            [
-                'nombre' => 'Administrador',
-                'correo' => 'admin@empresa.com',
-                'contrasena' => Hash::make('password123'),
-                'id_depto' => 'CIC_admin', // Usar departamento existente
-                'correo_verificado_at' => now(), // Marcar como verificado
-            ]
-        );
-        
-        // Asignar TODOS los permisos al administrador por defecto
-        $allPermissions = Permission::all();
-        if ($allPermissions->count() > 0) {
-            $admin->syncPermissions($allPermissions);
-        }
+        User::create([
+            'run' => '11111111-1',
+            'nombre' => 'Administrador',
+            'correo' => 'admin@ucsc.cl',
+            'contrasena' => 'password',
+            'id_depto' => 'CIC_admin',
+            'correo_verificado_at' => now(),
+        ])->assignRole('Administrador');
 
-        $jefe = User::firstOrCreate(
-            ['run' => '12345678-9'],
-            [
-                'nombre' => 'Jefe Departamento',
-                'correo' => 'jefe@empresa.com',
-                'contrasena' => Hash::make('password123'),
-                'id_depto' => 'CIC_info' // Usar departamento existente
-            ]
-        );
+        User::create([
+            'run' => '12345678-9',
+            'nombre' => 'Supervisor',
+            'correo' => 'supervisor@ucsc.cl',
+            'contrasena' => 'password',
+            'id_depto' => 'CIC_info',
+            'correo_verificado_at' => now(),
+        ])->assignRole('Supervisor');
 
-        $auxiliar = User::firstOrCreate(
-            ['run' => '87654321-0'],
-            [
-                'nombre' => 'Auxiliar',
-                'correo' => 'auxiliar@empresa.com',
-                'contrasena' => Hash::make('password123'),
-                'id_depto' => 'CIC_ofic' // Usar departamento existente
-            ]
-        );
-
-      
-        $worker = User::firstOrCreate(
-            ['run' => '98765432-1'],
-            [
-                'nombre' => 'Worker',
-                'correo' => 'worker@ucsc.cl',
-                'contrasena' => Hash::make('password'),
-                'id_depto' => 'CIC_info'
-            ]
-        );
-
-
+        User::create([
+            'run' => '98765432-1',
+            'nombre' => 'Usuario',
+            'correo' => 'usuario@ucsc.cl',
+            'contrasena' => 'password',
+            'id_depto' => 'CIC_info',
+            'correo_verificado_at' => now(),
+        ])->assignRole('Usuario');
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 class UsersController extends Controller
@@ -21,7 +20,7 @@ class UsersController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = User::with(['departamento', 'permissions'])
+            $query = User::with(['departamento'])
                 ->orderByName();
             if ($request->has('search')) {
                 $search = $request->get('search');
@@ -50,10 +49,33 @@ class UsersController extends Controller
     public function show(User $user): JsonResponse
     {
         try {
+            // Cargar relaciones incluyendo permisos de Spatie
             $user->load(['departamento', 'permissions', 'roles']);
+            
+            // IMPORTANTE: Para el modal de edición, mostrar SOLO los permisos DIRECTOS
+            // No incluir permisos de roles, porque solo podemos editar permisos directos
+            // Los permisos de roles se gestionan editando el rol, no el usuario
+            $directPermissions = $user->getDirectPermissions()->pluck('name')->toArray();
+            
+            \Illuminate\Support\Facades\Log::info('Obteniendo permisos del usuario para edición', [
+                'user_run' => $user->run,
+                'direct_permissions' => $directPermissions,
+                'direct_permissions_count' => count($directPermissions),
+                'all_permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+                'all_permissions_count' => $user->getAllPermissions()->count(),
+            ]);
+            
             return response()->json([
                 'success' => true,
-                'data' => $user,
+                'data' => [
+                    'run' => $user->run,
+                    'nombre' => $user->nombre,
+                    'correo' => $user->correo,
+                    'id_depto' => $user->id_depto,
+                    'departamento' => $user->departamento,
+                    // Solo permisos DIRECTOS para edición
+                    'permissions' => $directPermissions,
+                ],
                 'message' => 'Usuario obtenido exitosamente'
             ]);
         } catch (\Exception $e) {
@@ -72,8 +94,8 @@ class UsersController extends Controller
                 'correo' => 'required|email|unique:users,correo',
                 'contrasena' => 'required|string|min:8',
                 'id_depto' => 'required|exists:departamentos,id_depto',
-                'permissions' => 'array',
-                'permissions.*' => 'exists:permissions,name'
+                'permissions' => 'nullable|array',
+                'permissions.*' => 'exists:permissions,name',
             ]);
             if ($validator->fails()) {
                 return response()->json([
@@ -83,11 +105,15 @@ class UsersController extends Controller
                 ], 422);
             }
             $userData = $request->only(['run', 'nombre', 'correo', 'contrasena', 'id_depto']);
-            $userData['contrasena'] = Hash::make($userData['contrasena']);
+            // No hashear aquí, el mutator setContrasenaAttribute del modelo se encarga
             $user = User::create($userData);
-            if ($request->has('permissions')) {
+            
+            // Asignar permisos si se proporcionan (Spatie Permission)
+            if ($request->has('permissions') && is_array($request->permissions)) {
+                // syncPermissions acepta array de nombres de permisos
                 $user->syncPermissions($request->permissions);
             }
+            
             $user->load(['departamento', 'permissions']);
             return response()->json([
                 'success' => true,
@@ -127,8 +153,8 @@ class UsersController extends Controller
                 'correo' => 'sometimes|required|email|unique:users,correo,' . $user->run . ',run',
                 'contrasena' => 'nullable|string|min:8',
                 'id_depto' => 'sometimes|required|exists:departamentos,id_depto',
-                'permissions' => 'sometimes|array',
-                'permissions.*' => 'exists:permissions,name'
+                'permissions' => 'nullable|array',
+                'permissions.*' => 'exists:permissions,name',
             ]);
             
             if ($validator->fails()) {
@@ -221,11 +247,10 @@ class UsersController extends Controller
                             ->update($dirtyAttributes);
                     }
                     
-                    // Si había contraseña, actualizarla por separado
+                    // Si había contraseña, actualizarla usando el modelo para que el mutator la hashee
                     if ($request->has('contrasena') && !empty(trim($request->input('contrasena')))) {
-                        DB::table('users')
-                            ->where('run', $user->run)
-                            ->update(['contrasena' => Hash::make($request->input('contrasena'))]);
+                        $user->contrasena = $request->input('contrasena');
+                        $user->save();
                     }
                 }
                 
@@ -248,52 +273,96 @@ class UsersController extends Controller
                 ]);
             }
             
-            // Sincronizar permisos si se proporcionan
-            if ($request->has('permissions') && is_array($request->permissions)) {
-                // Sincronizar permisos en la base de datos
-                $user->syncPermissions($request->permissions);
+            // Actualizar permisos SIEMPRE (Spatie Permission)
+            // Si no se envía el campo permissions, mantener los permisos actuales
+            // Si se envía (incluso vacío), sincronizar con lo que se envió
+            $permissionsUpdated = false;
+            $isCurrentUser = Auth::check() && Auth::user()->run === $user->run;
+            
+            // Obtener permisos actuales antes de la actualización
+            $permissionsBefore = $user->getDirectPermissions()->pluck('name')->toArray();
+            
+            // Log de lo que se recibe
+            \Illuminate\Support\Facades\Log::info('Actualizando permisos del usuario', [
+                'user_run' => $user->run,
+                'has_permissions_key' => $request->has('permissions'),
+                'permissions_received' => $request->input('permissions'),
+                'permissions_is_array' => is_array($request->input('permissions')),
+                'permissions_count' => is_array($request->input('permissions')) ? count($request->input('permissions')) : 0,
+                'permissions_before' => $permissionsBefore,
+            ]);
+            
+            // SIEMPRE procesar permisos si se enviaron en la petición
+            if ($request->has('permissions')) {
+                $permissionsToSync = [];
                 
-                // LIMPIAR TODA LA CACHÉ DE PERMISOS - CRÍTICO
+                // Si es un array, usar ese array (puede estar vacío)
+                if (is_array($request->permissions)) {
+                    $permissionsToSync = $request->permissions;
+                } elseif ($request->permissions !== null) {
+                    // Si no es array pero tiene valor, convertirlo a array
+                    $permissionsToSync = [$request->permissions];
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Sincronizando permisos', [
+                    'user_run' => $user->run,
+                    'permissions_to_sync' => $permissionsToSync,
+                    'count' => count($permissionsToSync),
+                    'is_empty' => empty($permissionsToSync)
+                ]);
+                
+                // syncPermissions acepta array de nombres de permisos
+                // Si el array está vacío, se eliminarán todos los permisos directos (pero no los de roles)
+                $user->syncPermissions($permissionsToSync);
+                
+                // Recargar el usuario para obtener los permisos actualizados
+                $user->refresh();
+                $user->load('permissions');
+                
+                // Limpiar caché de permisos de Spatie
                 app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-                
-                // Limpiar caché específica del usuario
                 $user->forgetCachedPermissions();
-                \Illuminate\Support\Facades\Cache::forget("spatie.permission.cache.user.{$user->run}");
+                $permissionsUpdated = true;
                 
-                // Si el usuario actualizado es el usuario autenticado, actualizar su sesión
-                if (Auth::check() && Auth::user()->run === $user->run) {
-                    // Recargar el usuario desde la BD con permisos frescos
+                $permissionsAfter = $user->getDirectPermissions()->pluck('name')->toArray();
+                
+                \Illuminate\Support\Facades\Log::info('Permisos sincronizados exitosamente', [
+                    'user_run' => $user->run,
+                    'permissions_before' => $permissionsBefore,
+                    'permissions_after' => $permissionsAfter,
+                    'changed' => $permissionsBefore !== $permissionsAfter
+                ]);
+                
+                // Si es el usuario actual, actualizar la sesión para que los cambios se reflejen inmediatamente
+                if ($isCurrentUser) {
+                    // Limpiar todo el caché de permisos
+                    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+                    
+                    // Recargar el usuario con permisos frescos desde la base de datos
                     $freshUser = User::with(['permissions', 'roles'])
                         ->where('run', $user->run)
                         ->first();
-                    
                     if ($freshUser) {
-                        // Actualizar la sesión con el usuario fresco
-                        // NO regenerar la sesión para evitar invalidar el token CSRF
-                        // Solo actualizar el usuario en la sesión actual
+                        // Limpiar caché específico del usuario
+                        $freshUser->forgetCachedPermissions();
+                        
+                        // Actualizar el usuario en la sesión
                         Auth::setUser($freshUser);
                         
-                        // Recargar las relaciones del usuario en la sesión
-                        $freshUser->load(['permissions', 'roles']);
+                        // Regenerar sesión para asegurar que los cambios se reflejen
+                        request()->session()->regenerate(false);
                         
-                        // La sesión se guarda automáticamente, no necesitamos hacer nada más
-                        // Esto preserva el token CSRF actual
+                        // Limpiar caché de Laravel también
+                        \Illuminate\Support\Facades\Cache::forget("spatie.permission.cache.user.{$user->run}");
                     }
                 }
-                
-                \Illuminate\Support\Facades\Log::info('Permisos actualizados', [
-                    'user_run' => $user->run,
-                    'permissions' => $request->permissions,
-                    'permissions_count' => count($request->permissions),
-                    'is_current_user' => Auth::check() && Auth::user()->run === $user->run
-                ]);
             }
             
             DB::commit();
             
             // Recargar el modelo con relaciones
             $user->refresh();
-            $user->load(['departamento', 'permissions', 'roles']);
+            $user->load(['departamento', 'permissions']);
             
             // Log de cambios realizados
             $cambios = [];
@@ -313,12 +382,17 @@ class UsersController extends Controller
                 'usuario_actualizado_por' => Auth::id()
             ]);
             
-            return response()->json([
+            $response = response()->json([
                 'success' => true,
                 'data' => $user,
                 'message' => 'Usuario actualizado exitosamente',
-                'cambios' => $cambios
+                'cambios' => $cambios,
+                'is_current_user' => $isCurrentUser,
+                'permissions_updated' => $permissionsUpdated,
+                'session_updated' => $isCurrentUser && $permissionsUpdated
             ]);
+            
+            return $response;
             
         } catch (\Exception $e) {
             DB::rollBack();
@@ -368,6 +442,7 @@ class UsersController extends Controller
     public function getPermissions(): JsonResponse
     {
         try {
+            // Obtener todos los permisos usando Spatie Permission
             $permissions = Permission::orderBy('name')->get();
             return response()->json([
                 'success' => true,

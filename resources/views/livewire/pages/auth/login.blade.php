@@ -129,23 +129,13 @@ function formatRun(input) {
             input.setSelectionRange(newCursorPosition, newCursorPosition);
             
             // Notificar a Livewire del cambio
-            // Buscar el componente Livewire más cercano y actualizar el valor directamente
+            // Disparar evento 'input' para que Livewire detecte el cambio automáticamente
             setTimeout(() => {
-                if (window.Livewire) {
-                    // Buscar el componente Livewire que contiene este input
-                    const wireId = input.closest('[wire\\:id]')?.getAttribute('wire:id');
-                    if (wireId) {
-                        const component = Livewire.find(wireId);
-                        if (component && component.$wire) {
-                            // Actualizar el valor directamente en Livewire
-                            component.$wire.set('form.run', formattedValue);
-                        }
-                    }
-                    
-                    // También disparar evento 'input' para que Livewire lo detecte
-                    // pero solo después de que se haya actualizado el valor
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                }
+                // Disparar evento 'input' para que Livewire lo detecte
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                
+                // También disparar evento 'change' como respaldo
+                input.dispatchEvent(new Event('change', { bubbles: true }));
             }, 0);
         }
     } finally {

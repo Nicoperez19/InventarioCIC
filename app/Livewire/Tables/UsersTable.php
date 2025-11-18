@@ -47,7 +47,11 @@ class UsersTable extends Component
             $query->where('id_depto', $this->departamentoFilter);
         }
 
-        $users = $query->orderByName()->paginate($this->perPage);
+        // Cargar relaciones necesarias para el modal de edición
+        $users = $query->with([
+            'departamento:id_depto,nombre_depto',
+            'permissions:id,name'
+        ])->orderByName()->paginate($this->perPage);
 
         return view('livewire.tables.users-table', [
             'users' => $users,

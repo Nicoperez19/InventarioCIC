@@ -163,43 +163,13 @@
                                 <th class="text-center p-2 text-xs font-semibold text-gray-700 border-b border-gray-300 w-20">Activo</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @php
-                                // Permisos principales basados en los can: de las rutas
-                                $mainPermissions = [
-                                    ['number' => '1', 'name' => 'Solicitar Insumos', 'permission' => 'solicitar-insumos'],
-                                    ['number' => '2', 'name' => 'Administrar Usuarios', 'permission' => 'administrar-usuarios'],
-                                    ['number' => '3', 'name' => 'Administrar Departamentos', 'permission' => 'administrar-departamentos'],
-                                    ['number' => '4', 'name' => 'Administrar Unidades', 'permission' => 'administrar-unidades'],
-                                    ['number' => '5', 'name' => 'Administrar Tipo de Insumos', 'permission' => 'administrar-tipo-insumos'],
-                                    ['number' => '6', 'name' => 'Administrar Insumos', 'permission' => 'administrar-insumos'],
-                                    ['number' => '7', 'name' => 'Administrar Roles', 'permission' => 'administrar-roles'],
-                                    ['number' => '8', 'name' => 'Administrar Proveedores', 'permission' => 'administrar-proveedores'],
-                                    ['number' => '9', 'name' => 'Administrar Facturas', 'permission' => 'administrar-facturas'],
-                                    ['number' => '10', 'name' => 'Administrar Solicitudes', 'permission' => 'administrar-solicitudes'],
-                                ];
-                                
-                                $permissions = \Spatie\Permission\Models\Permission::orderBy('name')->get();
-                            @endphp
-                            
-                            @foreach($mainPermissions as $item)
-                                @php
-                                    $permission = $permissions->firstWhere('name', $item['permission']);
-                                @endphp
-                                @if($permission)
-                                <tr class="hover:bg-gray-50 transition-colors bg-white">
-                                    <td class="p-3 text-sm text-gray-600 border-b border-gray-200">{{ $item['number'] }}</td>
-                                    <td class="p-3 text-sm font-medium text-gray-800 border-b border-gray-200">{{ $item['name'] }}</td>
-                                    <td class="text-center p-2 border-b border-gray-200">
-                                        <input type="checkbox" 
-                                               id="permission_{{ $permission->id }}" 
-                                               name="permissions[]" 
-                                               value="{{ $permission->name }}" 
-                                               class="permission-checkbox w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500">
-                                    </td>
-                                </tr>
-                                @endif
-                            @endforeach
+                        <tbody id="create-permissions-body">
+                            <!-- Los permisos se cargarán dinámicamente -->
+                            <tr>
+                                <td colspan="3" class="p-4 text-center text-gray-500">
+                                    Cargando permisos...
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -354,42 +324,12 @@
                             </tr>
                         </thead>
                         <tbody id="edit-permissions-body">
-                            @php
-                                // Permisos principales basados en los can: de las rutas
-                                $mainPermissions = [
-                                    ['number' => '1', 'name' => 'Solicitar Insumos', 'permission' => 'solicitar-insumos'],
-                                    ['number' => '2', 'name' => 'Administrar Usuarios', 'permission' => 'administrar-usuarios'],
-                                    ['number' => '3', 'name' => 'Administrar Departamentos', 'permission' => 'administrar-departamentos'],
-                                    ['number' => '4', 'name' => 'Administrar Unidades', 'permission' => 'administrar-unidades'],
-                                    ['number' => '5', 'name' => 'Administrar Tipo de Insumos', 'permission' => 'administrar-tipo-insumos'],
-                                    ['number' => '6', 'name' => 'Administrar Insumos', 'permission' => 'administrar-insumos'],
-                                    ['number' => '7', 'name' => 'Administrar Roles', 'permission' => 'administrar-roles'],
-                                    ['number' => '8', 'name' => 'Administrar Proveedores', 'permission' => 'administrar-proveedores'],
-                                    ['number' => '9', 'name' => 'Administrar Facturas', 'permission' => 'administrar-facturas'],
-                                    ['number' => '10', 'name' => 'Administrar Solicitudes', 'permission' => 'administrar-solicitudes'],
-                                ];
-                                
-                                $permissions = \Spatie\Permission\Models\Permission::orderBy('name')->get();
-                            @endphp
-                            
-                            @foreach($mainPermissions as $item)
-                                @php
-                                    $permission = $permissions->firstWhere('name', $item['permission']);
-                                @endphp
-                                @if($permission)
-                                <tr class="hover:bg-gray-50 transition-colors bg-white">
-                                    <td class="p-3 text-sm text-gray-600 border-b border-gray-200">{{ $item['number'] }}</td>
-                                    <td class="p-3 text-sm font-medium text-gray-800 border-b border-gray-200">{{ $item['name'] }}</td>
-                                    <td class="text-center p-2 border-b border-gray-200">
-                                        <input type="checkbox" 
-                                               id="edit_permission_{{ $permission->id }}" 
-                                               name="permissions[]" 
-                                               value="{{ $permission->name }}" 
-                                               class="edit-permission-checkbox w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500">
-                                    </td>
-                                </tr>
-                                @endif
-                            @endforeach
+                            <!-- Los permisos se cargarán dinámicamente -->
+                            <tr>
+                                <td colspan="3" class="p-4 text-center text-gray-500">
+                                    Cargando permisos...
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -420,6 +360,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Cargar permisos al iniciar
+            loadPermissions();
+            
             // Funcionalidad para seleccionar/deseleccionar todos los permisos de un módulo
             document.querySelectorAll('.module-select-all').forEach(function(selectAllCheckbox) {
                 selectAllCheckbox.addEventListener('change', function() {
@@ -436,10 +379,14 @@
             document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
                 checkbox.addEventListener('change', function() {
                     const moduleName = this.dataset.module;
+                    if (!moduleName) return; // Si no tiene módulo, salir
+                    
                     const moduleCheckboxes = document.querySelectorAll(`.permission-checkbox[data-module="${moduleName}"]`);
                     const selectAllCheckbox = document.querySelector(`.module-select-all[data-module="${moduleName}"]`);
                     
-                    const checkedCount = Array.from(moduleCheckboxes).filter(cb => cb.checked).length;
+                    if (!selectAllCheckbox) return; // Si no existe el checkbox "select all", salir
+                    
+                    const checkedCount = Array.from(moduleCheckboxes).filter(cb => cb && cb.checked).length;
                     const totalCount = moduleCheckboxes.length;
                     
                     if (checkedCount === 0) {
@@ -471,10 +418,14 @@
             document.querySelectorAll('.edit-permission-checkbox').forEach(function(checkbox) {
                 checkbox.addEventListener('change', function() {
                     const moduleName = this.dataset.module;
+                    if (!moduleName) return; // Si no tiene módulo, salir
+                    
                     const moduleCheckboxes = document.querySelectorAll(`.edit-permission-checkbox[data-module="${moduleName}"]`);
                     const selectAllCheckbox = document.querySelector(`.edit-module-select-all[data-module="${moduleName}"]`);
                     
-                    const checkedCount = Array.from(moduleCheckboxes).filter(cb => cb.checked).length;
+                    if (!selectAllCheckbox) return; // Si no existe el checkbox "select all", salir
+                    
+                    const checkedCount = Array.from(moduleCheckboxes).filter(cb => cb && cb.checked).length;
                     const totalCount = moduleCheckboxes.length;
                     
                     if (checkedCount === 0) {
@@ -509,11 +460,8 @@
                         id_depto: formData.get('id_depto'),
                         contrasena: formData.get('contrasena') ? '***' : 'vacía'
                     };
-                    console.log('Datos del formulario ANTES de enviar:', formDataObj);
-                    
                     // Verificar que id_depto esté presente
                     if (!formDataObj.id_depto || formDataObj.id_depto === '') {
-                        console.warn('⚠️ ADVERTENCIA: id_depto está vacío o no está presente');
                         alert('Por favor, selecciona un departamento');
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
@@ -529,13 +477,42 @@
                     
                     // Recopilar permisos seleccionados
                     const permissions = [];
-                    document.querySelectorAll('.edit-permission-checkbox:checked').forEach(cb => {
-                        permissions.push(cb.value);
+                    const checkedCheckboxes = document.querySelectorAll('.edit-permission-checkbox:checked');
+                    const allCheckboxes = document.querySelectorAll('.edit-permission-checkbox');
+                    
+                    console.log('Recopilando permisos:', {
+                        totalCheckboxes: allCheckboxes.length,
+                        checkedCheckboxes: checkedCheckboxes.length,
+                        allCheckboxValues: Array.from(allCheckboxes).map(cb => ({ value: cb.value, checked: cb.checked }))
                     });
+                    
+                    checkedCheckboxes.forEach(cb => {
+                        if (cb && cb.value) {
+                            permissions.push(cb.value);
+                            console.log('Permiso agregado:', cb.value);
+                        }
+                    });
+                    
+                    console.log('Permisos a enviar:', permissions);
+                    
+                    // IMPORTANTE: Siempre enviar el campo permissions, incluso si está vacío
+                    // Esto permite al servidor saber que debe actualizar los permisos
                     formData.delete('permissions[]'); // Eliminar cualquier permiso previo
-                    permissions.forEach(perm => {
-                        formData.append('permissions[]', perm);
-                    });
+                    
+                    // Si no hay permisos seleccionados, enviar un array vacío explícitamente
+                    if (permissions.length === 0) {
+                        // Enviar un campo vacío para indicar que se deben eliminar todos los permisos directos
+                        formData.append('permissions', '[]');
+                        console.log('No hay permisos seleccionados, enviando array vacío');
+                    } else {
+                        permissions.forEach(perm => {
+                            formData.append('permissions[]', perm);
+                        });
+                    }
+                    
+                    // Verificar que los permisos se agregaron correctamente al FormData
+                    const formDataPermissions = formData.getAll('permissions[]');
+                    console.log('Permisos en FormData:', formDataPermissions);
                     
                     // Deshabilitar botón durante el envío
                     submitButton.disabled = true;
@@ -567,12 +544,29 @@
                                 dataObj[baseKey] = [];
                             }
                             dataObj[baseKey].push(value);
+                        } else if (key === 'permissions' && value === '[]') {
+                            // Si permissions es '[]', convertirlo a array vacío
+                            dataObj[key] = [];
                         } else {
                             dataObj[key] = value;
                         }
                     }
                     
-                    console.log('Datos a enviar:', dataObj);
+                    // Asegurar que permissions siempre esté presente como array
+                    if (!dataObj.hasOwnProperty('permissions')) {
+                        // Si no hay permissions[], usar los permisos recopilados
+                        dataObj.permissions = permissions;
+                    } else if (Array.isArray(dataObj.permissions) && dataObj.permissions.length === 0) {
+                        // Si permissions está vacío, mantenerlo como array vacío
+                        dataObj.permissions = [];
+                    }
+                    
+                    // Log del objeto final que se enviará
+                    console.log('Datos a enviar al servidor:', {
+                        ...dataObj,
+                        permissions: dataObj.permissions || [],
+                        permissions_count: Array.isArray(dataObj.permissions) ? dataObj.permissions.length : 0
+                    });
                     
                     fetch(`/users/${run}`, {
                         method: 'PUT',
@@ -627,9 +621,7 @@
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Respuesta del servidor:', data);
-                        
-                        // SIEMPRE restaurar el botón primero, antes de cualquier otra operación
+                        // SIEMPRE restaurar el botón primero
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
                         
@@ -637,35 +629,37 @@
                             // Cerrar modal
                             window.dispatchEvent(new CustomEvent('close-modal'));
                             
-                            // Actualizar la tabla Livewire sin recargar toda la página
+                            // Verificar si el usuario editado es el usuario actual
+                            const currentUserRun = '{{ auth()->user()->run ?? "" }}';
+                            const editedUserRun = data.data?.run || run;
+                            const isCurrentUser = data.is_current_user || false;
+                            const permissionsUpdated = data.permissions_updated || false;
+                            const sessionUpdated = data.session_updated || false;
+                            
+                            // Actualizar componentes Livewire
                             if (window.Livewire) {
-                                // Buscar el componente Livewire de la tabla
-                                const livewireComponent = Livewire.find('tables.users-table');
-                                if (livewireComponent) {
-                                    livewireComponent.$wire.$refresh();
+                                // Actualizar tabla de usuarios
+                                const usersTableComponent = Livewire.find('tables.users-table');
+                                if (usersTableComponent && usersTableComponent.$wire) {
+                                    usersTableComponent.$wire.$refresh();
                                 }
                                 
-                                // Forzar actualización del sidebar para que se re-evalúen los permisos
-                                const sidebarComponent = Livewire.find('layout.sidebar');
-                                if (sidebarComponent) {
-                                    // Limpiar caché de permisos y refrescar
-                                    sidebarComponent.$wire.$refresh();
-                                    // También disparar un evento personalizado para forzar actualización
-                                    window.dispatchEvent(new CustomEvent('permissions-updated'));
+                                // Si se actualizaron permisos y es el usuario actual, recargar la página para reflejar cambios
+                                if (permissionsUpdated && isCurrentUser) {
+                                    // Siempre recargar la página si se actualizaron permisos del usuario actual
+                                    // para asegurar que el sidebar se actualice correctamente
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 500);
+                                } else if (permissionsUpdated) {
+                                    // Si se actualizaron permisos de otro usuario, solo refrescar la tabla
+                                    // No es necesario recargar la página
                                 }
-                                
-                                // También intentar actualizar todos los componentes Livewire
-                                Livewire.all().forEach(component => {
-                                    if (component.$wire) {
-                                        component.$wire.$refresh();
-                                    }
-                                });
                             }
                             
-                            // Mostrar mensaje de éxito visual
+                            // Mostrar mensaje de éxito
                             const notification = document.createElement('div');
-                            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2 animate-fade-in';
-                            notification.style.cssText = 'animation: slideInRight 0.3s ease-out;';
+                            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2';
                             notification.innerHTML = `
                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -673,52 +667,7 @@
                                 <span class="font-medium">${data.message || 'Usuario actualizado exitosamente'}</span>
                             `;
                             document.body.appendChild(notification);
-                            
-                            // Remover la notificación después de 3 segundos
-                            setTimeout(() => {
-                                notification.style.animation = 'slideOutRight 0.3s ease-out';
-                                setTimeout(() => {
-                                    notification.remove();
-                                }, 300);
-                            }, 3000);
-                            
-                            // Verificar si el usuario editado es el usuario actual
-                            const currentUserRun = '{{ auth()->user()->run ?? "" }}';
-                            const editedUserRun = data.data?.run || run;
-                            const isCurrentUser = currentUserRun === editedUserRun;
-                            
-                            console.log('Permisos actualizados', {
-                                isCurrentUser: isCurrentUser,
-                                editedUser: editedUserRun
-                            });
-                            
-                            // Actualizar el sidebar de Livewire sin recargar la página
-                            if (window.Livewire) {
-                                const sidebarComponent = Livewire.find('layout.sidebar');
-                                if (sidebarComponent) {
-                                    // Forzar actualización completa del componente
-                                    sidebarComponent.$wire.$refresh();
-                                    
-                                    // Si es el usuario actual, también actualizar la sesión
-                                    if (isCurrentUser) {
-                                        // Disparar evento para que el sidebar recargue permisos
-                                        window.dispatchEvent(new CustomEvent('user-permissions-updated', {
-                                            detail: { run: editedUserRun }
-                                        }));
-                                    }
-                                }
-                                
-                                // Actualizar la tabla de usuarios también
-                                const usersTableComponent = Livewire.find('tables.users-table');
-                                if (usersTableComponent) {
-                                    usersTableComponent.$wire.$refresh();
-                                }
-                            }
-                            
-                            // NO recargar la página automáticamente
-                            // El sidebar se actualizará mediante Livewire sin necesidad de recargar
-                            // Esto evita problemas con tokens CSRF expirados
-                            console.log('Permisos actualizados. El sidebar se actualizará automáticamente.');
+                            setTimeout(() => notification.remove(), 3000);
                         } else {
                             // Mostrar errores
                             let errorMessage = data.message || 'Error al actualizar el usuario';
@@ -731,174 +680,197 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        // SIEMPRE restaurar el botón en caso de error
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
-                        
-                        // Mostrar error al usuario
                         alert('Error al actualizar el usuario. Por favor, intenta nuevamente.\n\n' + error.message);
                     });
                 });
             }
         });
+    </script>
 
-        // Función global para abrir el modal de editar
-        function openEditModal(run) {
-            // Mostrar indicador de carga
+    <script>
+        // Función global para abrir el modal de editar - datos directos desde el controlador
+        window.openEditModal = function(userData) {
+            // Los datos vienen directamente desde el controlador (tabla)
+            if (!userData || !userData.run) {
+                console.error('Datos de usuario no válidos');
+                return;
+            }
+            
+            // Limpiar formulario primero
             const runInput = document.getElementById('edit-run');
             const nombreInput = document.getElementById('edit-nombre');
             const correoInput = document.getElementById('edit-correo');
             const deptoSelect = document.getElementById('edit-id_depto');
-            
-            // Limpiar formulario
-            runInput.value = '';
-            nombreInput.value = '';
-            correoInput.value = '';
-            deptoSelect.value = '';
-            document.getElementById('edit-contrasena').value = '';
-            document.getElementById('edit-contrasena_confirmation').value = '';
-            
+
+            if (runInput) runInput.value = '';
+            if (nombreInput) nombreInput.value = '';
+            if (correoInput) correoInput.value = '';
+            if (deptoSelect) deptoSelect.value = '';
+
+            const contrasenaInput = document.getElementById('edit-contrasena');
+            const contrasenaConfInput = document.getElementById('edit-contrasena_confirmation');
+            if (contrasenaInput) contrasenaInput.value = '';
+            if (contrasenaConfInput) contrasenaConfInput.value = '';
+
             // Desmarcar todos los permisos
-            document.querySelectorAll('.edit-permission-checkbox').forEach(cb => cb.checked = false);
-            document.querySelectorAll('.edit-module-select-all').forEach(cb => {
-                cb.checked = false;
-                cb.indeterminate = false;
+            document.querySelectorAll('.edit-permission-checkbox').forEach(cb => {
+                if (cb) cb.checked = false;
             });
+            document.querySelectorAll('.edit-module-select-all').forEach(cb => {
+                if (cb) {
+                    cb.checked = false;
+                    cb.indeterminate = false;
+                }
+            });
+
+            // Llenar campos del formulario directamente con los datos del controlador
+            if (runInput) {
+                document.getElementById('edit-user-run').value = userData.run;
+                runInput.value = userData.run;
+            }
+            if (nombreInput) nombreInput.value = userData.nombre || '';
+            if (correoInput) correoInput.value = userData.correo || '';
+            
+            // Establecer departamento
+            if (userData.id_depto) {
+                if (deptoSelect) deptoSelect.value = userData.id_depto;
+            } else {
+                if (deptoSelect) deptoSelect.value = '';
+            }
             
             // Abrir modal
             window.dispatchEvent(new CustomEvent('open-modal', { detail: 'edit-user' }));
             
-            // Cargar datos del usuario
-            fetch(`/users/${run}`)
+            // Asegurar que los permisos estén cargados antes de marcarlos
+            const editPermissionsBody = document.getElementById('edit-permissions-body');
+            if (!editPermissionsBody || editPermissionsBody.children.length === 0) {
+                // Si no hay checkboxes renderizados, cargar permisos primero
+                loadPermissions();
+            }
+            
+            // Marcar permisos del usuario - esperar a que los checkboxes estén renderizados
+            const markPermissions = () => {
+                if (userData.permissions && Array.isArray(userData.permissions) && userData.permissions.length > 0) {
+                    const permissionSet = new Set(userData.permissions.map(p => String(p).trim()));
+                    const checkboxes = document.querySelectorAll('.edit-permission-checkbox');
+                    
+                    // Verificar que tenemos la cantidad correcta de checkboxes
+                    if (checkboxes.length === 0) {
+                        // Si no hay checkboxes aún, esperar un poco más
+                        setTimeout(markPermissions, 100);
+                        return;
+                    }
+                    
+                    let markedCount = 0;
+                    checkboxes.forEach(checkbox => {
+                        if (checkbox) {
+                            const checkboxValue = String(checkbox.value).trim();
+                            const shouldBeChecked = permissionSet.has(checkboxValue);
+                            
+                            // Forzar el cambio del estado del checkbox
+                            checkbox.checked = shouldBeChecked;
+                            
+                            // Disparar eventos para asegurar que se actualice visualmente
+                            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                            checkbox.dispatchEvent(new Event('input', { bubbles: true }));
+                            
+                            if (shouldBeChecked) {
+                                markedCount++;
+                            }
+                        }
+                    });
+                    
+                    // Actualizar estado de los checkboxes "select all" para cada módulo
+                    document.querySelectorAll('.edit-module-select-all').forEach(function(selectAllCheckbox) {
+                        if (!selectAllCheckbox) return;
+                        const moduleName = selectAllCheckbox.dataset.module;
+                        const moduleCheckboxes = document.querySelectorAll(`.edit-permission-checkbox[data-module="${moduleName}"]`);
+                        const checkedCount = Array.from(moduleCheckboxes).filter(cb => cb && cb.checked).length;
+                        const totalCount = moduleCheckboxes.length;
+                        
+                        if (checkedCount === 0) {
+                            selectAllCheckbox.indeterminate = false;
+                            selectAllCheckbox.checked = false;
+                        } else if (checkedCount === totalCount) {
+                            selectAllCheckbox.indeterminate = false;
+                            selectAllCheckbox.checked = true;
+                        } else {
+                            selectAllCheckbox.indeterminate = true;
+                            selectAllCheckbox.checked = false;
+                        }
+                    });
+                }
+            };
+            
+            // Intentar marcar permisos con múltiples intentos para asegurar que se marquen
+            markPermissions();
+            setTimeout(markPermissions, 200);
+            setTimeout(markPermissions, 500);
+        };
+
+        // Función para cargar permisos desde el servidor
+        function loadPermissions() {
+            fetch('/users/permissions')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data) {
-                        const user = data.data;
-                        
-                        console.log('Datos del usuario cargados:', {
-                            run: user.run,
-                            nombre: user.nombre,
-                            correo: user.correo,
-                            id_depto: user.id_depto,
-                            departamento: user.departamento
-                        });
-                        
-                        // Llenar campos del formulario
-                        document.getElementById('edit-user-run').value = user.run;
-                        runInput.value = user.run;
-                        nombreInput.value = user.nombre || '';
-                        correoInput.value = user.correo || '';
-                        
-                        // Establecer departamento
-                        if (user.id_depto) {
-                            deptoSelect.value = user.id_depto;
-                            console.log('Departamento establecido:', user.id_depto);
-                        } else {
-                            console.warn('⚠️ Usuario no tiene departamento asignado');
-                            deptoSelect.value = '';
-                        }
-                        
-                        // Función para marcar permisos del usuario
-                        const markUserPermissions = () => {
-                            if (!user.permissions || user.permissions.length === 0) {
-                                console.log('El usuario no tiene permisos asignados');
-                                return;
-                            }
-                            
-                            console.log('=== MARCADO DE PERMISOS ===');
-                            console.log('Permisos del usuario:', user.permissions);
-                            
-                            // Extraer nombres de permisos (manejar diferentes formatos)
-                            const permissionNames = user.permissions.map(p => {
-                                if (typeof p === 'string') return p;
-                                if (p && p.name) return p.name;
-                                if (p && p.id) {
-                                    // Si solo tenemos el ID, buscar el checkbox por el nombre del permiso
-                                    // Necesitamos buscar todos los checkboxes y comparar valores
-                                    return null;
-                                }
-                                return null;
-                            }).filter(p => p !== null && p !== undefined);
-                            
-                            console.log('Nombres de permisos a marcar:', permissionNames);
-                            
-                            // Buscar todos los checkboxes de permisos
-                            const checkboxes = document.querySelectorAll('.edit-permission-checkbox');
-                            console.log('Checkboxes encontrados:', checkboxes.length);
-                            
-                            if (checkboxes.length === 0) {
-                                console.warn('⚠️ No hay checkboxes en el DOM aún');
-                                return false;
-                            }
-                            
-                            // Crear un Set para búsqueda rápida
-                            const permissionSet = new Set(permissionNames);
-                            
-                            let markedCount = 0;
-                            checkboxes.forEach(checkbox => {
-                                const checkboxValue = checkbox.value.trim();
-                                if (permissionSet.has(checkboxValue)) {
-                                    checkbox.checked = true;
-                                    markedCount++;
-                                    console.log(`✓ Marcado: ${checkboxValue}`);
-                                }
-                            });
-                            
-                            console.log(`✓ Total marcados: ${markedCount} de ${permissionNames.length}`);
-                            
-                            // Si no se marcó ninguno, mostrar debug
-                            if (markedCount === 0 && permissionNames.length > 0) {
-                                console.warn('⚠️ PROBLEMA: No se marcó ningún permiso');
-                                console.warn('Permisos esperados:', permissionNames);
-                                const sampleValues = Array.from(checkboxes).slice(0, 10).map(cb => cb.value);
-                                console.warn('Valores de checkboxes (primeros 10):', sampleValues);
-                            }
-                            
-                            return markedCount > 0;
-                        };
-                        
-                        // Usar MutationObserver para detectar cuando se agregan los checkboxes
-                        const observer = new MutationObserver(() => {
-                            const checkboxes = document.querySelectorAll('.edit-permission-checkbox');
-                            if (checkboxes.length > 0) {
-                                console.log('MutationObserver: Checkboxes detectados');
-                                markUserPermissions();
-                            }
-                        });
-                        
-                        // Observar el contenedor de permisos
-                        const permissionsBody = document.getElementById('edit-permissions-body');
-                        if (permissionsBody) {
-                            observer.observe(permissionsBody, {
-                                childList: true,
-                                subtree: true
-                            });
-                        }
-                        
-                        // Intentar marcar con diferentes delays
-                        const attempts = [0, 100, 300, 600, 1000];
-                        attempts.forEach(delay => {
-                            setTimeout(() => {
-                                const success = markUserPermissions();
-                                if (success && delay > 0) {
-                                    observer.disconnect();
-                                }
-                            }, delay);
-                        });
-                        
-                        // Desconectar observer después de 2 segundos
-                        setTimeout(() => observer.disconnect(), 2000);
-                    } else {
-                        alert('Error al cargar los datos del usuario');
-                        window.dispatchEvent(new CustomEvent('close-modal'));
+                        renderPermissions(data.data, 'create-permissions-body', 'permission-checkbox', 'permission');
+                        renderPermissions(data.data, 'edit-permissions-body', 'edit-permission-checkbox', 'edit_permission');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al cargar los datos del usuario');
-                    window.dispatchEvent(new CustomEvent('close-modal'));
+                    console.error('Error al cargar permisos:', error);
                 });
+        }
+
+        // Función para renderizar permisos en la tabla
+        function renderPermissions(permissions, tbodyId, checkboxClass, checkboxIdPrefix) {
+            const tbody = document.getElementById(tbodyId);
+            if (!tbody) return;
+
+            // Mapeo de nombres de permisos a nombres legibles
+            const permissionLabels = {
+                'dashboard': 'Dashboard',
+                'solicitudes': 'Solicitudes',
+                'mantenedor de usuarios': 'Mantenedor de Usuarios',
+                'mantenedor de departamentos': 'Mantenedor de Departamentos',
+                'mantenedor de unidades': 'Mantenedor de Unidades',
+                'insumos': 'Insumos',
+                'mantenedor de tipos de insumo': 'Mantenedor de Tipos de Insumo',
+                'carga masiva': 'Carga Masiva',
+                'mantenedor de proveedores': 'Mantenedor de Proveedores',
+                'mantenedor de facturas': 'Mantenedor de Facturas',
+                'admin solicitudes': 'Admin Solicitudes',
+                'reportes': 'Reportes',
+                'reportes insumos': 'Reporte de Insumos',
+                'reportes stock': 'Reporte de Stock Crítico',
+                'reportes consumo departamento': 'Reporte de Consumo por Departamento',
+                'reportes rotacion': 'Reporte de Rotación',
+                'notificaciones': 'Notificaciones',
+            };
+
+            tbody.innerHTML = '';
+            permissions.forEach((permission, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors bg-white';
+                
+                const label = permissionLabels[permission.name] || permission.name.replace(/\b\w/g, l => l.toUpperCase());
+                
+                row.innerHTML = `
+                    <td class="p-3 text-sm text-gray-600 border-b border-gray-200">${index + 1}</td>
+                    <td class="p-3 text-sm font-medium text-gray-800 border-b border-gray-200">${label}</td>
+                    <td class="text-center p-2 border-b border-gray-200">
+                        <input type="checkbox" 
+                               id="${checkboxIdPrefix}_${permission.id}" 
+                               name="permissions[]" 
+                               value="${permission.name}" 
+                               class="${checkboxClass} w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500">
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
         }
     </script>
 </x-app-layout>
