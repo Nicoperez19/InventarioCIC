@@ -8,14 +8,10 @@ use Illuminate\Support\Facades\Auth;
 new class extends Component {
     public function with()
     {
-        // Asegurar que el usuario esté disponible y sus permisos cargados
+        // Obtener el usuario sin forzar recarga innecesaria
+        // Solo cargar relaciones si no están ya cargadas
         $user = Auth::user();
-        if ($user) {
-            // Limpiar caché de permisos para asegurar que estén actualizados
-            $user->forgetCachedPermissions();
-            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-            // Recargar el usuario con permisos frescos
-            $user->refresh();
+        if ($user && !$user->relationLoaded('permissions')) {
             $user->load('permissions', 'roles');
         }
         
@@ -57,17 +53,22 @@ new class extends Component {
     #[On('user-permissions-updated')]
     public function refreshPermissions()
     {
-        // Limpiar caché de permisos
+        // Limpiar caché de permisos solo cuando sea necesario
         if (Auth::check()) {
-            Auth::user()->forgetCachedPermissions();
+            $user = Auth::user();
+            $user->forgetCachedPermissions();
             app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+            // Recargar relaciones solo si es necesario
+            if (!$user->relationLoaded('permissions')) {
+                $user->load('permissions', 'roles');
+            }
         }
         // Forzar refresco del componente para que los @can() se re-evalúen
         $this->dispatch('$refresh');
     }
 }; ?>
 
-<div>
+<div wire:key="sidebar-component" wire:ignore.self>
     <aside
         class="fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out shadow-xl bg-primary-100 backdrop-blur-sm md:flex md:flex-col"
         :class="{ 'w-64': isSidebarOpen, 'w-0': !isSidebarOpen }" x-show="isSidebarOpen"

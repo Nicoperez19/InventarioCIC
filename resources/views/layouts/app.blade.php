@@ -28,7 +28,9 @@
 <body class="font-sans antialiased" x-data="{ isSidebarOpen: true }">
     <div class="h-screen bg-gray-100 flex overflow-hidden">
         <!-- Sidebar -->
+        <div wire:key="sidebar-wrapper">
         <livewire:layout.sidebar />
+        </div>
         
         <!-- Overlay eliminado para evitar oscurecimiento -->
         
@@ -63,6 +65,77 @@
     </div>
     @livewireScripts
     @stack('scripts')
+    
+    <script>
+        // Función para actualizar el favicon (reutilizable)
+        function updateFaviconInBrowser(faviconUrl) {
+            try {
+                if (!faviconUrl) {
+                    return;
+                }
+                
+                // Obtener el elemento head de forma segura
+                const head = document.head || (document.getElementsByTagName && document.getElementsByTagName('head')[0]);
+                if (!head) {
+                    return;
+                }
+                
+                // Actualizar todos los links de favicon existentes
+                const links = document.querySelectorAll("link[rel*='icon']");
+                if (links && links.length > 0) {
+                    links.forEach(link => {
+                        if (link && link.nodeName && link.nodeName.toLowerCase() === 'link') {
+                            link.href = faviconUrl;
+                        }
+                    });
+                } else {
+                    // Si no hay ningún link, crear uno nuevo
+                    const link = document.createElement('link');
+                    if (link) {
+                        link.rel = 'icon';
+                        link.type = 'image/x-icon';
+                        link.href = faviconUrl;
+                        if (head && head.appendChild) {
+                            head.appendChild(link);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error al actualizar favicon:', error);
+            }
+        }
+        
+        // Registrar el listener solo una vez
+        if (!window.faviconListenerRegistered) {
+            window.faviconListenerRegistered = true;
+            
+            // Escuchar cuando Livewire esté listo
+            if (typeof Livewire !== 'undefined') {
+                Livewire.on('update-favicon-in-browser', (event) => {
+                    let faviconUrl = null;
+                    if (Array.isArray(event)) {
+                        faviconUrl = event[0]?.url || event[0]?.detail?.url;
+                    } else if (typeof event === 'object' && event !== null) {
+                        faviconUrl = event.url || event.detail?.url;
+                    }
+                    updateFaviconInBrowser(faviconUrl);
+                });
+            } else {
+                // Si Livewire aún no está cargado, esperar a que se inicialice
+                document.addEventListener('livewire:init', function() {
+                    Livewire.on('update-favicon-in-browser', (event) => {
+                        let faviconUrl = null;
+                        if (Array.isArray(event)) {
+                            faviconUrl = event[0]?.url || event[0]?.detail?.url;
+                        } else if (typeof event === 'object' && event !== null) {
+                            faviconUrl = event.url || event.detail?.url;
+                        }
+                        updateFaviconInBrowser(faviconUrl);
+                    });
+                }, { once: true });
+            }
+        }
+    </script>
 </body>
 
 </html>

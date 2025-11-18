@@ -488,7 +488,7 @@
                     
                     checkedCheckboxes.forEach(cb => {
                         if (cb && cb.value) {
-                            permissions.push(cb.value);
+                        permissions.push(cb.value);
                             console.log('Permiso agregado:', cb.value);
                         }
                     });
@@ -505,9 +505,9 @@
                         formData.append('permissions', '[]');
                         console.log('No hay permisos seleccionados, enviando array vacío');
                     } else {
-                        permissions.forEach(perm => {
-                            formData.append('permissions[]', perm);
-                        });
+                    permissions.forEach(perm => {
+                        formData.append('permissions[]', perm);
+                    });
                     }
                     
                     // Verificar que los permisos se agregaron correctamente al FormData
@@ -726,12 +726,12 @@
             });
 
             // Llenar campos del formulario directamente con los datos del controlador
-            if (runInput) {
-                document.getElementById('edit-user-run').value = userData.run;
-                runInput.value = userData.run;
-            }
-            if (nombreInput) nombreInput.value = userData.nombre || '';
-            if (correoInput) correoInput.value = userData.correo || '';
+                if (runInput) {
+                    document.getElementById('edit-user-run').value = userData.run;
+                    runInput.value = userData.run;
+                }
+                if (nombreInput) nombreInput.value = userData.nombre || '';
+                if (correoInput) correoInput.value = userData.correo || '';
             
             // Establecer departamento
             if (userData.id_depto) {
@@ -739,7 +739,7 @@
             } else {
                 if (deptoSelect) deptoSelect.value = '';
             }
-            
+
             // Abrir modal
             window.dispatchEvent(new CustomEvent('open-modal', { detail: 'edit-user' }));
             
@@ -813,12 +813,12 @@
         // Función para cargar permisos desde el servidor
         function loadPermissions() {
             fetch('/users/permissions')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.data) {
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.data) {
                         renderPermissions(data.data, 'create-permissions-body', 'permission-checkbox', 'permission');
                         renderPermissions(data.data, 'edit-permissions-body', 'edit-permission-checkbox', 'edit_permission');
-                    }
+                        }
                 })
                 .catch(error => {
                     console.error('Error al cargar permisos:', error);

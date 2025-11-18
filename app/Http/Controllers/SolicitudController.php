@@ -68,20 +68,16 @@ class SolicitudController extends Controller
                 ]);
             }
 
-            // Crear notificaciones solo para usuarios con permiso receive-notifications
+            // Crear notificaciones para usuarios con permiso de administrar solicitudes
             try {
-                // Buscar usuarios que pueden recibir notificaciones (tienen el permiso receive-notifications)
-                // y además tienen permiso para gestionar solicitudes
-                $usuariosNotificables = \App\Models\User::permission('receive-notifications')
-                    ->where(function($query) {
-                        $query->role('Administrador')
-                            ->orWhereHas('permissions', function($q) {
-                                $q->whereIn('name', ['manage-requests', 'approve-requests']);
-                            });
-                    })
-                    ->get();
-                
-                \Illuminate\Support\Facades\Log::info('Creando notificaciones', [
+                // Buscar usuarios que pueden aprobar solicitudes (administradores o con permiso 'admin solicitudes')
+                $usuariosNotificables = \App\Models\User::whereHas('roles', function ($query) {
+                    $query->where('name', 'Administrador');
+                })->orWhereHas('permissions', function ($query) {
+                    $query->where('name', 'admin solicitudes');
+                })->get();
+
+                \Illuminate\Support\Facades\Log::info('Creando notificaciones de solicitud', [
                     'solicitud_id' => $solicitud->id,
                     'numero_solicitud' => $solicitud->numero_solicitud,
                     'usuarios_notificables_count' => $usuariosNotificables->count()
@@ -90,18 +86,18 @@ class SolicitudController extends Controller
                 foreach ($usuariosNotificables as $usuario) {
                     Notificacion::create([
                         'tipo' => 'solicitud',
-                        'titulo' => 'Nueva Solicitud de Insumos',
-                        'mensaje' => "Se ha creado una nueva solicitud #{$solicitud->numero_solicitud} por " . Auth::user()->nombre,
+                        'titulo' => 'Nueva Solicitud Pendiente de Aprobación',
+                        'mensaje' => "Se ha creado una nueva solicitud #{$solicitud->numero_solicitud} por " . Auth::user()->nombre . " del departamento " . ($solicitud->departamento->nombre_depto ?? 'N/A') . ". Requiere aprobación.",
                         'user_id' => $usuario->run,
                         'solicitud_id' => $solicitud->id,
                     ]);
                 }
                 
-                \Illuminate\Support\Facades\Log::info('Notificaciones creadas exitosamente', [
+                \Illuminate\Support\Facades\Log::info('Notificaciones de solicitud creadas exitosamente', [
                     'count' => $usuariosNotificables->count()
                 ]);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Error al crear notificaciones', [
+                \Illuminate\Support\Facades\Log::error('Error al crear notificaciones de solicitud', [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);

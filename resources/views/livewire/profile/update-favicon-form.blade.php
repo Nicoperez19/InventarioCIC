@@ -125,57 +125,6 @@ new class extends Component
 }; ?>
 
 <section>
-    <script>
-        // Escuchar el evento para actualizar el favicon en el navegador
-        document.addEventListener('livewire:init', function() {
-            Livewire.on('update-favicon-in-browser', (event) => {
-                try {
-                    // Extraer la URL del evento
-                    let faviconUrl = null;
-                    if (Array.isArray(event)) {
-                        faviconUrl = event[0]?.url || event[0]?.detail?.url;
-                    } else if (typeof event === 'object' && event !== null) {
-                        faviconUrl = event.url || event.detail?.url;
-                    }
-                    
-                    if (!faviconUrl) {
-                        console.warn('No se pudo obtener la URL del favicon del evento');
-                        return;
-                    }
-                    
-                    // Obtener el elemento head de forma segura
-                    const head = document.head || (document.getElementsByTagName && document.getElementsByTagName('head')[0]);
-                    if (!head) {
-                        console.warn('No se pudo encontrar el elemento head');
-                        return;
-                    }
-                    
-                    // Actualizar todos los links de favicon existentes
-                    const links = document.querySelectorAll("link[rel*='icon']");
-                    if (links && links.length > 0) {
-                        links.forEach(link => {
-                            if (link && link.nodeName && link.nodeName.toLowerCase() === 'link') {
-                                link.href = faviconUrl;
-                            }
-                        });
-                    } else {
-                        // Si no hay ningún link, crear uno nuevo
-                        const link = document.createElement('link');
-                        if (link) {
-                            link.rel = 'icon';
-                            link.type = 'image/x-icon';
-                            link.href = faviconUrl;
-                            if (head && head.appendChild) {
-                                head.appendChild(link);
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error al actualizar favicon:', error);
-                }
-            });
-        });
-    </script>
     <header class="mb-6">
         <div class="flex items-center space-x-3 mb-4">
             <div class="flex-shrink-0">

@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
     {
         User::create([
             'run' => '11111111-1',
-            'nombre' => 'Administrador',
+                'nombre' => 'Administrador',
             'correo' => 'admin@ucsc.cl',
             'contrasena' => 'password',
             'id_depto' => 'CIC_admin',

@@ -29,11 +29,16 @@ class NotificationBell extends Component
 
     public function cargarNotificaciones()
     {
-        $this->notificaciones = Notificacion::paraUsuario(Auth::user()->run)
+        $todasNotificaciones = Notificacion::paraUsuario(Auth::user()->run)
             ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->toArray();
+            ->get();
+        
+        // Agrupar notificaciones por tipo
+        $this->notificaciones = [
+            'stock_agotado' => $todasNotificaciones->where('tipo', 'stock_agotado')->take(1)->values()->toArray(),
+            'stock_critico' => $todasNotificaciones->where('tipo', 'stock_critico')->take(1)->values()->toArray(),
+            'solicitudes' => $todasNotificaciones->where('tipo', 'solicitud')->take(20)->values()->toArray(),
+        ];
         
         $this->countNoLeidas = Notificacion::paraUsuario(Auth::user()->run)
             ->noLeidas()
