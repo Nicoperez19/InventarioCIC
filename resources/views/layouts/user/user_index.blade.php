@@ -745,7 +745,7 @@
             
             // Asegurar que los permisos estén cargados antes de marcarlos
             const editPermissionsBody = document.getElementById('edit-permissions-body');
-            if (!editPermissionsBody || editPermissionsBody.children.length === 0) {
+            if (!editPermissionsBody || !editPermissionsBody.children || editPermissionsBody.children.length === 0) {
                 // Si no hay checkboxes renderizados, cargar permisos primero
                 loadPermissions();
             }

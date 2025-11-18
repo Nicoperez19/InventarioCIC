@@ -8,6 +8,14 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
+    <!-- Favicon -->
+    @php
+        $faviconPath = public_path('favicon.ico');
+        $faviconUrl = file_exists($faviconPath) ? asset('favicon.ico') . '?v=' . filemtime($faviconPath) : asset('favicon.ico');
+    @endphp
+    <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ $faviconUrl }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />

@@ -32,6 +32,13 @@
                     <livewire:profile.update-password-form />
                 </div>
             </div>
+            
+            <!-- Configuración del Favicon -->
+            <div class="mt-6">
+                <div class="p-4 bg-white shadow-sm rounded-lg border border-neutral-200 sm:p-8">
+                    <livewire:profile.update-favicon-form />
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>
