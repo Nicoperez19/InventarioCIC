@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Stock Crítico - GestionCIC</title>
+    <title>{{ $titulo ?? 'Reporte de Stock Crítico' }} - GestionCIC</title>
     <style>
         * {
             margin: 0;
@@ -11,41 +11,44 @@
             box-sizing: border-box;
         }
         body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            color: #333;
-            line-height: 1.6;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-size: 11px;
+            color: #1f2937;
+            line-height: 1.5;
+            padding: 20px 50px;
+            background-color: #ffffff;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #306073;
+            margin-bottom: 35px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #d1d5db;
         }
         .header h1 {
-            font-size: 24px;
-            color: #306073;
+            font-size: 20px;
+            color: #111827;
             margin-bottom: 5px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
         }
         .header .subtitle {
-            font-size: 14px;
-            color: #525252;
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 400;
         }
         .info-section {
-            margin-bottom: 25px;
-            padding: 15px;
-            background-color: #f0f4f6;
-            border-radius: 5px;
-            border-left: 4px solid #306073;
+            margin-bottom: 30px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
         }
         .info-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         .info-label {
-            font-weight: bold;
-            color: #374151;
+            font-weight: 500;
+            color: #4b5563;
         }
         .info-value {
             color: #111827;
@@ -55,34 +58,53 @@
             page-break-inside: avoid;
         }
         .section-title {
-            font-size: 18px;
-            color: #306073;
-            margin-bottom: 15px;
+            font-size: 14px;
+            color: #111827;
+            margin-bottom: 18px;
             padding-bottom: 8px;
-            border-bottom: 2px solid #306073;
+            border-bottom: 1px solid #d1d5db;
+            font-weight: 600;
+        }
+        .content-wrapper {
+            page-break-inside: avoid;
+        }
+        .report-title {
+            font-size: 18px;
+            color: #111827;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .table-container {
+            margin: 0 auto;
+            max-width: 95%;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
         }
         table thead {
-            background-color: #306073;
-            color: white;
+            background-color: #f9fafb;
         }
         table th {
-            padding: 10px;
+            padding: 10px 12px;
             text-align: left;
-            font-weight: bold;
-            font-size: 11px;
+            font-weight: 600;
+            font-size: 10px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #374151;
+            border: 1px solid #d1d5db;
         }
         table td {
-            padding: 8px 10px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        table tbody tr:nth-child(even) {
-            background-color: #fafafa;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            color: #1f2937;
         }
         .text-right {
             text-align: right;
@@ -90,145 +112,68 @@
         .text-center {
             text-align: center;
         }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .stat-card {
-            padding: 15px;
-            background-color: #f0f4f6;
-            border-left: 4px solid #306073;
-            border-radius: 5px;
-        }
-        .stat-label {
-            font-size: 11px;
-            color: #6b7280;
-            margin-bottom: 5px;
-        }
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #111827;
-        }
         .footer {
-            margin-top: 40px;
+            margin-top: 50px;
             padding-top: 15px;
             border-top: 1px solid #e5e7eb;
             text-align: center;
-            font-size: 10px;
-            color: #6b7280;
+            font-size: 9px;
+            color: #9ca3af;
         }
         .no-data {
             text-align: center;
-            padding: 20px;
+            padding: 30px 20px;
             color: #6b7280;
             font-style: italic;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background-color: #f9fafb;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Gestión de Insumos - GestionCIC</h1>
-        <div class="subtitle">Reporte de Stock Crítico y Bajo</div>
-    </div>
-
-    <div class="info-section">
-        <div class="info-row">
-            <span class="info-label">Fecha de Generación:</span>
-            <span class="info-value">{{ $fecha }}</span>
+    <div class="content-wrapper">
+        <div class="report-title">
+            {{ $titulo ?? 'Reporte de Stock Crítico' }}
         </div>
-    </div>
-
-    <!-- Estadísticas Generales -->
-    <div class="section">
-        <h2 class="section-title">Estadísticas Generales</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total de Insumos</div>
-                <div class="stat-value">{{ $estadisticas['total_insumos'] ?? 0 }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Stock Crítico</div>
-                <div class="stat-value">{{ $estadisticas['stock_critico'] ?? 0 }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Stock Agotado</div>
-                <div class="stat-value">{{ $estadisticas['stock_agotado'] ?? 0 }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Stock Normal</div>
-                <div class="stat-value">{{ $estadisticas['stock_normal'] ?? 0 }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Insumos que Necesitan Reposición -->
-    <div class="section">
-        <h2 class="section-title">Insumos que Necesitan Reposición</h2>
-        @if(count($necesitanReposicion) > 0)
-            <table>
-                <thead>
-                    <tr>
-                        <th>Insumo</th>
-                        <th>Tipo</th>
-                        <th class="text-right">Stock Actual</th>
-                        <th class="text-right">Stock Mínimo</th>
-                        <th class="text-right">Faltante</th>
-                        <th>Unidad</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($necesitanReposicion as $insumo)
+        
+        <!-- Insumos según la pestaña activa -->
+        @if(count($insumos ?? []) > 0)
+            <div class="table-container">
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ $insumo->nombre_insumo }}</td>
-                            <td>{{ $insumo->tipoInsumo->nombre_tipo ?? 'N/A' }}</td>
-                            <td class="text-right">{{ $insumo->stock_actual }}</td>
-                            <td class="text-right">{{ $insumo->stock_minimo }}</td>
-                            <td class="text-right">{{ $insumo->cantidad_faltante }}</td>
-                            <td>{{ $insumo->unidadMedida->nombre_unidad_medida ?? 'N/A' }}</td>
+                            <th>Insumo</th>
+                            <th>Tipo</th>
+                            <th class="text-right">Stock Actual</th>
+                            <th>Unidad</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach($insumos as $insumo)
+                            <tr>
+                                <td>{{ $insumo->nombre_insumo }}</td>
+                                <td>{{ $insumo->tipoInsumo->nombre_tipo ?? 'N/A' }}</td>
+                                <td class="text-right">{{ number_format($insumo->stock_actual, 0, ',', '.') }}</td>
+                                <td>{{ $insumo->unidadMedida->nombre_unidad_medida ?? 'N/A' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         @else
-            <div class="no-data">No hay insumos que necesiten reposición</div>
-        @endif
-    </div>
-
-    <!-- Insumos Agotados -->
-    <div class="section">
-        <h2 class="section-title">Insumos con Stock Agotado</h2>
-        @if(count($stockAgotado) > 0)
-            <table>
-                <thead>
-                    <tr>
-                        <th>Insumo</th>
-                        <th>Tipo</th>
-                        <th class="text-right">Stock Mínimo</th>
-                        <th>Unidad</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($stockAgotado as $insumo)
-                        <tr>
-                            <td>{{ $insumo->nombre_insumo }}</td>
-                            <td>{{ $insumo->tipoInsumo->nombre_tipo ?? 'N/A' }}</td>
-                            <td class="text-right">{{ $insumo->stock_minimo }}</td>
-                            <td>{{ $insumo->unidadMedida->nombre_unidad_medida ?? 'N/A' }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <div class="no-data">No hay insumos con stock agotado</div>
+            <div class="no-data">
+                @if(($tab ?? 'agotados') === 'agotados')
+                    No hay insumos agotados
+                @else
+                    No hay insumos con stock bajo
+                @endif
+            </div>
         @endif
     </div>
 
     <div class="footer">
         <p>Reporte generado el {{ $fecha }} por el sistema GestionCIC</p>
-        <p>Este es un documento generado automáticamente</p>
     </div>
 </body>
 </html>

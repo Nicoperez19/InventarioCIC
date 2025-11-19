@@ -30,38 +30,59 @@ class ReporteStockController extends Controller
 
     public function exportarExcel(Request $request)
     {
+        $tab = $request->input('tab', 'agotados'); // Por defecto 'agotados'
+        
+        // Obtener datos según la pestaña activa
         $stockCritico = $this->reporteService->getStockCritico();
-        $stockAgotado = $this->reporteService->getStockAgotado();
-        $necesitanReposicion = $this->reporteService->getNecesitanReposicion();
+        
+        // Filtrar según la pestaña
+        if ($tab === 'agotados') {
+            $insumosParaExportar = $stockCritico->filter(function($item) {
+                return $item->stock_actual <= 0;
+            })->values();
+            $titulo = 'Insumos Agotados';
+            $nombreArchivo = 'Reporte_Stock_Agotado_' . now()->format('Y-m-d') . '.xlsx';
+        } else {
+            $insumosParaExportar = $stockCritico->filter(function($item) {
+                if ($item->stock_actual <= 0) {
+                    return false;
+                }
+                if ($item->stock_minimo > 0) {
+                    return $item->stock_actual <= $item->stock_minimo;
+                }
+                return $item->stock_actual < 10;
+            })->values();
+            $titulo = 'Insumos con Stock Bajo';
+            $nombreArchivo = 'Reporte_Stock_Bajo_' . now()->format('Y-m-d') . '.xlsx';
+        }
+
         $estadisticas = $this->reporteService->getEstadisticasStock();
 
         $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle($tab === 'agotados' ? 'Agotados' : 'Stock Bajo');
         
-        // Hoja 1: Stock Crítico
-        $sheet1 = $spreadsheet->getActiveSheet();
-        $sheet1->setTitle('Stock Crítico');
+        $sheet->setCellValue('A1', 'Reporte de ' . $titulo . ' - GestionCIC');
+        $sheet->mergeCells('A1:D1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         
-        $sheet1->setCellValue('A1', 'Reporte de Stock Crítico y Bajo - GestionCIC');
-        $sheet1->mergeCells('A1:F1');
-        $sheet1->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet1->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        
-        $sheet1->setCellValue('A3', 'Fecha de Generación:');
-        $sheet1->setCellValue('B3', now()->format('d/m/Y H:i:s'));
-        $sheet1->getStyle('A3')->getFont()->setBold(true);
+        $sheet->setCellValue('A3', 'Fecha de Generación:');
+        $sheet->setCellValue('B3', now()->format('d/m/Y H:i:s'));
+        $sheet->getStyle('A3')->getFont()->setBold(true);
         
         $row = 5;
-        $headers = ['Insumo', 'Tipo', 'Stock Actual', 'Stock Mínimo', 'Faltante', 'Unidad'];
+        $headers = ['Insumo', 'Tipo', 'Stock Actual', 'Unidad'];
         $col = 'A';
         foreach ($headers as $header) {
-            $sheet1->setCellValue($col . $row, $header);
-            $sheet1->getStyle($col . $row)->getFont()->setBold(true);
-            $sheet1->getStyle($col . $row)->getFill()
+            $sheet->setCellValue($col . $row, $header);
+            $sheet->getStyle($col . $row)->getFont()->setBold(true);
+            $sheet->getStyle($col . $row)->getFill()
                 ->setFillType(Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('306073');
-            $sheet1->getStyle($col . $row)->getFont()->getColor()->setRGB('FFFFFF');
-            $sheet1->getStyle($col . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet1->getStyle($col . $row)->applyFromArray([
+                ->getStartColor()->setRGB($tab === 'agotados' ? 'DC2626' : 'EA580C');
+            $sheet->getStyle($col . $row)->getFont()->getColor()->setRGB('FFFFFF');
+            $sheet->getStyle($col . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle($col . $row)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -72,16 +93,14 @@ class ReporteStockController extends Controller
         }
         
         $row++;
-        foreach ($necesitanReposicion as $insumo) {
-            $sheet1->setCellValue('A' . $row, $insumo->nombre_insumo);
-            $sheet1->setCellValue('B' . $row, $insumo->tipoInsumo->nombre_tipo ?? 'N/A');
-            $sheet1->setCellValue('C' . $row, $insumo->stock_actual);
-            $sheet1->setCellValue('D' . $row, $insumo->stock_minimo);
-            $sheet1->setCellValue('E' . $row, $insumo->cantidad_faltante);
-            $sheet1->setCellValue('F' . $row, $insumo->unidadMedida->nombre_unidad_medida ?? 'N/A');
+        foreach ($insumosParaExportar as $insumo) {
+            $sheet->setCellValue('A' . $row, $insumo->nombre_insumo);
+            $sheet->setCellValue('B' . $row, $insumo->tipoInsumo->nombre_tipo ?? 'N/A');
+            $sheet->setCellValue('C' . $row, $insumo->stock_actual);
+            $sheet->setCellValue('D' . $row, $insumo->unidadMedida->nombre_unidad_medida ?? 'N/A');
             
-            foreach (range('A', 'F') as $col) {
-                $sheet1->getStyle($col . $row)->applyFromArray([
+            foreach (range('A', 'D') as $col) {
+                $sheet->getStyle($col . $row)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -92,90 +111,11 @@ class ReporteStockController extends Controller
             $row++;
         }
         
-        foreach (range('A', 'F') as $col) {
-            $sheet1->getColumnDimension($col)->setAutoSize(true);
-        }
-        
-        // Hoja 2: Stock Agotado
-        $sheet2 = $spreadsheet->createSheet();
-        $sheet2->setTitle('Stock Agotado');
-        
-        $sheet2->setCellValue('A1', 'Insumos con Stock Agotado');
-        $sheet2->mergeCells('A1:D1');
-        $sheet2->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet2->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        
-        $row = 3;
-        $headers2 = ['Insumo', 'Tipo', 'Stock Mínimo', 'Unidad'];
-        $col = 'A';
-        foreach ($headers2 as $header) {
-            $sheet2->setCellValue($col . $row, $header);
-            $sheet2->getStyle($col . $row)->getFont()->setBold(true);
-            $sheet2->getStyle($col . $row)->getFill()
-                ->setFillType(Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('306073');
-            $sheet2->getStyle($col . $row)->getFont()->getColor()->setRGB('FFFFFF');
-            $sheet2->getStyle($col . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $col++;
-        }
-        
-        $row++;
-        foreach ($stockAgotado as $insumo) {
-            $sheet2->setCellValue('A' . $row, $insumo->nombre_insumo);
-            $sheet2->setCellValue('B' . $row, $insumo->tipoInsumo->nombre_tipo ?? 'N/A');
-            $sheet2->setCellValue('C' . $row, $insumo->stock_minimo);
-            $sheet2->setCellValue('D' . $row, $insumo->unidadMedida->nombre_unidad_medida ?? 'N/A');
-            $row++;
-        }
-        
         foreach (range('A', 'D') as $col) {
-            $sheet2->getColumnDimension($col)->setAutoSize(true);
+            $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-        
-        // Hoja 3: Estadísticas
-        $sheet3 = $spreadsheet->createSheet();
-        $sheet3->setTitle('Estadísticas');
-        
-        $sheet3->setCellValue('A1', 'Estadísticas de Stock');
-        $sheet3->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        
-        $row = 3;
-        $sheet3->setCellValue('A' . $row, 'Total de Insumos:');
-        $sheet3->setCellValue('B' . $row, $estadisticas['total_insumos']);
-        $sheet3->getStyle('A' . $row)->getFont()->setBold(true);
-        $row++;
-        
-        $sheet3->setCellValue('A' . $row, 'Stock Crítico:');
-        $sheet3->setCellValue('B' . $row, $estadisticas['stock_critico']);
-        $sheet3->getStyle('A' . $row)->getFont()->setBold(true);
-        $row++;
-        
-        $sheet3->setCellValue('A' . $row, 'Stock Agotado:');
-        $sheet3->setCellValue('B' . $row, $estadisticas['stock_agotado']);
-        $sheet3->getStyle('A' . $row)->getFont()->setBold(true);
-        $row++;
-        
-        $sheet3->setCellValue('A' . $row, 'Stock Normal:');
-        $sheet3->setCellValue('B' . $row, $estadisticas['stock_normal']);
-        $sheet3->getStyle('A' . $row)->getFont()->setBold(true);
-        $row++;
-        
-        $sheet3->setCellValue('A' . $row, 'Total Stock Actual:');
-        $sheet3->setCellValue('B' . $row, $estadisticas['total_stock_actual']);
-        $sheet3->getStyle('A' . $row)->getFont()->setBold(true);
-        $row++;
-        
-        $sheet3->setCellValue('A' . $row, 'Total Stock Mínimo:');
-        $sheet3->setCellValue('B' . $row, $estadisticas['total_stock_minimo']);
-        $sheet3->getStyle('A' . $row)->getFont()->setBold(true);
-        
-        $sheet3->getColumnDimension('A')->setWidth(30);
-        $sheet3->getColumnDimension('B')->setWidth(20);
-        
-        $spreadsheet->setActiveSheetIndex(0);
         
         $writer = new Xlsx($spreadsheet);
-        $nombreArchivo = 'Reporte_Stock_Critico_' . now()->format('Y-m-d') . '.xlsx';
         
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
@@ -187,9 +127,32 @@ class ReporteStockController extends Controller
 
     public function exportarPdf(Request $request)
     {
+        $tab = $request->input('tab', 'agotados'); // Por defecto 'agotados'
+        
+        // Obtener datos según la pestaña activa
         $stockCritico = $this->reporteService->getStockCritico();
-        $stockAgotado = $this->reporteService->getStockAgotado();
-        $necesitanReposicion = $this->reporteService->getNecesitanReposicion();
+        
+        // Filtrar según la pestaña
+        if ($tab === 'agotados') {
+            $insumosParaExportar = $stockCritico->filter(function($item) {
+                return $item->stock_actual <= 0;
+            })->values();
+            $titulo = 'Insumos Agotados';
+            $nombreArchivo = 'Reporte_Stock_Agotado_' . now()->format('Y-m-d') . '.pdf';
+        } else {
+            $insumosParaExportar = $stockCritico->filter(function($item) {
+                if ($item->stock_actual <= 0) {
+                    return false;
+                }
+                if ($item->stock_minimo > 0) {
+                    return $item->stock_actual <= $item->stock_minimo;
+                }
+                return $item->stock_actual < 10;
+            })->values();
+            $titulo = 'Insumos con Stock Bajo';
+            $nombreArchivo = 'Reporte_Stock_Bajo_' . now()->format('Y-m-d') . '.pdf';
+        }
+
         $estadisticas = $this->reporteService->getEstadisticasStock();
 
         $options = new Options();
@@ -200,9 +163,9 @@ class ReporteStockController extends Controller
         $dompdf = new Dompdf($options);
 
         $html = view('reportes.stock.pdf', [
-            'stockCritico' => $stockCritico,
-            'stockAgotado' => $stockAgotado,
-            'necesitanReposicion' => $necesitanReposicion,
+            'insumos' => $insumosParaExportar,
+            'titulo' => $titulo,
+            'tab' => $tab,
             'estadisticas' => $estadisticas,
             'fecha' => now()->format('d/m/Y H:i:s')
         ])->render();
@@ -210,8 +173,6 @@ class ReporteStockController extends Controller
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
-
-        $nombreArchivo = 'Reporte_Stock_Critico_' . now()->format('Y-m-d') . '.pdf';
 
         return $dompdf->stream($nombreArchivo);
     }
