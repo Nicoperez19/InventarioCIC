@@ -25,12 +25,10 @@
     @livewireStyles
 </head>
 
-<body class="font-sans antialiased" x-data="{ isSidebarOpen: true }">
+<body class="font-sans antialiased" x-data="{ isSidebarOpen: true }" x-init="isSidebarOpen = true">
     <div class="h-screen bg-gray-100 flex overflow-hidden">
         <!-- Sidebar -->
-        <div wire:key="sidebar-wrapper">
-        <livewire:layout.sidebar />
-        </div>
+        <x-sidebar />
         
         <!-- Overlay eliminado para evitar oscurecimiento -->
         
@@ -67,20 +65,17 @@
     @stack('scripts')
     
     <script>
-        // Función para actualizar el favicon (reutilizable)
         function updateFaviconInBrowser(faviconUrl) {
             try {
                 if (!faviconUrl) {
                     return;
                 }
                 
-                // Obtener el elemento head de forma segura
                 const head = document.head || (document.getElementsByTagName && document.getElementsByTagName('head')[0]);
                 if (!head) {
                     return;
                 }
                 
-                // Actualizar todos los links de favicon existentes
                 const links = document.querySelectorAll("link[rel*='icon']");
                 if (links && links.length > 0) {
                     links.forEach(link => {
@@ -89,7 +84,6 @@
                         }
                     });
                 } else {
-                    // Si no hay ningún link, crear uno nuevo
                     const link = document.createElement('link');
                     if (link) {
                         link.rel = 'icon';
@@ -105,11 +99,9 @@
             }
         }
         
-        // Registrar el listener solo una vez
         if (!window.faviconListenerRegistered) {
             window.faviconListenerRegistered = true;
             
-            // Escuchar cuando Livewire esté listo
             if (typeof Livewire !== 'undefined') {
                 Livewire.on('update-favicon-in-browser', (event) => {
                     let faviconUrl = null;
@@ -121,7 +113,6 @@
                     updateFaviconInBrowser(faviconUrl);
                 });
             } else {
-                // Si Livewire aún no está cargado, esperar a que se inicialice
                 document.addEventListener('livewire:init', function() {
                     Livewire.on('update-favicon-in-browser', (event) => {
                         let faviconUrl = null;
