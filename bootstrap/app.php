@@ -12,10 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Middleware de logging para rutas web
-        $middleware->web(append: [
-            \App\Http\Middleware\RequestLoggingMiddleware::class,
-        ]);
+        //
     })
     ->withSchedule(function (Schedule $schedule): void {
         // Verificar insumos con stock bajo diariamente a las 8:00 AM
