@@ -18,7 +18,15 @@
                     <p class="hidden mt-1 text-xs text-gray-600 sm:text-sm sm:block">Administra y organiza los usuarios del sistema</p>
                 </div>
             </div>
-            <div class="flex-shrink-0 w-full sm:w-auto">
+            <div class="flex-shrink-0 w-full sm:w-auto flex gap-2">
+                <button onclick="generateAllBarcodes()" 
+                   id="generate-all-barcodes-btn"
+                   class="inline-flex items-center justify-center w-full px-3 py-2 text-xs font-medium text-white transition-all duration-150 rounded-lg shadow-sm sm:w-auto sm:px-4 sm:text-sm bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400">
+                    <svg class="w-3 h-3 mr-1 sm:w-4 sm:h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span>Generar Código</span>
+                </button>
                 <button @click="$dispatch('open-modal', 'create-user')" 
                    class="inline-flex items-center justify-center w-full px-3 py-2 text-xs font-medium text-white transition-all duration-150 rounded-lg shadow-sm sm:w-auto sm:px-4 sm:text-sm bg-secondary-500 hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-400">
                     <svg class="w-3 h-3 mr-1 sm:w-4 sm:h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -870,6 +878,72 @@
                     </td>
                 `;
                 tbody.appendChild(row);
+            });
+        }
+
+        // Función para generar códigos de barras para todos los usuarios
+        function generateAllBarcodes() {
+            const btn = document.getElementById('generate-all-barcodes-btn');
+            const originalText = btn.innerHTML;
+            
+            if (!confirm('¿Estás seguro de generar códigos de barras para todos los usuarios?\n\nEsto eliminará todas las imágenes de códigos existentes y generará nuevos códigos únicos para cada usuario.')) {
+                return;
+            }
+            
+            // Deshabilitar botón y mostrar loading
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin w-3 h-3 mr-1 sm:w-4 sm:h-4 sm:mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generando...</span>';
+            
+            // Obtener token CSRF
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
+            fetch('/users/generate-all-barcodes', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                
+                if (data.success) {
+                    // Mostrar mensaje de éxito
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2';
+                    notification.innerHTML = `
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span class="font-medium">${data.message || 'Códigos de barras generados exitosamente'}</span>
+                    `;
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 5000);
+                    
+                    // Recargar la tabla de usuarios
+                    if (window.Livewire) {
+                        const usersTableComponent = Livewire.find('tables.users-table');
+                        if (usersTableComponent && usersTableComponent.$wire) {
+                            usersTableComponent.$wire.$refresh();
+                        }
+                    }
+                    
+                    // Recargar la página después de un breve delay
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudieron generar los códigos de barras'));
+                }
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                console.error('Error:', error);
+                alert('Error al generar códigos de barras. Por favor, intenta nuevamente.');
             });
         }
     </script>

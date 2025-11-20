@@ -35,6 +35,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/{user}', [UsersController::class, 'show'])->name('users.show');
     Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{user}/generate-barcode', [UsersController::class, 'generateBarcode'])->name('users.generate-barcode');
+    Route::post('/users/generate-all-barcodes', [UsersController::class, 'generateAllBarcodes'])->name('users.generate-all-barcodes');
+    Route::get('/users/{user}/barcode/image', [UsersController::class, 'downloadBarcodeImage'])->name('users.barcode.image');
+    Route::get('/users/{user}/barcode/svg', [UsersController::class, 'downloadBarcodeSvg'])->name('users.barcode.svg');
 });
 Route::middleware(['auth'])->group(function () {
     Route::view('departamentos', 'layouts.departamento.departamento_index')->name('departamentos');
