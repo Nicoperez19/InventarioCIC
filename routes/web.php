@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\CargaMasivaController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\InsumoController;
@@ -19,7 +20,7 @@ Route::get('/', function () {
 });
 require __DIR__.'/auth.php';
 Route::middleware(['auth'])->group(function () {
-    Route::view('dashboard', 'layouts.dashboard.dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::view('profile', 'layouts.profile.profile')->name('profile');
     Route::post('logout', function () {
         Auth::logout();
