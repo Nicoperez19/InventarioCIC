@@ -67,7 +67,7 @@ jobs:
 
       # --- DEPLOY TO AZURE USING PUBLISH PROFILE ---
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'InventarioCIC'
           slot-name: 'Production'
