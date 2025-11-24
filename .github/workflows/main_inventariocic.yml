@@ -16,20 +16,14 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-<<<<<<< HEAD
       - name: Checkout repository
         uses: actions/checkout@v4
 
       # --- PHP ---
-=======
-      - uses: actions/checkout@v4
-
->>>>>>> parent of af799d0 (a)
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-<<<<<<< HEAD
+          php-version: "8.3"
           extensions: mbstring, pdo_mysql, zip, intl, gd
           coverage: none
 
@@ -39,20 +33,13 @@ jobs:
       # --- NODE + VITE ---
       - name: Setup Node
         uses: actions/setup-node@v4
-=======
-
-      - name: Check if composer.json exists
-        id: check_files
-        uses: andstor/file-existence-action@v1
->>>>>>> parent of af799d0 (a)
         with:
-          files: 'composer.json'
+          files: "composer.json"
 
       - name: Run composer install if composer.json exists
         if: steps.check_files.outputs.files_exists == 'true'
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
 
-<<<<<<< HEAD
       # --- Laravel optimizations ---
       - name: Optimize Laravel
         run: |
@@ -67,10 +54,6 @@ jobs:
         run: zip -r deploy.zip . -x "node_modules/*"
 
       - name: Upload artifact
-=======
-
-      - name: Upload artifact for deployment job
->>>>>>> parent of af799d0 (a)
         uses: actions/upload-artifact@v4
         with:
           name: php-app
@@ -88,7 +71,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: php-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -96,22 +79,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CB6320BB29184F02BF5F6DA99FE8DD92 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FBAF385B98AE4C8097A4B0E77C846A15 }}
 
-<<<<<<< HEAD
       # --- DEPLOY TO AZURE USING PUBLISH PROFILE ---
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'InventarioCIC'
-          slot-name: 'Production'
+          app-name: "InventarioCIC"
+          slot-name: "Production"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: deploy.zip
-=======
-      - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
-        with:
-          app-name: 'InventarioCIC'
-          slot-name: 'Production'
-          package: .
-          
->>>>>>> parent of af799d0 (a)
