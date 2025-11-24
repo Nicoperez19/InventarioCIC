@@ -62,7 +62,7 @@ class ReporteStockController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle($tab === 'agotados' ? 'Agotados' : 'Stock Bajo');
         
-        $sheet->setCellValue('A1', 'Reporte de ' . $titulo . ' - GestionCIC');
+        $sheet->setCellValue('A1', 'Reporte de ' . $titulo . ' - InventarioCIC');
         $sheet->mergeCells('A1:D1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);

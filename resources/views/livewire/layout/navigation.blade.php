@@ -23,9 +23,9 @@ new class extends Component { }; ?>
                      x-transition:leave-end="opacity-0 transform scale-95"
                      class="flex items-center ml-4">
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-2 mr-3">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo GestionCIC" class="h-8 w-auto">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo InventarioCIC" class="h-8 w-auto">
                     </div>
-                    <h1 class="text-xl font-semibold text-white">GestionCIC</h1>
+                    <h1 class="text-xl font-semibold text-white">InventarioCIC</h1>
                 </div>
             </div>
 

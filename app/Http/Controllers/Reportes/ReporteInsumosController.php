@@ -101,7 +101,7 @@ class ReporteInsumosController extends Controller
         $row = 1;
         
         // Encabezado principal
-        $sheet1->setCellValue('A' . $row, 'Reporte de Insumos - GestionCIC');
+        $sheet1->setCellValue('A' . $row, 'Reporte de Insumos - InventarioCIC');
         $sheet1->mergeCells('A' . $row . ':E' . $row);
         $sheet1->getStyle('A' . $row)->getFont()->setBold(true)->setSize(14);
         $sheet1->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -186,7 +186,7 @@ class ReporteInsumosController extends Controller
         $row = 1;
         
         // Encabezado principal
-        $sheet2->setCellValue('A' . $row, 'Reporte de Insumos - GestionCIC');
+        $sheet2->setCellValue('A' . $row, 'Reporte de Insumos - InventarioCIC');
         $sheet2->mergeCells('A' . $row . ':D' . $row);
         $sheet2->getStyle('A' . $row)->getFont()->setBold(true)->setSize(14);
         $sheet2->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -265,7 +265,7 @@ class ReporteInsumosController extends Controller
         $row = 1;
         
         // Encabezado principal
-        $sheet3->setCellValue('A' . $row, 'Reporte de Insumos - GestionCIC');
+        $sheet3->setCellValue('A' . $row, 'Reporte de Insumos - InventarioCIC');
         $sheet3->mergeCells('A' . $row . ':B' . $row);
         $sheet3->getStyle('A' . $row)->getFont()->setBold(true)->setSize(14);
         $sheet3->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);

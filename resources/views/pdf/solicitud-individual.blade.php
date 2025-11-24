@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud {{ $solicitud->numero_solicitud }} - GestionCIC</title>
+    <title>Solicitud {{ $solicitud->numero_solicitud }} - InventarioCIC</title>
     <style>
         * {
             margin: 0;
@@ -134,7 +134,7 @@
     </table>
 
     <div class="footer">
-        <p>Generado el {{ $fecha }} | GestionCIC</p>
+        <p>Generado el {{ $fecha }} | InventarioCIC</p>
     </div>
 </body>
 

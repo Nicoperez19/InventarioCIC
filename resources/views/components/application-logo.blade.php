@@ -1,4 +1,4 @@
-<!-- Logo personalizado para GestionCIC - Sistema de Inventario -->
+<!-- Logo personalizado para InventarioCIC - Sistema de Inventario -->
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {{ $attributes }}>
     <!-- Fondo del logo -->
     <rect x="10" y="10" width="80" height="80" rx="12" fill="currentColor" opacity="0.1"/>

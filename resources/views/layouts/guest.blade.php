@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'InventarioCIC') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -21,9 +21,9 @@
             <div class="text-center mb-8">
                 <!-- Logo -->
                 <div class="flex justify-center mb-4">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo GestionCIC" class="h-32 w-auto">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo InventarioCIC" class="h-32 w-auto">
                 </div>
-                <h1 class="text-4xl font-bold text-white mb-2">GestionCIC</h1>
+                <h1 class="text-4xl font-bold text-white mb-2">InventarioCIC</h1>
                 <p class="text-white/90 text-lg">Sistema de Gestión de Inventario</p>
             </div>
 
@@ -36,7 +36,7 @@
                 <!-- Footer -->
                 <div class="text-center mt-6">
                     <p class="text-white/70 text-sm">
-                        © {{ date('Y') }} GestionCIC. Todos los derechos reservados.
+                        © {{ date('Y') }} InventarioCIC. Todos los derechos reservados.
                     </p>
                 </div>
             </div>

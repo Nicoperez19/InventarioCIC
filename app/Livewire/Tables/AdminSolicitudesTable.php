@@ -53,10 +53,25 @@ class AdminSolicitudesTable extends Component
     public function aprobarSolicitud($solicitudId)
     {
         try {
-            $solicitud = Solicitud::findOrFail($solicitudId);
+            $solicitud = Solicitud::with(['items', 'user', 'departamento'])->findOrFail($solicitudId);
             $solicitud->aprobar(Auth::user()->run);
             
-            session()->flash('success', "Solicitud #{$solicitud->numero_solicitud} aprobada exitosamente");
+            // Recargar la solicitud para obtener los datos actualizados
+            $solicitud->refresh();
+            
+            // Obtener información relevante para el mensaje
+            $cantidadItems = $solicitud->items->count();
+            $totalUnidades = $solicitud->items->sum('cantidad_aprobada');
+            
+            // Mensaje elegante y conciso siguiendo el estilo de otros módulos
+            if ($cantidadItems == 1) {
+                $mensaje = "Solicitud #{$solicitud->numero_solicitud} aprobada exitosamente. Se aprobaron {$totalUnidades} unidad(es).";
+            } else {
+                $mensaje = "Solicitud #{$solicitud->numero_solicitud} aprobada exitosamente. Se aprobaron {$cantidadItems} insumo(s) por un total de {$totalUnidades} unidad(es).";
+            }
+            
+            // Usar el mismo método que en SolicitudInsumosTable para mantener consistencia
+            $this->dispatch('solicitud-aprobada-exito', ['mensaje' => $mensaje]);
         } catch (\Exception $e) {
             session()->flash('error', 'Error al aprobar la solicitud: ' . $e->getMessage());
         }

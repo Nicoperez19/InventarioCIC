@@ -8,24 +8,42 @@ use App\Models\Solicitud;
 use App\Models\SolicitudItem;
 use App\Models\Notificacion;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class SolicitudInsumosTable extends Component
 {
-    public $insumos;
+    use WithPagination;
+    
     public $cantidades = [];
     public $tipoInsumoFiltro = null;
     public $busqueda = '';
     public $ordenamiento = 'nombre_asc';
     public $errores = [];
+    public $perPage = 12; // Número de cards por página
 
-    public function mount()
+    public function updatingTipoInsumoFiltro()
     {
-        $this->cargarInsumos();
+        $this->resetPage();
     }
 
-    public function cargarInsumos()
+    public function updatingBusqueda()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingOrdenamiento()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage()
+    {
+        $this->resetPage();
+    }
+
+    private function obtenerQueryInsumos()
     {
         $user = Auth::user();
         
@@ -67,21 +85,13 @@ class SolicitudInsumosTable extends Component
                 $query->orderBy('nombre_insumo', 'asc');
         }
 
-        $this->insumos = $query->get();
-        
-        // Asegurar que las relaciones estén cargadas
-        $this->insumos->loadMissing(['unidadMedida', 'tipoInsumo']);
-        
-        // Inicializar cantidades en 0 solo para nuevos insumos
-        foreach ($this->insumos as $insumo) {
-            if (!isset($this->cantidades[$insumo->id_insumo])) {
-                $this->cantidades[$insumo->id_insumo] = 0;
-            }
-        }
-        
-        // Limpiar cantidades de insumos que ya no están disponibles
-        $insumoIds = $this->insumos->pluck('id_insumo')->toArray();
-        $this->cantidades = array_intersect_key($this->cantidades, array_flip($insumoIds));
+        return $query;
+    }
+    
+    private function obtenerTodosLosInsumos()
+    {
+        // Obtener todos los insumos (sin paginación) para validaciones
+        return $this->obtenerQueryInsumos()->get();
     }
 
     public function obtenerTiposPermitidos($user)
@@ -98,38 +108,16 @@ class SolicitudInsumosTable extends Component
         }
     }
 
-    private function verificarRelacionesCargadas()
-    {
-        if (!$this->insumos || $this->insumos->isEmpty()) {
-            return false;
-        }
-
-        $firstInsumo = $this->insumos->first();
-        return $firstInsumo->relationLoaded('tipoInsumo') && $firstInsumo->relationLoaded('unidadMedida');
-    }
-
-    public function updatedTipoInsumoFiltro()
-    {
-        $this->cargarInsumos();
-    }
-
-    public function updatedBusqueda()
-    {
-        $this->cargarInsumos();
-    }
-
-    public function updatedOrdenamiento()
-    {
-        $this->cargarInsumos();
-    }
 
 
     public function actualizarCantidad($insumoId, $cantidad)
     {
         $cantidad = (int) $cantidad;
         
-        // Buscar el insumo en la colección por id_insumo
-        $insumo = $this->insumos->firstWhere('id_insumo', $insumoId);
+        // Buscar el insumo en la base de datos
+        $insumo = Insumo::with(['unidadMedida', 'tipoInsumo'])
+            ->where('id_insumo', $insumoId)
+            ->first();
         
         // Limpiar error previo para este insumo
         unset($this->errores[$insumoId]);
@@ -303,9 +291,6 @@ class SolicitudInsumosTable extends Component
             $this->cantidades = array_fill_keys(array_keys($this->cantidades), 0);
             $this->errores = [];
             
-            // Recargar insumos para actualizar el stock
-            $this->cargarInsumos();
-            
             // Preparar datos para el mensaje de éxito claro y entendible
             $totalUnidades = $itemsConCantidad->sum();
             $numeroSolicitud = $solicitud->numero_solicitud;
@@ -340,18 +325,11 @@ class SolicitudInsumosTable extends Component
             return $cantidad > 0;
         });
 
-        // Asegurar que los insumos tienen las relaciones cargadas
-        $this->insumos->loadMissing(['unidadMedida']);
-
         $detalle = [];
         foreach ($itemsConCantidad as $insumoId => $cantidad) {
-            $insumo = $this->insumos->firstWhere('id_insumo', $insumoId);
+            // Obtener el insumo desde la base de datos
+            $insumo = Insumo::with('unidadMedida')->find($insumoId);
             if ($insumo) {
-                // Cargar la relación si no está cargada
-                if (!$insumo->relationLoaded('unidadMedida')) {
-                    $insumo->load('unidadMedida');
-                }
-                
                 $detalle[] = [
                     'id' => $insumo->id_insumo,
                     'nombre' => $insumo->nombre_insumo,
@@ -367,28 +345,34 @@ class SolicitudInsumosTable extends Component
 
     public function obtenerResumenPedido()
     {
-        // Asegurar que los insumos tienen las relaciones cargadas antes de obtener el resumen
-        if ($this->insumos && $this->insumos->isNotEmpty()) {
-            $this->insumos->loadMissing(['unidadMedida']);
-        }
         return $this->resumenPedido;
+    }
+    
+    public function paginationView()
+    {
+        return 'vendor.livewire.tailwind';
     }
 
     public function render()
     {
-        // Asegurar que los insumos siempre tengan las relaciones cargadas
-        if (!$this->insumos || $this->insumos->isEmpty()) {
-            $this->cargarInsumos();
+        // Obtener insumos paginados
+        $insumos = $this->obtenerQueryInsumos()->paginate($this->perPage);
+        
+        // Inicializar cantidades en 0 solo para nuevos insumos
+        foreach ($insumos as $insumo) {
+            if (!isset($this->cantidades[$insumo->id_insumo])) {
+                $this->cantidades[$insumo->id_insumo] = 0;
+            }
         }
         
-        // Verificar que las relaciones estén cargadas
-        if (!$this->verificarRelacionesCargadas()) {
-            $this->cargarInsumos();
-        }
+        // Limpiar cantidades de insumos que ya no están disponibles (solo si cambió la página)
+        $insumoIds = $insumos->pluck('id_insumo')->toArray();
+        // Mantener las cantidades de todos los insumos, no solo los de la página actual
         
         $tiposDisponibles = TipoInsumo::whereIn('id', $this->obtenerTiposPermitidos(Auth::user()))->get();
         
         return view('livewire.tables.solicitud-insumos-table', [
+            'insumos' => $insumos,
             'tiposDisponibles' => $tiposDisponibles
         ]);
     }
