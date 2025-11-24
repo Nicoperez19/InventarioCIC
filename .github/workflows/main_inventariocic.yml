@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy PHP app to Azure Web App - InventarioCIC
+name: Build and deploy PHP app to Azure Web App - GestionCIC
 
 on:
   push:
@@ -13,61 +10,58 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       # --- PHP ---
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
-          extensions: mbstring, pdo_mysql, zip, intl, gd
-          coverage: none
+          php-version: '8.3'
 
       - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader
+        run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
 
       # --- NODE + VITE ---
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          files: "composer.json"
+          node-version: '20'
 
-      - name: Run composer install if composer.json exists
-        if: steps.check_files.outputs.files_exists == 'true'
-        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build frontend (Vite)
+        run: npm run build
 
       # --- Laravel optimizations ---
-      - name: Optimize Laravel
+      - name: Generate app key (if needed)
+        run: php artisan key:generate --force || true
+
+      - name: Laravel cache optimization
         run: |
-          php artisan config:clear
-          php artisan route:clear
-          php artisan view:clear
           php artisan config:cache
           php artisan route:cache
+          php artisan view:cache
 
-      # --- Build artifact ZIP ---
-      - name: Create deployment ZIP
-        run: zip -r deploy.zip . -x "node_modules/*"
-
-      - name: Upload artifact
+      # --- Upload artifact ---
+      - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: php-app
-          path: .
+          path: ./
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: php-app
@@ -75,15 +69,13 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_37F829BDDF1A4D16BEC720A00356F2F7 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CB6320BB29184F02BF5F6DA99FE8DD92 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FBAF385B98AE4C8097A4B0E77C846A15 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6DD4B815020C4EC187DB48CD1560964F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6480321142BA4BCE9E9E697718E642C9 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2D1568E80C244BD79CFE780BF09201DE }}
 
-      # --- DEPLOY TO AZURE USING PUBLISH PROFILE ---
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
-          app-name: "InventarioCIC"
-          slot-name: "Production"
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: deploy.zip
+          app-name: 'GestionCIC'
+          slot-name: 'Production'
+          package: .
