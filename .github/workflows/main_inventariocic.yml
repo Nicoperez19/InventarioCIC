@@ -65,16 +65,11 @@ jobs:
         with:
           name: deploy-artifact
 
-      # --- AZURE LOGIN ---
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # --- DEPLOY TO AZURE ---
+      # --- DEPLOY TO AZURE USING PUBLISH PROFILE ---
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'InventarioCIC'
           slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: deploy.zip
