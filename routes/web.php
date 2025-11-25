@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\CargaMasivaController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\InsumoController;
@@ -19,7 +20,7 @@ Route::get('/', function () {
 });
 require __DIR__.'/auth.php';
 Route::middleware(['auth'])->group(function () {
-    Route::view('dashboard', 'layouts.dashboard.dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::view('profile', 'layouts.profile.profile')->name('profile');
     Route::post('logout', function () {
         Auth::logout();
@@ -33,34 +34,31 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/permissions', [UsersController::class, 'getPermissions'])->name('users.permissions');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
     Route::get('/users/{user}', [UsersController::class, 'show'])->name('users.show');
-    Route::get('/users/{user}/edit', [UsersController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{user}/generate-barcode', [UsersController::class, 'generateBarcode'])->name('users.generate-barcode');
+    Route::post('/users/generate-all-barcodes', [UsersController::class, 'generateAllBarcodes'])->name('users.generate-all-barcodes');
+    Route::get('/users/{user}/barcode/image', [UsersController::class, 'downloadBarcodeImage'])->name('users.barcode.image');
+    Route::get('/users/{user}/barcode/svg', [UsersController::class, 'downloadBarcodeSvg'])->name('users.barcode.svg');
 });
 Route::middleware(['auth'])->group(function () {
     Route::view('departamentos', 'layouts.departamento.departamento_index')->name('departamentos');
-    Route::get('/departamentos/create', [DepartamentoController::class, 'create'])->name('departamentos.create');
     Route::post('/departamentos', [DepartamentoController::class, 'store'])->name('departamentos.store');
     Route::get('/departamentos/{departamento}', [DepartamentoController::class, 'show'])->name('departamentos.show');
-    Route::get('/departamentos/{departamento}/edit', [DepartamentoController::class, 'edit'])->name('departamentos.edit');
     Route::put('/departamentos/{departamento}', [DepartamentoController::class, 'update'])->name('departamentos.update');
     Route::delete('/departamentos/{departamento}', [DepartamentoController::class, 'destroy'])->name('departamentos.destroy');
 });
 Route::middleware(['auth'])->group(function () {
     Route::view('unidades', 'layouts.unidad.unidad_index')->name('unidades');
-    Route::get('/unidades/create', [UnidadMedidaController::class, 'create'])->name('unidades.create');
     Route::post('/unidades', [UnidadMedidaController::class, 'store'])->name('unidades.store');
     Route::get('/unidades/{unidad}', [UnidadMedidaController::class, 'show'])->name('unidades.show');
-    Route::get('/unidades/{unidad}/edit', [UnidadMedidaController::class, 'edit'])->name('unidades.edit');
     Route::put('/unidades/{unidad}', [UnidadMedidaController::class, 'update'])->name('unidades.update');
     Route::delete('/unidades/{unidad}', [UnidadMedidaController::class, 'destroy'])->name('unidades.destroy');
 });
 Route::middleware(['auth'])->group(function () {
     Route::view('tipo-insumos', 'layouts.tipo_insumo.tipo_insumo_index')->name('tipo-insumos.index');
-    Route::get('/tipo-insumos/create', [TipoInsumoController::class, 'create'])->name('tipo-insumos.create');
     Route::post('/tipo-insumos', [TipoInsumoController::class, 'store'])->name('tipo-insumos.store');
     Route::get('/tipo-insumos/{tipoInsumo}', [TipoInsumoController::class, 'show'])->name('tipo-insumos.show');
-    Route::get('/tipo-insumos/{tipoInsumo}/edit', [TipoInsumoController::class, 'edit'])->name('tipo-insumos.edit');
     Route::put('/tipo-insumos/{tipoInsumo}', [TipoInsumoController::class, 'update'])->name('tipo-insumos.update');
     Route::delete('/tipo-insumos/{tipoInsumo}', [TipoInsumoController::class, 'destroy'])->name('tipo-insumos.destroy');
     Route::get('/tipo-insumos/{tipoInsumo}/pdf', [TipoInsumoController::class, 'generatePdf'])->name('tipo-insumos.pdf');
@@ -86,20 +84,15 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::view('proveedores', 'layouts.proveedor.proveedor_index')->name('proveedores.index');
-    Route::get('/proveedores/create', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
     Route::get('/proveedores/{proveedor}', [ProveedorController::class, 'show'])->name('proveedores.show');
-    Route::get('/proveedores/{proveedor}/edit', [ProveedorController::class, 'edit'])->name('proveedores.edit');
     Route::put('/proveedores/{proveedor}', [ProveedorController::class, 'update'])->name('proveedores.update');
     Route::delete('/proveedores/{proveedor}', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
 });
 Route::middleware(['auth'])->group(function () {
     Route::view('facturas', 'layouts.factura.factura_index')->name('facturas.index');
-    Route::get('/facturas/create', [FacturaController::class, 'create'])->name('facturas.create');
     Route::post('/facturas', [FacturaController::class, 'store'])->name('facturas.store');
     Route::post('/facturas/upload', [FacturaController::class, 'upload'])->name('facturas.upload');
-    Route::get('/facturas/{factura}', [FacturaController::class, 'show'])->name('facturas.show');
-    Route::get('/facturas/{factura}/edit', [FacturaController::class, 'edit'])->name('facturas.edit');
     Route::put('/facturas/{factura}', [FacturaController::class, 'update'])->name('facturas.update');
     Route::delete('/facturas/{factura}', [FacturaController::class, 'destroy'])->name('facturas.destroy');
     Route::get('/facturas/{factura}/download', [FacturaController::class, 'download'])->name('facturas.download');

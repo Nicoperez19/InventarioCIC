@@ -55,7 +55,7 @@ class ReporteConsumoDepartamentoController extends Controller
         $sheet1 = $spreadsheet->getActiveSheet();
         $sheet1->setTitle('Consumo por Departamento');
         
-        $sheet1->setCellValue('A1', 'Reporte de Consumo por Departamento - GestionCIC');
+        $sheet1->setCellValue('A1', 'Reporte de Consumo por Departamento - InventarioCIC');
         $sheet1->mergeCells('A1:F1');
         $sheet1->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet1->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);

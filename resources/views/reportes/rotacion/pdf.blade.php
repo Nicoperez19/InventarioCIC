@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Rotación de Inventario - GestionCIC</title>
+    <title>Reporte de Rotación de Inventario - InventarioCIC</title>
     <style>
         * {
             margin: 0;
@@ -127,7 +127,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Gestión de Insumos - GestionCIC</h1>
+        <h1>Gestión de Insumos - InventarioCIC</h1>
         <div class="subtitle">Reporte de Rotación de Inventario - Período {{ ucfirst($tipoPeriodo) }}</div>
     </div>
 
@@ -261,7 +261,7 @@
     </div>
 
     <div class="footer">
-        <p>Reporte generado el {{ $fecha }} por el sistema GestionCIC</p>
+        <p>Reporte generado el {{ $fecha }} por el sistema InventarioCIC</p>
         <p>Este es un documento generado automáticamente</p>
     </div>
 </body>

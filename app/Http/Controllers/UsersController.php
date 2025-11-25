@@ -2,11 +2,14 @@
 namespace App\Http\Controllers;
 use App\Models\Departamento;
 use App\Models\User;
+use App\Services\BarcodeService;
 use App\Services\UserService;
+use Illuminate\Http\BinaryFileResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 class UsersController extends Controller
@@ -453,6 +456,183 @@ class UsersController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener permisos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Genera un código de barras para un usuario
+     */
+    public function generateBarcode(User $user): JsonResponse
+    {
+        try {
+            $barcodeService = new BarcodeService();
+            
+            // Eliminar todas las imágenes anteriores del usuario si existen
+            if ($user->codigo_barra) {
+                $barcodeService->deleteUserBarcodeImage($user->codigo_barra);
+            }
+            $barcodeService->deleteAllUserBarcodeImages($user);
+            
+            // Generar nuevo código de barras basado en el RUN
+            $codigoBarra = $barcodeService->generateUserBarcode($user->run);
+            
+            // Actualizar el usuario con el nuevo código
+            $user->codigo_barra = $codigoBarra;
+            $user->save();
+            
+            // Generar las imágenes (PNG y SVG)
+            $barcodeService->generateUserBarcodeImage($codigoBarra);
+            $barcodeService->generateUserBarcodeSVG($codigoBarra);
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'codigo_barra' => $codigoBarra,
+                    'url' => $barcodeService->getUserBarcodeUrl($codigoBarra)
+                ],
+                'message' => 'Código de barras generado exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar código de barras: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Muestra la imagen PNG del código de barras de un usuario
+     */
+    public function downloadBarcodeImage(User $user)
+    {
+        if (!$user->codigo_barra) {
+            abort(404, 'El usuario no tiene código de barras asignado');
+        }
+
+        $barcodeService = new BarcodeService();
+        
+        // Asegurar que la imagen existe
+        $imagePath = $barcodeService->generateUserBarcodeImage($user->codigo_barra);
+        $fullPath = storage_path('app/public/' . $imagePath);
+
+        if (!file_exists($fullPath)) {
+            abort(404, 'No se pudo generar la imagen del código de barras');
+        }
+
+        // Si es una petición AJAX o para mostrar, devolver la imagen
+        if (request()->wantsJson() || request()->has('preview')) {
+            return response()->file($fullPath, ['Content-Type' => 'image/png']);
+        }
+
+        // Si es para descargar, usar download
+        return response()->download($fullPath, "codigo_barras_{$user->run}.png");
+    }
+
+    /**
+     * Descarga la imagen SVG del código de barras de un usuario
+     */
+    public function downloadBarcodeSvg(User $user): BinaryFileResponse
+    {
+        if (!$user->codigo_barra) {
+            abort(404, 'El usuario no tiene código de barras asignado');
+        }
+
+        $barcodeService = new BarcodeService();
+        $imagePath = $barcodeService->generateUserBarcodeSVG($user->codigo_barra);
+        $fullPath = storage_path('app/public/' . $imagePath);
+
+        if (!file_exists($fullPath)) {
+            abort(404, 'No se pudo generar la imagen SVG del código de barras');
+        }
+
+        return response()->download($fullPath, "codigo_barras_{$user->run}.svg");
+    }
+
+    /**
+     * Genera códigos de barras para todos los usuarios
+     * Elimina todas las imágenes existentes y genera nuevos códigos únicos
+     */
+    public function generateAllBarcodes(): JsonResponse
+    {
+        try {
+            DB::beginTransaction();
+            
+            $barcodeService = new BarcodeService();
+            
+            // Obtener todos los usuarios
+            $users = User::all();
+            
+            // Eliminar todas las imágenes de códigos de barras de usuarios
+            $directory = "codigos_usuarios";
+            if (Storage::disk('public')->exists($directory)) {
+                $files = Storage::disk('public')->files($directory);
+                foreach ($files as $file) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
+            
+            // Generar códigos únicos para cada usuario
+            $generated = 0;
+            $errors = [];
+            $usedBarcodes = [];
+            
+            foreach ($users as $user) {
+                try {
+                    // Generar código de barras basado en el RUN
+                    $codigoBarra = $barcodeService->generateUserBarcode($user->run);
+                    
+                    // Verificar que el código no esté duplicado
+                    $attempts = 0;
+                    while (in_array($codigoBarra, $usedBarcodes) || User::where('codigo_barra', $codigoBarra)->where('run', '!=', $user->run)->exists()) {
+                        // Si hay duplicado, agregar un sufijo único
+                        $codigoBarra = $barcodeService->generateUserBarcode($user->run . '-' . $attempts);
+                        $attempts++;
+                        
+                        // Prevenir bucle infinito
+                        if ($attempts > 100) {
+                            throw new \Exception("No se pudo generar un código único para el usuario {$user->run} después de 100 intentos");
+                        }
+                    }
+                    
+                    // Actualizar el usuario con el nuevo código
+                    $user->codigo_barra = $codigoBarra;
+                    $user->save();
+                    
+                    // Agregar a la lista de códigos usados
+                    $usedBarcodes[] = $codigoBarra;
+                    
+                    // Generar las imágenes (PNG y SVG)
+                    $barcodeService->generateUserBarcodeImage($codigoBarra);
+                    $barcodeService->generateUserBarcodeSVG($codigoBarra);
+                    
+                    $generated++;
+                } catch (\Exception $e) {
+                    $errors[] = [
+                        'user' => $user->run,
+                        'nombre' => $user->nombre,
+                        'error' => $e->getMessage()
+                    ];
+                }
+            }
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Se generaron códigos de barras para {$generated} usuario(s)" . (count($errors) > 0 ? ". Hubo " . count($errors) . " error(es)." : ""),
+                'data' => [
+                    'generated' => $generated,
+                    'total' => $users->count(),
+                    'errors' => $errors
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar códigos de barras: ' . $e->getMessage()
             ], 500);
         }
     }

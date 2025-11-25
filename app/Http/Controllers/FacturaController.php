@@ -54,31 +54,6 @@ class FacturaController extends Controller
             ], 500);
         }
     }
-    public function create()
-    {
-        $proveedores = Proveedor::orderBy('nombre_proveedor')->get();
-        return view('layouts.factura.factura_create', compact('proveedores'));
-    }
-
-    public function show(Factura $factura)
-    {
-            if ($factura->run !== Auth::user()->run) {
-            abort(403, 'No tienes permisos para ver esta factura');
-            }
-            $factura->load('proveedor');
-        return view('layouts.factura.factura_show', compact('factura'));
-    }
-
-    public function edit(Factura $factura)
-    {
-        if ($factura->run !== Auth::user()->run) {
-            abort(403, 'No tienes permisos para editar esta factura');
-        }
-        $proveedores = Proveedor::orderBy('nombre_proveedor')->get();
-        $factura->load('proveedor');
-        return view('layouts.factura.factura_update', compact('factura', 'proveedores'));
-    }
-
     public function store(Request $request): JsonResponse
     {
         try {
@@ -161,7 +136,7 @@ class FacturaController extends Controller
         
             $factura->update($facturaData);
         
-        return redirect()->route('facturas.show', $factura)
+        return redirect()->route('facturas.index')
             ->with('success', 'Factura actualizada exitosamente.');
     }
     public function destroy(Factura $factura)

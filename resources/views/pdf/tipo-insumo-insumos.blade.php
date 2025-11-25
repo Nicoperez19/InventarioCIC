@@ -157,7 +157,7 @@
 
 <body>
     <div class="header">
-        <h1>Gestión de Insumos - GestionCIC</h1>
+        <h1>Gestión de Insumos - InventarioCIC</h1>
         <div class="subtitle">Reporte de Insumos por Tipo</div>
     </div>
 

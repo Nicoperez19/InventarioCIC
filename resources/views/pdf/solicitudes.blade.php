@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Solicitudes - GestionCIC</title>
+    <title>Reporte de Solicitudes - InventarioCIC</title>
     <style>
         * {
             margin: 0;
@@ -163,7 +163,7 @@
 
 <body>
     <div class="header">
-        <h1>Gestión de Solicitudes - GestionCIC</h1>
+        <h1>Gestión de Solicitudes - InventarioCIC</h1>
         <div class="subtitle">Reporte de Solicitudes de Insumos</div>
     </div>
 
@@ -277,7 +277,7 @@
     @endif
 
     <div class="footer">
-        <p>Generado el {{ $fecha }} | GestionCIC - Sistema de Gestión de Insumos</p>
+        <p>Generado el {{ $fecha }} | InventarioCIC - Sistema de Gestión de Insumos</p>
     </div>
 </body>
 

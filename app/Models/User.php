@@ -20,6 +20,7 @@ class User extends Authenticatable
         'correo',
         'contrasena',
         'id_depto',
+        'codigo_barra',
     ];
     
     /**
