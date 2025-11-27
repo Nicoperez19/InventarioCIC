@@ -16,7 +16,7 @@ jobs:
 
       # --- PHP ---
       - name: Setup PHP
-        uses: shivammathur/setup-php@v3
+        uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: mbstring, pdo_mysql, zip, intl, gd
@@ -66,14 +66,15 @@ jobs:
           name: deploy-artifact
           path: .
 
+      # --- LOGIN TO AZURE USING SERVICE PRINCIPAL ---
       - name: Azure Login
-        uses: azure/login@v3
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # --- DEPLOY TO AZURE USING SERVICE PRINCIPAL ---
+      # --- DEPLOY ---
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: "InventarioCIC"
-          package: ./deploy.zip
+          package: "./deploy.zip"
