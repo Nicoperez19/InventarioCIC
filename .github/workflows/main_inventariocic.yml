@@ -1,4 +1,4 @@
-name: Build and deploy PHP app to Azure Web App - GestionCIC
+name: Build and deploy Laravel to Azure Web App - InventarioCIC
 
 on:
   push:
@@ -9,73 +9,75 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       # --- PHP ---
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          extensions: mbstring, pdo_mysql, zip, intl, gd
+          coverage: none
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+        run: composer install --no-dev --optimize-autoloader
 
       # --- NODE + VITE ---
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 18
 
-      - name: Install NPM dependencies
-        run: npm ci
-
-      - name: Build frontend (Vite)
-        run: npm run build
-
-      # --- Laravel optimizations ---
-      - name: Generate app key (if needed)
-        run: php artisan key:generate --force || true
-
-      - name: Laravel cache optimization
+      - name: Install frontend dependencies and build
         run: |
+          npm install
+          npm run build
+
+      # --- Laravel production optimizations ---
+      - name: Optimize Laravel
+        run: |
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
           php artisan config:cache
           php artisan route:cache
-          php artisan view:cache
 
-      # --- Upload artifact ---
-      - name: Upload artifact for deployment job
+      # --- Build artifact ZIP ---
+      - name: Create deployment ZIP
+        run: zip -r deploy.zip . -x "node_modules/*" -x ".git/*" -x ".github/*"
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-app
-          path: ./
+          name: deploy-artifact
+          path: deploy.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: php-app
+          name: deploy-artifact
+          path: .
 
-      - name: Login to Azure
+      - name: Azure login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6DD4B815020C4EC187DB48CD1560964F }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6480321142BA4BCE9E9E697718E642C9 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2D1568E80C244BD79CFE780BF09201DE }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
-          app-name: 'GestionCIC'
-          slot-name: 'Production'
-          package: .
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          slot-name: Production
+          package: "deploy.zip"
+
+      - name: Deployment status
+        if: always()
+        run: echo "Deployment completed"
