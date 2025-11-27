@@ -71,11 +71,11 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Deploy using azure/webapps-deploy
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          slot-name: Production
           package: "deploy.zip"
 
       - name: Deployment status
