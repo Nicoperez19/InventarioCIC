@@ -83,15 +83,34 @@ jobs:
             echo "ERROR: AZUREAPPSERVICE_PUBLISHPROFILE secret is not set!"
             exit 1
           else
-            echo "Publish profile secret is configured"
+            echo "Publish profile secret is configured (length: ${#AZUREAPPSERVICE_PUBLISHPROFILE})"
+            # Verificar que contiene XML
+            if echo "${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}" | grep -q "<?xml"; then
+              echo "Publish profile appears to be valid XML"
+            else
+              echo "WARNING: Publish profile may not be valid XML"
+            fi
           fi
 
       # --- DEPLOY TO AZURE USING PUBLISH PROFILE ---
       - name: Deploy to Azure Web App
+        id: deploy
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'InventarioCIC'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: ./deploy.zip
+        continue-on-error: false
+
+      - name: Deployment status
+        if: always()
+        run: |
+          if [ "${{ steps.deploy.outcome }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+          else
+            echo "❌ Deployment failed!"
+            echo "Check the logs above for details"
+            exit 1
+          fi
 
