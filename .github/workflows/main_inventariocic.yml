@@ -16,7 +16,7 @@ jobs:
 
       # --- PHP ---
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@v3
         with:
           php-version: '8.3'
           extensions: mbstring, pdo_mysql, zip, intl, gd
@@ -67,7 +67,7 @@ jobs:
           path: .
 
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
