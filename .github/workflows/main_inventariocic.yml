@@ -36,7 +36,7 @@ jobs:
           npm install
           npm run build
 
-      # --- Laravel optimizations ---
+      # --- Laravel production optimizations ---
       - name: Optimize Laravel
         run: |
           php artisan config:clear
@@ -66,51 +66,18 @@ jobs:
           name: deploy-artifact
           path: .
 
-      - name: Verify deployment package
-        run: |
-          ls -la
-          if [ -f deploy.zip ]; then
-            echo "Deploy ZIP found"
-            ls -lh deploy.zip
-          else
-            echo "ERROR: deploy.zip not found!"
-            exit 1
-          fi
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Verify publish profile secret
-        run: |
-          if [ -z "${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}" ]; then
-            echo "ERROR: AZUREAPPSERVICE_PUBLISHPROFILE secret is not set!"
-            exit 1
-          else
-            echo "Publish profile secret is configured (length: ${#AZUREAPPSERVICE_PUBLISHPROFILE})"
-            # Verificar que contiene XML
-            if echo "${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}" | grep -q "<?xml"; then
-              echo "Publish profile appears to be valid XML"
-            else
-              echo "WARNING: Publish profile may not be valid XML"
-            fi
-          fi
-
-      # --- DEPLOY TO AZURE USING PUBLISH PROFILE ---
+      # Deploy using azure/webapps-deploy
       - name: Deploy to Azure Web App
-        id: deploy
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'InventarioCIC'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: ./deploy.zip
-        continue-on-error: false
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          package: "deploy.zip"
 
       - name: Deployment status
         if: always()
-        run: |
-          if [ "${{ steps.deploy.outcome }}" == "success" ]; then
-            echo "✅ Deployment successful!"
-          else
-            echo "❌ Deployment failed!"
-            echo "Check the logs above for details"
-            exit 1
-          fi
-
+        run: echo "Deployment completed"
