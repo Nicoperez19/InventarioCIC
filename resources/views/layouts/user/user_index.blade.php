@@ -1,3 +1,6 @@
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -69,15 +72,20 @@
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     <!-- RUN -->
                     <div>
-                        <label for="run" class="block mb-2 text-sm font-medium text-gray-700">
+                        <x-input-label for="run" class="font-semibold text-primary-700">
                             RUN <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="run" name="run" required
-                               class="w-full px-3 py-2 transition-colors border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                               placeholder="12.345.678-9" maxlength="20">
-                        @error('run')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        </x-input-label>
+                        <div class="relative mt-2">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <input type="text" id="run" name="run" required
+                                   class="block w-full py-3 pl-10 pr-3 transition-all duration-200 border shadow-sm border-neutral-300 rounded-xl placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 hover:border-primary-300"
+                                   placeholder="12.345.678-9" maxlength="20" oninput="formatRun(this)">
+                        </div>
+                        <x-input-error :messages="$errors->get('run')" class="mt-2" />
                     </div>
 
                     <!-- Nombre -->
@@ -367,9 +375,220 @@
     </x-modal>
 
     <script>
+        // Bandera para prevenir recursión infinita
+        let isFormatting = false;
+
+        function formatRun(input) {
+            // Si ya estamos formateando, salir para evitar recursión
+            if (isFormatting) {
+                return;
+            }
+            
+            // Usar requestAnimationFrame para asegurar que el valor se capture después de que el navegador actualice el DOM
+            requestAnimationFrame(() => {
+                // Si ya estamos formateando, salir
+                if (isFormatting) {
+                    return;
+                }
+                
+                // Marcar que estamos formateando
+                isFormatting = true;
+                
+                try {
+                    // Guardar la posición del cursor
+                    const cursorPosition = input.selectionStart;
+                    const oldValue = input.value;
+                    
+                    // Limpiar y formatear el valor - capturar el valor actual del input
+                    let value = input.value.replace(/[^0-9kK]/g, '').toUpperCase();
+                    
+                    // Formatear según la longitud
+                    let formattedValue;
+                    if (value.length <= 7) {
+                        formattedValue = value;
+                    } else if (value.length === 8) {
+                        // 8 dígitos: primeros 7 + guion + último dígito
+                        formattedValue = value.substring(0, 7) + '-' + value.substring(7, 8);
+                    } else if (value.length === 9) {
+                        // 9 dígitos: primeros 8 + guion + último dígito
+                        formattedValue = value.substring(0, 8) + '-' + value.substring(8, 9);
+                    } else {
+                        // Más de 9 dígitos: tomar solo los primeros 8 + guion + 9no dígito
+                        formattedValue = value.substring(0, 8) + '-' + value.substring(8, 9);
+                    }
+                    
+                    // Calcular nueva posición del cursor basándose en los dígitos
+                    let newCursorPosition = cursorPosition;
+                    
+                    // Contar dígitos antes del cursor en el valor anterior
+                    const oldDigitsOnly = oldValue.replace(/[^0-9kK]/g, '');
+                    const digitsBeforeCursor = oldValue.substring(0, cursorPosition).replace(/[^0-9kK]/g, '').length;
+                    
+                    // Si se agregó un guion (no había guion antes pero ahora sí)
+                    if (!oldValue.includes('-') && formattedValue.includes('-')) {
+                        // Se agregó el guion: colocar cursor al final para que el usuario vea el último dígito
+                        newCursorPosition = formattedValue.length;
+                    } else if (oldValue.includes('-') && formattedValue.includes('-')) {
+                        // Ya tenía guion: calcular posición basándose en dígitos antes del cursor
+                        const newDashIndex = formattedValue.indexOf('-');
+                        
+                        if (digitsBeforeCursor <= 7) {
+                            // Cursor estaba antes del guion: mantener posición relativa a los dígitos
+                            newCursorPosition = Math.min(digitsBeforeCursor, newDashIndex);
+                        } else {
+                            // Cursor estaba después del guion: ajustar posición
+                            newCursorPosition = newDashIndex + 1 + Math.min(digitsBeforeCursor - 7, formattedValue.length - newDashIndex - 1);
+                        }
+                    } else if (oldValue.includes('-') && !formattedValue.includes('-')) {
+                        // Se eliminó el guion: mantener posición relativa a los dígitos
+                        newCursorPosition = Math.min(digitsBeforeCursor, formattedValue.length);
+                    } else {
+                        // Sin guion en ambos: mantener posición relativa a los dígitos
+                        newCursorPosition = Math.min(digitsBeforeCursor, formattedValue.length);
+                    }
+                    
+                    // Asegurar que la posición del cursor sea válida
+                    newCursorPosition = Math.max(0, Math.min(newCursorPosition, formattedValue.length));
+                    
+                    // Actualizar el valor
+                    input.value = formattedValue;
+                    
+                    // Ajustar la posición del cursor
+                    setTimeout(() => {
+                        input.setSelectionRange(newCursorPosition, newCursorPosition);
+                    }, 0);
+                    
+                } finally {
+                    // Siempre liberar la bandera después de un breve delay
+                    setTimeout(() => {
+                        isFormatting = false;
+                    }, 10);
+                }
+            });
+        }
+    </script>
+
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Cargar permisos al iniciar
             loadPermissions();
+            
+            // Manejo del formulario de crear usuario
+            const createForm = document.getElementById('create-user-form');
+            if (createForm) {
+                createForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(createForm);
+                    const submitButton = createForm.querySelector('button[type="submit"]');
+                    const originalText = submitButton.innerHTML;
+                    
+                    // Recopilar permisos seleccionados
+                    const permissions = [];
+                    const checkedCheckboxes = document.querySelectorAll('.permission-checkbox:checked');
+                    checkedCheckboxes.forEach(cb => {
+                        if (cb && cb.value) {
+                            permissions.push(cb.value);
+                        }
+                    });
+                    
+                    // Agregar permisos al FormData
+                    formData.delete('permissions[]');
+                    permissions.forEach(perm => {
+                        formData.append('permissions[]', perm);
+                    });
+                    
+                    // Deshabilitar botón durante el envío
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Creando...';
+                    
+                    // Obtener token CSRF
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token');
+                    
+                    fetch(createForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                // Si hay errores de validación, mostrarlos
+                                if (response.status === 422 && data.errors) {
+                                    const errorMessages = Object.values(data.errors).flat().join('\n');
+                                    throw new Error(errorMessages || data.message || 'Error de validación');
+                                }
+                                throw new Error(data.message || 'Error en la respuesta del servidor');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Restaurar botón
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        
+                        if (data.success) {
+                            // Cerrar modal
+                            window.dispatchEvent(new CustomEvent('close-modal'));
+                            
+                            // Limpiar formulario
+                            createForm.reset();
+                            
+                            // Desmarcar todos los permisos
+                            document.querySelectorAll('.permission-checkbox').forEach(cb => {
+                                if (cb) cb.checked = false;
+                            });
+                            
+                            // Mostrar Sweet Alert de éxito
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Usuario creado exitosamente!',
+                                text: data.message || 'El usuario ha sido creado correctamente.',
+                                confirmButtonText: 'Aceptar',
+                                confirmButtonColor: '#10b981',
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                            
+                            // Actualizar tabla de usuarios
+                            if (window.Livewire) {
+                                const usersTableComponent = Livewire.find('tables.users-table');
+                                if (usersTableComponent && usersTableComponent.$wire) {
+                                    usersTableComponent.$wire.$refresh();
+                                }
+                            }
+                        } else {
+                            // Mostrar error con Sweet Alert
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error al crear usuario',
+                                text: data.message || 'Ocurrió un error al crear el usuario.',
+                                confirmButtonText: 'Aceptar',
+                                confirmButtonColor: '#ef4444'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        // Restaurar botón
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                        
+                        // Mostrar error con Sweet Alert
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al crear usuario',
+                            text: error.message || 'Ocurrió un error al crear el usuario. Por favor, intenta nuevamente.',
+                            confirmButtonText: 'Aceptar',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    });
+                });
+            }
             
             // Funcionalidad para seleccionar/deseleccionar todos los permisos de un módulo
             document.querySelectorAll('.module-select-all').forEach(function(selectAllCheckbox) {
