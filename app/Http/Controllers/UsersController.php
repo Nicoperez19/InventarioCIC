@@ -22,6 +22,9 @@ class UsersController extends Controller
     }
     public function index(Request $request): JsonResponse
     {
+        // Verificar permiso para acceder a usuarios
+        abort_if(!auth()->user()->can('mantenedor de usuarios'), 403, 'No tienes permisos para acceder a esta página.');
+        
         try {
             $query = User::with(['departamento'])
                 ->orderByName();

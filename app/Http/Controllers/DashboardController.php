@@ -17,6 +17,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        abort_if(!auth()->user()->can('dashboard'), 403, 'No tienes permisos para acceder a esta página.');
+        
         $stats = $this->getDashboardStats();
         
         return view('layouts.dashboard.dashboard', compact('stats'));

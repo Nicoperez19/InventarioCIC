@@ -13,6 +13,9 @@
                 <p class="mt-2 text-sm text-gray-600">
                     {{ $message ?? 'No tienes permisos para acceder a esta página.' }}
                 </p>
+                <p class="mt-4 text-xs text-gray-500">
+                    Si crees que esto es un error, contacta al administrador del sistema.
+                </p>
             </div>
             
             <div class="mt-8 space-y-4">
