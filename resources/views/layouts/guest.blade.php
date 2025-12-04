@@ -16,26 +16,26 @@
         @livewireStyles
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gradient-to-b from-secondary-500 via-primary-500 to-primary-700 flex flex-col justify-center items-center p-4">
+        <div class="h-screen bg-gradient-to-b from-secondary-500 via-primary-500 to-primary-700 flex flex-col justify-center items-center p-2 sm:p-3 overflow-hidden">
             <!-- Logo y Título -->
-            <div class="text-center mb-8">
+            <div class="text-center mb-2 sm:mb-3 flex-shrink-0">
                 <!-- Logo -->
-                <div class="flex justify-center mb-4">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo InventarioCIC" class="h-32 w-auto">
+                <div class="flex justify-center mb-1.5 sm:mb-2">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo InventarioCIC" class="h-32 sm:h-40 md:h-44 w-auto">
                 </div>
-                <h1 class="text-4xl font-bold text-white mb-2">InventarioCIC</h1>
-                <p class="text-white/90 text-lg">Sistema de Gestión de Inventario</p>
+                <h1 class="text-xl sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">InventarioCIC</h1>
+                <p class="text-white/90 text-xs sm:text-sm">Sistema de Gestión de Inventario</p>
             </div>
 
             <!-- Card de login -->
-            <div class="w-full max-w-md">
-                <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/30">
+            <div class="w-full max-w-md flex-shrink-0">
+                <div class="bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-5 md:p-6 border border-white/30">
                     {{ $slot }}
                 </div>
 
                 <!-- Footer -->
-                <div class="text-center mt-6">
-                    <p class="text-white/70 text-sm">
+                <div class="text-center mt-2 sm:mt-3 flex-shrink-0">
+                    <p class="text-white/70 text-xs">
                         © {{ date('Y') }} InventarioCIC. Todos los derechos reservados.
                     </p>
                 </div>
