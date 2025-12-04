@@ -302,8 +302,7 @@
 
                                 @if($solicitud->estado === 'pendiente')
                                     <!-- Aprobar -->
-                                    <button wire:click="aprobarSolicitud({{ $solicitud->id }})"
-                                            wire:confirm="¿Estás seguro de aprobar esta solicitud?"
+                                    <button onclick="confirmarAprobarSolicitud({{ $solicitud->id }}, '{{ $solicitud->numero_solicitud }}')"
                                             class="inline-flex items-center justify-center px-2 py-1.5 text-xs font-medium transition-all duration-150 border border-transparent rounded-md text-success-600 bg-success-50 hover:bg-success-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success-400"
                                             title="Aprobar solicitud">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,8 +311,7 @@
                                     </button>
 
                                     <!-- Rechazar -->
-                                    <button wire:click="rechazarSolicitud({{ $solicitud->id }})"
-                                            wire:confirm="¿Estás seguro de rechazar esta solicitud?"
+                                    <button onclick="confirmarRechazarSolicitud({{ $solicitud->id }}, '{{ $solicitud->numero_solicitud }}')"
                                             class="inline-flex items-center justify-center px-2 py-1.5 text-xs font-medium transition-colors duration-150 border border-transparent rounded-md text-danger-600 bg-danger-50 hover:bg-danger-600 hover:text-white active:bg-danger-700 active:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger-500"
                                             title="Rechazar solicitud">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,8 +322,7 @@
 
                                 @if($solicitud->estado === 'aprobada')
                                     <!-- Entregar -->
-                                    <button wire:click="entregarSolicitud({{ $solicitud->id }})"
-                                            wire:confirm="¿Marcar esta solicitud como entregada?"
+                                    <button onclick="confirmarEntregarSolicitud({{ $solicitud->id }}, '{{ $solicitud->numero_solicitud }}')"
                                             class="inline-flex items-center justify-center px-2 py-1.5 text-xs font-medium transition-all duration-150 border border-transparent rounded-md text-primary-600 bg-primary-50 hover:bg-primary-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400"
                                             title="Marcar como entregada">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,5 +394,88 @@ function toggleDetails(solicitudId) {
         detailsRow.classList.add('hidden');
     }
 }
+
+// Funciones para confirmaciones personalizadas con diseño mejorado
+function confirmarAprobarSolicitud(solicitudId, numeroSolicitud) {
+    if (window.confirmAction) {
+        window.confirmAction({
+            title: 'Confirmar Aprobación',
+            message: `¿Estás seguro de aprobar la solicitud #${numeroSolicitud}? Esta acción cambiará el estado de la solicitud a "Aprobada".`,
+            confirmText: 'Sí, aprobar',
+            cancelText: 'Cancelar'
+        })
+        .then(function() {
+            // Llamar al método de Livewire para aprobar
+            @this.aprobarSolicitud(solicitudId);
+        })
+        .catch(function() {
+            // Usuario canceló
+        });
+    } else {
+        // Fallback si no está disponible el sistema de confirmación
+        if (confirm('¿Estás seguro de aprobar esta solicitud?')) {
+            @this.aprobarSolicitud(solicitudId);
+        }
+    }
+}
+
+function confirmarRechazarSolicitud(solicitudId, numeroSolicitud) {
+    if (window.confirmAction) {
+        window.confirmAction({
+            title: 'Confirmar Rechazo',
+            message: `¿Estás seguro de rechazar la solicitud #${numeroSolicitud}? Esta acción cambiará el estado de la solicitud a "Rechazada" y no se podrá deshacer.`,
+            confirmText: 'Sí, rechazar',
+            cancelText: 'Cancelar'
+        })
+        .then(function() {
+            // Llamar al método de Livewire para rechazar
+            @this.rechazarSolicitud(solicitudId);
+        })
+        .catch(function() {
+            // Usuario canceló
+        });
+    } else {
+        // Fallback si no está disponible el sistema de confirmación
+        if (confirm('¿Estás seguro de rechazar esta solicitud?')) {
+            @this.rechazarSolicitud(solicitudId);
+        }
+    }
+}
+
+function confirmarEntregarSolicitud(solicitudId, numeroSolicitud) {
+    if (window.confirmAction) {
+        window.confirmAction({
+            title: 'Confirmar Entrega',
+            message: `¿Marcar la solicitud #${numeroSolicitud} como entregada? Esta acción cambiará el estado de la solicitud a "Entregada".`,
+            confirmText: 'Sí, marcar como entregada',
+            cancelText: 'Cancelar'
+        })
+        .then(function() {
+            // Llamar al método de Livewire para entregar
+            @this.entregarSolicitud(solicitudId);
+        })
+        .catch(function() {
+            // Usuario canceló
+        });
+    } else {
+        // Fallback si no está disponible el sistema de confirmación
+        if (confirm('¿Marcar esta solicitud como entregada?')) {
+            @this.entregarSolicitud(solicitudId);
+        }
+    }
+}
+
+// Escuchar evento de Livewire para mostrar notificación modal centrada como en otros módulos
+document.addEventListener('livewire:init', function() {
+    Livewire.on('solicitud-aprobada-exito', function(data) {
+        // Esperar un poco para que se complete la transacción
+        setTimeout(function() {
+            const mensaje = data && data[0] ? data[0].mensaje : (data?.mensaje || data);
+            if (window.notifySuccess && mensaje) {
+                window.notifySuccess(mensaje);
+            }
+        }, 100);
+    });
+});
 </script>
 

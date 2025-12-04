@@ -20,5 +20,9 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultView('vendor.livewire.tailwind');
         Paginator::defaultSimpleView('vendor.livewire.simple-tailwind');
         date_default_timezone_set('America/Santiago');
+
+        if (config('app.env') == 'production') {
+            \URL::forceScheme('https');
+        }
     }
 }

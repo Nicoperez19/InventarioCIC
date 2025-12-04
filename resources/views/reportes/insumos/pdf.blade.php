@@ -152,7 +152,7 @@
 
 <body>
     <div class="header">
-        <h1>Gestión de Insumos - GestionCIC</h1>
+        <h1>Gestión de Insumos - InventarioCIC</h1>
         <div class="subtitle">Reporte de Insumos - Período {{ ucfirst($tipoPeriodo) }}</div>
     </div>
 
@@ -257,7 +257,7 @@
     @endif
 
     <div class="footer">
-        <p>Generado el {{ $fecha }} | GestionCIC</p>
+        <p>Generado el {{ $fecha }} | InventarioCIC</p>
         <p>Este es un documento generado automáticamente</p>
     </div>
 </body>

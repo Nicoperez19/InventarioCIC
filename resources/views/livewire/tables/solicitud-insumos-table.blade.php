@@ -135,7 +135,54 @@
                 <!-- Header de la tarjeta -->
                 <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b-2 border-gray-200">
                     <h3 class="text-base font-bold text-gray-900 mb-2 leading-tight line-clamp-2">{{ $insumo->nombre_insumo }}</h3>
-                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
+                    @php
+                        $tipoNombre = $insumo->tipoInsumo ? trim(strtolower($insumo->tipoInsumo->nombre_tipo)) : 'sin tipo';
+                        // Normalizar: quitar acentos y espacios extra
+                        $tipoNormalizado = str_replace(['á', 'é', 'í', 'ó', 'ú', 'ñ'], ['a', 'e', 'i', 'o', 'u', 'n'], $tipoNombre);
+                        $tipoNormalizado = preg_replace('/\s+/', ' ', $tipoNormalizado);
+                        
+                        // Asignar colores basándose en palabras clave (orden de prioridad)
+                        $colorClase = 'bg-gray-100 text-gray-800'; // Por defecto
+                        
+                        // Verificar primero tipos específicos que pueden contener otras palabras
+                        if (strpos($tipoNormalizado, 'imprenta') !== false) {
+                            $colorClase = 'bg-rose-100 text-rose-800';
+                        } elseif (strpos($tipoNormalizado, 'informatica') !== false) {
+                            $colorClase = 'bg-blue-100 text-blue-800';
+                        } elseif (strpos($tipoNormalizado, 'aseo') !== false) {
+                            $colorClase = 'bg-green-100 text-green-800';
+                        } elseif (strpos($tipoNormalizado, 'oficina') !== false) {
+                            $colorClase = 'bg-purple-100 text-purple-800';
+                        } elseif (strpos($tipoNormalizado, 'limpieza') !== false) {
+                            $colorClase = 'bg-emerald-100 text-emerald-800';
+                        } elseif (strpos($tipoNormalizado, 'papeleria') !== false || strpos($tipoNormalizado, 'papel') !== false) {
+                            $colorClase = 'bg-orange-100 text-orange-800';
+                        } elseif (strpos($tipoNormalizado, 'tecnologia') !== false) {
+                            $colorClase = 'bg-indigo-100 text-indigo-800';
+                        } elseif (strpos($tipoNormalizado, 'mobiliario') !== false) {
+                            $colorClase = 'bg-amber-100 text-amber-800';
+                        } elseif (strpos($tipoNormalizado, 'equipo') !== false) {
+                            $colorClase = 'bg-cyan-100 text-cyan-800';
+                        } elseif (strpos($tipoNormalizado, 'herramienta') !== false) {
+                            $colorClase = 'bg-pink-100 text-pink-800';
+                        } elseif (strpos($tipoNormalizado, 'material') !== false) {
+                            $colorClase = 'bg-teal-100 text-teal-800';
+                        } else {
+                            // Si no coincide con ninguna palabra clave, asignar color basado en hash del nombre
+                            $hash = crc32($tipoNombre);
+                            $coloresAlternativos = [
+                                'bg-red-100 text-red-800',
+                                'bg-yellow-100 text-yellow-800',
+                                'bg-lime-100 text-lime-800',
+                                'bg-sky-100 text-sky-800',
+                                'bg-violet-100 text-violet-800',
+                                'bg-fuchsia-100 text-fuchsia-800',
+                                'bg-slate-100 text-slate-800',
+                            ];
+                            $colorClase = $coloresAlternativos[abs($hash) % count($coloresAlternativos)];
+                        }
+                    @endphp
+                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold {{ $colorClase }}">
                         {{ $insumo->tipoInsumo ? $insumo->tipoInsumo->nombre_tipo : 'Sin tipo' }}
                     </span>
                 </div>
@@ -251,6 +298,11 @@
                 </div>
             </div>
         @endforelse
+    </div>
+
+    <!-- Paginación -->
+    <div class="px-4 py-3 border-t bg-gray-50 border-neutral-200 rounded-lg mb-8">
+        {{ $insumos->links() }}
     </div>
 
     <!-- Detalle de Solicitud - Fijo al costado en desktop -->

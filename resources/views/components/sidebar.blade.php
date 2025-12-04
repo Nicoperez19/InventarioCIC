@@ -31,11 +31,11 @@
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent"></div>
             <div class="relative z-10 flex items-center">
                 <div class="p-2 mr-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo GestionCIC" class="w-auto h-10">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo InventarioCIC" class="w-auto h-10">
                 </div>
                 <h1 class="overflow-hidden text-xl font-semibold text-white transition-all duration-300 ease-in-out drop-shadow-sm"
                     :class="{ 'w-auto opacity-100': isSidebarOpen, 'w-0 opacity-0': !isSidebarOpen }">
-                    GestionCIC
+                    InventarioCIC
                 </h1>
             </div>
         </div>
