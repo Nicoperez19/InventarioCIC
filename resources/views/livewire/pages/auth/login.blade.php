@@ -9,14 +9,16 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public LoginForm $form;
 
-    public function login(): void
+    public function login()
     {
-        $this->validate();
-        $this->form->authenticate();
-        Session::regenerate();
-        
-        // Redirect al dashboard usando redirectIntended para respetar intended URL
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: false);
+        $success = $this->form->authenticate();
+
+        if ($success) {
+            Session::regenerate();
+
+            // Server-side redirect to intended URL (forces full navigation and preserves session)
+            return redirect()->intended(route('dashboard', [], false));
+        }
     }
 }; ?>
 
@@ -39,7 +41,7 @@ new #[Layout('layouts.guest')] class extends Component
                 </div>
                 <x-text-input wire:model="form.run" id="run" 
                     class="block w-full py-2 pl-8 sm:pl-9 pr-3 text-sm transition-all duration-200 border shadow-sm border-neutral-300 rounded-lg placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 hover:border-primary-300" 
-                    type="text" name="run" required autofocus autocomplete="username" 
+                    type="text" name="run" autofocus autocomplete="username" 
                     placeholder="12.345.678-9" oninput="formatRun(this)" />
             </div>
             <x-input-error :messages="$errors->get('form.run')" class="mt-1 text-xs" />
@@ -55,7 +57,7 @@ new #[Layout('layouts.guest')] class extends Component
                 </div>
                 <x-text-input wire:model="form.password" id="password" 
                     class="block w-full py-2 pl-8 sm:pl-9 pr-3 text-sm transition-all duration-200 border shadow-sm border-neutral-300 rounded-lg placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 hover:border-primary-300"
-                    type="password" name="password" required autocomplete="current-password" 
+                    type="password" name="password" autocomplete="current-password" 
                     placeholder="••••••••" />
             </div>
             <x-input-error :messages="$errors->get('form.password')" class="mt-1 text-xs" />
