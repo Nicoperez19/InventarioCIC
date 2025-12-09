@@ -17,6 +17,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Verificar permisos del usuario
         abort_if(!auth()->user()->can('dashboard'), 403, 'No tienes permisos para acceder a esta página.');
         
         $stats = $this->getDashboardStats();

@@ -376,23 +376,26 @@
 
     <script>
         // Bandera para prevenir recursión infinita
-        let isFormatting = false;
+        // Usar window para evitar redeclaración cuando Livewire navega
+        if (typeof window.userFormatting === 'undefined') {
+            window.userFormatting = false;
+        }
 
         function formatRun(input) {
             // Si ya estamos formateando, salir para evitar recursión
-            if (isFormatting) {
+            if (window.userFormatting) {
                 return;
             }
             
             // Usar requestAnimationFrame para asegurar que el valor se capture después de que el navegador actualice el DOM
             requestAnimationFrame(() => {
                 // Si ya estamos formateando, salir
-                if (isFormatting) {
+                if (window.userFormatting) {
                     return;
                 }
                 
                 // Marcar que estamos formateando
-                isFormatting = true;
+                window.userFormatting = true;
                 
                 try {
                     // Guardar la posición del cursor
@@ -461,7 +464,7 @@
                 } finally {
                     // Siempre liberar la bandera después de un breve delay
                     setTimeout(() => {
-                        isFormatting = false;
+                        window.userFormatting = false;
                     }, 10);
                 }
             });

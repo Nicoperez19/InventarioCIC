@@ -2,4 +2,4 @@
 
 use Illuminate\Support\Facades\Route;
 
-// APIs eliminadas - solo usando rutas web y controladores
+// Rutas API - vacío por ahora

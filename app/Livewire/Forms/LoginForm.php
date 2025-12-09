@@ -1,40 +1,45 @@
 <?php
 namespace App\Livewire\Forms;
-use App\Rules\RunValidation;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
+
 class LoginForm extends Form
 {
     #[Validate('required|string')]
     public string $run = '';
+    
     #[Validate('required|string')]
     public string $password = '';
+    
     #[Validate('boolean')]
     public bool $remember = false;
+    
     public function authenticate(): void
     {
+        // Verificar rate limiting
         $this->ensureIsNotRateLimited();
         
         // Formatear RUN antes de buscar
         $originalRun = $this->run;
-        $this->run = \App\Helpers\RunFormatter::format($this->run);
+        $formattedRun = \App\Helpers\RunFormatter::format($this->run);
         
         \Log::info('Intentando autenticar', [
             'run_original' => $originalRun,
-            'run_formateado' => $this->run,
+            'run_formateado' => $formattedRun,
             'password_length' => strlen($this->password),
         ]);
         
         // Buscar el usuario por RUN
-        $user = \App\Models\User::where('run', $this->run)->first();
+        $user = \App\Models\User::where('run', $formattedRun)->first();
         
         if (!$user) {
-            \Log::warning('Usuario no encontrado', ['run' => $this->run]);
+            \Log::warning('Usuario no encontrado', ['run' => $formattedRun]);
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
                 'form.run' => trans('auth.failed'),
@@ -44,34 +49,26 @@ class LoginForm extends Form
         \Log::info('Usuario encontrado', [
             'run' => $user->run,
             'nombre' => $user->nombre,
-            'password_hash_preview' => substr($user->contrasena, 0, 20) . '...',
         ]);
         
-        // Verificar credenciales manualmente
-        // Limpiar espacios en la contraseña
+        // Verificar credenciales
         $cleanPassword = trim($this->password);
-        $passwordValid = \Illuminate\Support\Facades\Hash::check($cleanPassword, $user->contrasena);
+        $passwordValid = Hash::check($cleanPassword, $user->contrasena);
         
         \Log::info('Verificación de contraseña', [
             'password_valid' => $passwordValid,
-            'password_provided' => $this->password,
-            'password_provided_length' => strlen($this->password),
-            'password_clean' => $cleanPassword,
-            'password_clean_length' => strlen($cleanPassword),
-            'password_has_spaces' => $this->password !== $cleanPassword,
-            'hash_preview' => substr($user->contrasena, 0, 30),
-            'hash_length' => strlen($user->contrasena),
+            'password_length' => strlen($cleanPassword),
         ]);
         
         if (!$passwordValid) {
-            \Log::warning('Contraseña inválida', ['run' => $this->run]);
+            \Log::warning('Contraseña inválida', ['run' => $formattedRun]);
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
                 'form.run' => trans('auth.failed'),
             ]);
         }
         
-        // Autenticar al usuario manualmente
+        // Autenticar al usuario
         Auth::login($user, $this->remember);
         RateLimiter::clear($this->throttleKey());
         
@@ -80,13 +77,16 @@ class LoginForm extends Form
             'remember' => $this->remember,
         ]);
     }
+    
     protected function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
+        
         event(new Lockout(request()));
         $seconds = RateLimiter::availableIn($this->throttleKey());
+        
         throw ValidationException::withMessages([
             'form.run' => trans('auth.throttle', [
                 'seconds' => $seconds,
@@ -94,8 +94,9 @@ class LoginForm extends Form
             ]),
         ]);
     }
+    
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->run).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->run) . '|' . request()->ip());
     }
 }

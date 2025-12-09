@@ -120,24 +120,6 @@ class TipoInsumoController extends Controller
             ], 500);
         }
     }
-    public function getAll(): JsonResponse
-    {
-        try {
-            $tiposInsumo = TipoInsumo::orderBy('nombre_tipo')
-                ->get(['id', 'nombre_tipo']);
-            return response()->json([
-                'success' => true,
-                'data' => $tiposInsumo,
-                'message' => 'Tipos de insumo obtenidos exitosamente'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener tipos de insumo: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function generatePdf(TipoInsumo $tipoInsumo)
     {
         try {

@@ -96,10 +96,9 @@ class User extends Authenticatable
     {
         return $this->attributes['correo'];
     }
-    public function getPasswordAttribute(): string
-    {
-        return $this->attributes['contrasena'];
-    }
+    // NOTA: Se eliminó getPasswordAttribute() por seguridad
+    // La contraseña debe accederse solo a través de getAuthPassword() o directamente con $user->contrasena
+    // y está oculta en el array $hidden para evitar exposición en JSON
     public static function findByEmail(string $email): ?self
     {
         return static::where('correo', $email)->first();

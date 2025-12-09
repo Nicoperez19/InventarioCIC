@@ -3,6 +3,7 @@ namespace App\Services;
 use App\Models\Insumo;
 use App\Models\TipoInsumo;
 use App\Models\UnidadMedida;
+use App\Models\Proveedor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -95,6 +96,8 @@ class ExcelImportService
             $nombreInsumo = $worksheet->getCell('C' . $row)->getValue();
             $unidadMedida = $worksheet->getCell('D' . $row)->getValue();
             $stockActual = $worksheet->getCell('E' . $row)->getValue();
+            $rutProveedor = $worksheet->getCell('F' . $row)->getValue();
+            $nombreProveedor = $worksheet->getCell('G' . $row)->getValue();
             
             if (empty($nombreInsumo)) {
                 $this->errors[] = "Fila {$row}: Nombre del insumo es requerido";
@@ -111,6 +114,15 @@ class ExcelImportService
                 $stockActual = (int) $stockActual;
             }
             
+            // Procesar proveedor si se proporciona RUT o nombre
+            $proveedorId = null;
+            if (!empty($rutProveedor) || !empty($nombreProveedor)) {
+                $proveedor = $this->findOrCreateProveedor($rutProveedor, $nombreProveedor, $row);
+                if ($proveedor) {
+                    $proveedorId = $proveedor->id;
+                }
+            }
+            
             $unidadMedidaId = $this->findOrCreateUnidadMedida($unidadMedida);
             $insumoExistente = Insumo::where('id_insumo', $codigoInsumo)->first();
             if ($insumoExistente) {
@@ -123,6 +135,7 @@ class ExcelImportService
                 'nombre_insumo' => $nombreInsumo,
                 'id_unidad' => $unidadMedidaId,
                 'tipo_insumo_id' => $tipoInsumoId,
+                'proveedor_id' => $proveedorId,
                 'stock_actual' => $stockActual,
                 'codigo_barra' => null
             ]);
@@ -153,6 +166,73 @@ class ExcelImportService
             ]);
         }
         return $unidad->id_unidad;
+    }
+    
+    private function findOrCreateProveedor($rut, $nombreProveedor, $row)
+    {
+        try {
+            // Si no hay RUT ni nombre, no hacer nada
+            if (empty($rut) && empty($nombreProveedor)) {
+                return null;
+            }
+            
+            // Si hay RUT, formatearlo y buscar por RUT
+            if (!empty($rut)) {
+                $rutFormateado = \App\Helpers\RunFormatter::format($rut);
+                $proveedor = Proveedor::where('rut', $rutFormateado)->first();
+                
+                if ($proveedor) {
+                    // Si existe y tiene nombre diferente, actualizar el nombre si está vacío en BD
+                    if (!empty($nombreProveedor) && empty($proveedor->nombre_proveedor)) {
+                        $proveedor->update(['nombre_proveedor' => $nombreProveedor]);
+                    }
+                    return $proveedor;
+                }
+            }
+            
+            // Si no se encontró por RUT, buscar por nombre
+            if (!empty($nombreProveedor)) {
+                $proveedor = Proveedor::where('nombre_proveedor', $nombreProveedor)->first();
+                if ($proveedor) {
+                    // Si existe y tiene RUT diferente, actualizar el RUT si está vacío en BD
+                    if (!empty($rut)) {
+                        $rutFormateado = \App\Helpers\RunFormatter::format($rut);
+                        if (empty($proveedor->rut)) {
+                            $proveedor->update(['rut' => $rutFormateado]);
+                        }
+                    }
+                    return $proveedor;
+                }
+            }
+            
+            // Si no existe, crear nuevo proveedor
+            // Validar que al menos tenga RUT o nombre
+            if (empty($rut) && empty($nombreProveedor)) {
+                return null;
+            }
+            
+            $data = [];
+            if (!empty($rut)) {
+                $data['rut'] = \App\Helpers\RunFormatter::format($rut);
+            }
+            if (!empty($nombreProveedor)) {
+                $data['nombre_proveedor'] = $nombreProveedor;
+            }
+            
+            // Si no hay RUT, generar uno temporal o usar el nombre como identificador
+            if (empty($data['rut'])) {
+                // Usar el nombre como base para un RUT temporal (solo para identificación)
+                $data['rut'] = 'TEMP-' . strtoupper(Str::random(8));
+            }
+            
+            $proveedor = Proveedor::create($data);
+            return $proveedor;
+            
+        } catch (\Exception $e) {
+            // No fallar la importación si hay error con el proveedor
+            $this->errors[] = "Fila {$row}: Error al procesar proveedor - " . $e->getMessage();
+            return null;
+        }
     }
     public function getErrors()
     {

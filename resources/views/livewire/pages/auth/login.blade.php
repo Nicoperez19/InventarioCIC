@@ -14,7 +14,9 @@ new #[Layout('layouts.guest')] class extends Component
         $this->validate();
         $this->form->authenticate();
         Session::regenerate();
-        redirect()->intended(route('dashboard'));
+        
+        // Redirect al dashboard usando redirectIntended para respetar intended URL
+        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: false);
     }
 }; ?>
 
@@ -89,23 +91,26 @@ new #[Layout('layouts.guest')] class extends Component
 
 <script>
 // Bandera para prevenir recursión infinita
-let isFormatting = false;
+// Usar window para evitar redeclaración cuando Livewire navega
+if (typeof window.loginFormatting === 'undefined') {
+    window.loginFormatting = false;
+}
 
 function formatRun(input) {
     // Si ya estamos formateando, salir para evitar recursión
-    if (isFormatting) {
+    if (window.loginFormatting) {
         return;
     }
     
     // Usar requestAnimationFrame para asegurar que el valor se capture después de que el navegador actualice el DOM
     requestAnimationFrame(() => {
         // Si ya estamos formateando, salir
-        if (isFormatting) {
+        if (window.loginFormatting) {
             return;
         }
         
         // Marcar que estamos formateando
-        isFormatting = true;
+        window.loginFormatting = true;
         
         try {
             // Guardar la posición del cursor
@@ -183,7 +188,7 @@ function formatRun(input) {
         } finally {
             // Siempre liberar la bandera después de un breve delay para asegurar que termine el formateo
             setTimeout(() => {
-                isFormatting = false;
+                window.loginFormatting = false;
             }, 10);
         }
     });

@@ -16,6 +16,11 @@ class Proveedor extends Model
     {
         return $this->hasMany(Factura::class);
     }
+    
+    public function insumos(): HasMany
+    {
+        return $this->hasMany(Insumo::class, 'proveedor_id');
+    }
     public function getNombreCompletoAttribute(): string
     {
         return $this->nombre_proveedor;

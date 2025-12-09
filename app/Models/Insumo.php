@@ -15,6 +15,7 @@ class Insumo extends Model
         'stock_minimo',
         'id_unidad',
         'tipo_insumo_id',
+        'proveedor_id',
     ];
     protected $table = 'insumos';
     protected $primaryKey = 'id_insumo';
@@ -41,6 +42,11 @@ class Insumo extends Model
     public function tipoInsumo(): BelongsTo
     {
         return $this->belongsTo(TipoInsumo::class, 'tipo_insumo_id');
+    }
+    
+    public function proveedor(): BelongsTo
+    {
+        return $this->belongsTo(Proveedor::class, 'proveedor_id');
     }
     public function getStockStatusAttribute(): string
     {

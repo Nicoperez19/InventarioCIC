@@ -2,11 +2,9 @@
 namespace App\Http\Controllers;
 use App\Models\Departamento;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\View\View;
 class DepartamentoController extends Controller
 {
     public function __construct()
@@ -14,21 +12,6 @@ class DepartamentoController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Mostrar formulario de creación
-     */
-    public function create(): View
-    {
-        return view('layouts.departamento.departamento_create');
-    }
-
-    /**
-     * Mostrar formulario de edición
-     */
-    public function edit(Departamento $departamento): View
-    {
-        return view('layouts.departamento.departamento_update', compact('departamento'));
-    }
     public function index(Request $request): JsonResponse
     {
         try {

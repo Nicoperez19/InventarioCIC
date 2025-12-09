@@ -11,7 +11,6 @@ class DatabaseSeeder extends Seeder
         // 1. Crear datos maestros básicos
         $this->call(DepartamentoSeeder::class);
         $this->call(UnidadSeeder::class);
-        $this->call(ProveedorSeeder::class);
         
         // 2. Crear sistema de permisos y roles
         $this->call(RoleSeeder::class);
