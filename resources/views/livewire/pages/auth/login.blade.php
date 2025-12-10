@@ -1,7 +1,6 @@
 <?php
 
 use App\Livewire\Forms\LoginForm;
-use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
@@ -14,9 +13,8 @@ new #[Layout('layouts.guest')] class extends Component
         $success = $this->form->authenticate();
 
         if ($success) {
-            Session::regenerate();
-
-            // Server-side redirect to intended URL (forces full navigation and preserves session)
+            // Session regeneration is now done inside LoginForm::authenticate()
+            // Just redirect to intended dashboard
             return redirect()->intended(route('dashboard', [], false));
         }
     }

@@ -49,6 +49,10 @@ class LoginForm extends Form
         // Autenticar al usuario
         Auth::login($user, $this->remember);
 
+        // Regenerar la sesión DENTRO del formulario (antes de Livewire responda)
+        // Esto asegura que la nueva sesión se cree en BD con el user_id correcto
+        session()->regenerate();
+
         \Log::info('Usuario autenticado', [
             'run' => $user->run,
             'remember' => $this->remember,

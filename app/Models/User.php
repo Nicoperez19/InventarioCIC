@@ -68,9 +68,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Factura::class, 'run', 'run');
     }
+    /**
+     * Get accessor for 'contrasena' attribute to avoid infinite recursion
+     */
+    public function getContrasenaAttribute(): string
+    {
+        return $this->attributes['contrasena'] ?? '';
+    }
+    /**
+     * Get the password for authentication.
+     * Returns from attributes directly to ensure string type.
+     */
     public function getAuthPassword(): string
     {
-        return $this->contrasena;
+        return $this->attributes['contrasena'] ?? '';
     }
     public function getAuthIdentifierName(): string
     {

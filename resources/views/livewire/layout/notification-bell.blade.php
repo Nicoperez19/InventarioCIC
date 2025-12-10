@@ -64,7 +64,7 @@
                                 wire:key="notificacion-agotado-{{ $notificacion['id'] }}"
                                 class="block"
                                 @click="open = false"
-                                wire:click="marcarComoLeida({{ $notificacion['id'] }})">
+                                wire:click.prevent="marcarComoLeida({{ $notificacion['id'] }}, '{{ route('insumos.index') }}')">
                                 <div class="flex items-start">
                                     <div class="flex-shrink-0">
                                         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-red-200">
@@ -104,7 +104,7 @@
                                 wire:key="notificacion-critico-{{ $notificacion['id'] }}"
                                 class="block"
                                 @click="open = false"
-                                wire:click="marcarComoLeida({{ $notificacion['id'] }})">
+                                wire:click.prevent="marcarComoLeida({{ $notificacion['id'] }}, '{{ route('insumos.index') }}')">
                                 <div class="flex items-start">
                                     <div class="flex-shrink-0">
                                         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-200">
@@ -147,7 +147,7 @@
                                 wire:key="notificacion-solicitud-{{ $notificacion['id'] }}"
                                 class="block"
                                 @click="open = false"
-                                wire:click="marcarComoLeida({{ $notificacion['id'] }})">
+                                wire:click.prevent="marcarComoLeida({{ $notificacion['id'] }}, '{{ route('admin-solicitudes') }}')">
                                 <div class="flex items-start">
                                     <div class="flex-shrink-0">
                                         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">

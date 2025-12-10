@@ -45,12 +45,16 @@ class NotificationBell extends Component
             ->count();
     }
 
-    public function marcarComoLeida($notificacionId)
+    public function marcarComoLeida($notificacionId, $redirectUrl = null)
     {
         $notificacion = Notificacion::find($notificacionId);
         if ($notificacion && $notificacion->user_id === Auth::user()->run) {
             $notificacion->marcarComoLeida();
             $this->cargarNotificaciones();
+            // Si se indicó una URL, redirigir después de marcar como leída
+            if ($redirectUrl) {
+                return redirect()->to($redirectUrl);
+            }
         }
     }
 

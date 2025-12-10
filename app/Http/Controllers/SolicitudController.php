@@ -50,6 +50,32 @@ class SolicitudController extends Controller
         ]);
         try {
             DB::beginTransaction();
+            // Consolidar cantidades por insumo para evitar decrementos duplicados
+            $requestedQuantities = [];
+            foreach ($request->items as $item) {
+                $id = $item['insumo_id'];
+                $qty = (int) $item['cantidad_solicitada'];
+                if ($qty <= 0) {
+                    throw new \Exception("Cantidad inválida para el insumo {$id}");
+                }
+                if (!isset($requestedQuantities[$id])) {
+                    $requestedQuantities[$id] = 0;
+                }
+                $requestedQuantities[$id] += $qty;
+            }
+
+            // Bloquear filas y verificar stock disponible
+            foreach ($requestedQuantities as $insumoId => $totalQty) {
+                $insumo = Insumo::where('id_insumo', $insumoId)->lockForUpdate()->first();
+                if (!$insumo) {
+                    throw new \Exception("Insumo no encontrado: {$insumoId}");
+                }
+                if (!$insumo->canReduceStock($totalQty)) {
+                    throw new \Exception("Stock insuficiente para el insumo {$insumo->nombre_insumo} (solicitado: {$totalQty}, disponible: {$insumo->stock_actual})");
+                }
+            }
+
+            // Todos los insumos tienen stock suficiente, proceder a crear la solicitud
             $solicitud = Solicitud::create([
                 'tipo_solicitud' => $request->tipo_solicitud,
                 'observaciones' => $request->observaciones,
@@ -59,13 +85,30 @@ class SolicitudController extends Controller
                 'tipo_insumo_id' => $request->tipo_insumo_id,
                 'fecha_solicitud' => now(),
             ]);
+
+            // Crear items y decrementar stock (dentro de la misma transacción)
             foreach ($request->items as $item) {
+                $insumoId = $item['insumo_id'];
+                $cantidad = (int) $item['cantidad_solicitada'];
+
                 SolicitudItem::create([
                     'solicitud_id' => $solicitud->id,
-                    'insumo_id' => $item['insumo_id'],
-                    'cantidad_solicitada' => $item['cantidad_solicitada'],
+                    'insumo_id' => $insumoId,
+                    'cantidad_solicitada' => $cantidad,
                     'observaciones_item' => $item['observaciones_item'] ?? null,
                 ]);
+
+                // Decrementar stock usando lockForUpdate para evitar condiciones de carrera
+                $insumo = Insumo::where('id_insumo', $insumoId)->lockForUpdate()->first();
+                if (!$insumo) {
+                    throw new \Exception("Insumo no encontrado al decrementar: {$insumoId}");
+                }
+                // Asumimos que la verificación previa garantiza disponibilidad, pero volvemos a validar
+                if (!$insumo->canReduceStock($cantidad)) {
+                    throw new \Exception("Stock insuficiente al decrementar para el insumo {$insumo->nombre_insumo}");
+                }
+                $insumo->stock_actual -= $cantidad;
+                $insumo->save();
             }
 
             // Crear notificaciones para usuarios con permiso de administrar solicitudes

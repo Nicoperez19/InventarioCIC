@@ -12,7 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Middleware que guarda el user_id (RUN) en la tabla sessions
+        $middleware->web(
+            \App\Http\Middleware\StoreSessionUserId::class,
+        );
     })
     ->withSchedule(function (Schedule $schedule): void {
         // Verificar insumos con stock bajo diariamente a las 8:00 AM
