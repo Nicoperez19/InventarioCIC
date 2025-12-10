@@ -245,18 +245,11 @@ class SolicitudInsumosTable extends Component
 
             // Crear notificaciones para usuarios con permiso de administrar solicitudes
             try {
-                // Buscar usuarios que pueden aprobar solicitudes (administradores o con permiso 'admin solicitudes')
                 $usuariosNotificables = \App\Models\User::whereHas('roles', function ($query) {
                     $query->where('name', 'Administrador');
                 })->orWhereHas('permissions', function ($query) {
                     $query->where('name', 'admin solicitudes');
                 })->get();
-                
-                \Illuminate\Support\Facades\Log::info('Creando notificaciones de solicitud (Livewire)', [
-                    'solicitud_id' => $solicitud->id,
-                    'numero_solicitud' => $solicitud->numero_solicitud,
-                    'usuarios_notificables_count' => $usuariosNotificables->count()
-                ]);
 
                 // Cargar relaciones necesarias para el mensaje
                 $solicitud->load('departamento');
@@ -271,17 +264,9 @@ class SolicitudInsumosTable extends Component
                     ]);
                 }
                 
-                \Illuminate\Support\Facades\Log::info('Notificaciones de solicitud creadas exitosamente (Livewire)', [
-                    'count' => $usuariosNotificables->count()
-                ]);
-                
                 // Disparar evento Livewire para actualizar notificaciones en tiempo real
                 $this->dispatch('notificacionCreada');
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Error al crear notificaciones de solicitud (Livewire)', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
                 // No fallar la creación de la solicitud si falla la notificación
             }
 

@@ -7,12 +7,10 @@ use App\Models\Departamento;
 use App\Models\TipoInsumo;
 use App\Models\Notificacion;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use Dompdf\Dompdf;
@@ -113,18 +111,11 @@ class SolicitudController extends Controller
 
             // Crear notificaciones para usuarios con permiso de administrar solicitudes
             try {
-                // Buscar usuarios que pueden aprobar solicitudes (administradores o con permiso 'admin solicitudes')
                 $usuariosNotificables = \App\Models\User::whereHas('roles', function ($query) {
                     $query->where('name', 'Administrador');
                 })->orWhereHas('permissions', function ($query) {
                     $query->where('name', 'admin solicitudes');
                 })->get();
-
-                \Illuminate\Support\Facades\Log::info('Creando notificaciones de solicitud', [
-                    'solicitud_id' => $solicitud->id,
-                    'numero_solicitud' => $solicitud->numero_solicitud,
-                    'usuarios_notificables_count' => $usuariosNotificables->count()
-                ]);
 
                 foreach ($usuariosNotificables as $usuario) {
                     Notificacion::create([
@@ -135,15 +126,7 @@ class SolicitudController extends Controller
                         'solicitud_id' => $solicitud->id,
                     ]);
                 }
-                
-                \Illuminate\Support\Facades\Log::info('Notificaciones de solicitud creadas exitosamente', [
-                    'count' => $usuariosNotificables->count()
-                ]);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Error al crear notificaciones de solicitud', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
                 // No fallar la creación de la solicitud si falla la notificación
             }
 

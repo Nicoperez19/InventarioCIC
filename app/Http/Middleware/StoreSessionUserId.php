@@ -37,11 +37,6 @@ class StoreSessionUserId
                     'user_id' => $user->run,
                     'last_activity' => time(),
                 ]);
-
-            \Log::debug('Session user_id updated', [
-                'session_id' => substr($sessionId, 0, 10) . '...',
-                'user_id' => $user->run,
-            ]);
         }
 
         return $response;

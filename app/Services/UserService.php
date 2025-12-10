@@ -1,7 +1,6 @@
 <?php
 namespace App\Services;
 use App\Models\User;
-use App\Models\Departamento;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;

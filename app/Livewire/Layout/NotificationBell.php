@@ -66,7 +66,6 @@ class NotificationBell extends Component
                 'leida' => true,
                 'leida_at' => now(),
             ]);
-        
         $this->cargarNotificaciones();
     }
 
