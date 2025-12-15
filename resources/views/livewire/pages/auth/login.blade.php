@@ -37,7 +37,7 @@ new #[Layout('layouts.guest')] class extends Component
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
-                <x-text-input wire:model="form.run" id="run" 
+                <x-text-input wire:model.live="form.run" id="run" 
                     class="block w-full py-2 pl-8 sm:pl-9 pr-3 text-sm transition-all duration-200 border shadow-sm border-neutral-300 rounded-lg placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 hover:border-primary-300" 
                     type="text" name="run" autofocus autocomplete="username" 
                     placeholder="12.345.678-9" oninput="formatRun(this)" />
@@ -167,22 +167,35 @@ function formatRun(input) {
             // Asegurar que la posición del cursor sea válida
             newCursorPosition = Math.max(0, Math.min(newCursorPosition, formattedValue.length));
             
-            // Actualizar el valor
+            // Actualizar el valor del input
             input.value = formattedValue;
+            
+            // Encontrar el componente de Livewire y actualizar el valor
+            // Buscar el componente Livewire más cercano
+            let component = null;
+            if (typeof Livewire !== 'undefined') {
+                // Buscar el componente Livewire que contiene este input
+                let element = input.closest('[wire\\:id]');
+                if (element) {
+                    const wireId = element.getAttribute('wire:id');
+                    if (wireId) {
+                        component = Livewire.find(wireId);
+                    }
+                }
+            }
+            
+            // Si encontramos el componente, actualizar el valor
+            if (component) {
+                component.set('form.run', formattedValue);
+            } else {
+                // Si no encontramos el componente, disparar eventos para que Livewire los capture
+                // Con wire:model.live, Livewire debería capturar el cambio automáticamente
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
             
             // Ajustar la posición del cursor
             setTimeout(() => {
                 input.setSelectionRange(newCursorPosition, newCursorPosition);
-            }, 0);
-            
-            // Notificar a Livewire del cambio
-            // Disparar evento 'input' para que Livewire detecte el cambio automáticamente
-            setTimeout(() => {
-                // Disparar evento 'input' para que Livewire lo detecte
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                
-                // También disparar evento 'change' como respaldo
-                input.dispatchEvent(new Event('change', { bubbles: true }));
             }, 0);
             
         } finally {

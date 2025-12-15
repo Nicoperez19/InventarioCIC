@@ -238,7 +238,7 @@ class InsumoController extends Controller
     public function generateBarcode(Insumo $insumo): BinaryFileResponse
     {
         if (!$insumo->codigo_barra) {
-            abort(404, 'El insumo no tiene código de barras asignado');
+            abort(404, 'El insumo no tiene código QR asignado');
         }
 
         $barcodeService = new BarcodeService();
@@ -246,16 +246,16 @@ class InsumoController extends Controller
         $fullPath = storage_path('app/public/' . $imagePath);
 
         if (!file_exists($fullPath)) {
-            abort(404, 'No se pudo generar la imagen del código de barras');
+            abort(404, 'No se pudo generar la imagen del código QR');
         }
 
-        return response()->download($fullPath, "codigo_barras_{$insumo->id_insumo}.png");
+        return response()->download($fullPath, "codigo_qr_{$insumo->id_insumo}.png");
     }
 
     public function generateBarcodeSvg(Insumo $insumo): BinaryFileResponse
     {
         if (!$insumo->codigo_barra) {
-            abort(404, 'El insumo no tiene código de barras asignado');
+            abort(404, 'El insumo no tiene código QR asignado');
         }
 
         $barcodeService = new BarcodeService();
@@ -263,9 +263,9 @@ class InsumoController extends Controller
         $fullPath = storage_path('app/public/' . $imagePath);
 
         if (!file_exists($fullPath)) {
-            abort(404, 'No se pudo generar la imagen SVG del código de barras');
+            abort(404, 'No se pudo generar la imagen SVG del código QR');
         }
 
-        return response()->download($fullPath, "codigo_barras_{$insumo->id_insumo}.svg");
+        return response()->download($fullPath, "codigo_qr_{$insumo->id_insumo}.svg");
     }
 }

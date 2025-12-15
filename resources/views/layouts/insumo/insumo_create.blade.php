@@ -53,15 +53,15 @@
                                 @enderror
                             </div>
 
-                            <!-- Código de Barras -->
+                            <!-- Código QR -->
                             <div>
                                 <label for="codigo_barra" class="block mb-2 text-sm font-medium text-gray-700">
-                                    Código de Barras
+                                    Código QR
                                 </label>
                                 <input type="text" id="codigo_barra" name="codigo_barra" value="{{ old('codigo_barra') }}" 
                                        class="w-full px-3 py-2 transition-colors border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400" 
-                                       placeholder="Ej: 1234567890123">
-                                <p class="mt-1 text-xs text-gray-500">Opcional: código de barras único del insumo</p>
+                                       placeholder="Se genera automáticamente si se deja vacío">
+                                <p class="mt-1 text-xs text-gray-500">Opcional: código QR único del insumo (se genera automáticamente si se deja vacío)</p>
                                 @error('codigo_barra')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror

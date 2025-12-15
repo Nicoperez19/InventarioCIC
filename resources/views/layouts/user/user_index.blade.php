@@ -1103,12 +1103,12 @@
             });
         }
 
-        // Función para generar códigos de barras para todos los usuarios
+        // Función para generar códigos QR para todos los usuarios
         function generateAllBarcodes() {
             const btn = document.getElementById('generate-all-barcodes-btn');
             const originalText = btn.innerHTML;
             
-            if (!confirm('¿Estás seguro de generar códigos de barras para todos los usuarios?\n\nEsto eliminará todas las imágenes de códigos existentes y generará nuevos códigos únicos para cada usuario.')) {
+            if (!confirm('¿Estás seguro de generar códigos QR para todos los usuarios?\n\nEsto eliminará todas las imágenes de códigos existentes y generará nuevos códigos únicos para cada usuario.')) {
                 return;
             }
             
@@ -1127,23 +1127,46 @@
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Error al generar códigos QR');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
                 
                 if (data.success) {
-                    // Mostrar mensaje de éxito
+                    // Mostrar mensaje de éxito o advertencia
+                    const hasErrors = data.data && data.data.errors && data.data.errors.length > 0;
                     const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2';
+                    notification.className = `fixed top-4 right-4 ${hasErrors ? 'bg-yellow-500' : 'bg-green-500'} text-white px-6 py-3 rounded-lg shadow-lg z-50 max-w-md`;
+                    
+                    let errorDetails = '';
+                    if (hasErrors && data.data.errors.length > 0) {
+                        errorDetails = '<div class="mt-2 text-sm text-white/90"><strong>Errores:</strong><ul class="list-disc list-inside mt-1">';
+                        data.data.errors.forEach((error) => {
+                            errorDetails += `<li>${error.nombre || error.user}: ${error.error}</li>`;
+                        });
+                        errorDetails += '</ul></div>';
+                    }
+                    
                     notification.innerHTML = `
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        <span class="font-medium">${data.message || 'Códigos de barras generados exitosamente'}</span>
+                        <div class="flex items-start space-x-2">
+                            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${hasErrors ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' : 'M5 13l4 4L19 7'}"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <span class="font-medium block">${data.message || 'Códigos QR generados exitosamente'}</span>
+                                ${errorDetails}
+                            </div>
+                        </div>
                     `;
                     document.body.appendChild(notification);
-                    setTimeout(() => notification.remove(), 5000);
+                    setTimeout(() => notification.remove(), hasErrors ? 15000 : 5000);
                     
                     // Recargar la tabla de usuarios
                     if (window.Livewire) {
@@ -1158,14 +1181,14 @@
                         window.location.reload();
                     }, 1500);
                 } else {
-                    alert('Error: ' + (data.message || 'No se pudieron generar los códigos de barras'));
+                    alert('Error: ' + (data.message || 'No se pudieron generar los códigos QR'));
                 }
             })
             .catch(error => {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
                 console.error('Error:', error);
-                alert('Error al generar códigos de barras. Por favor, intenta nuevamente.');
+                alert('Error al generar códigos QR. Por favor, intenta nuevamente.');
             });
         }
     </script>

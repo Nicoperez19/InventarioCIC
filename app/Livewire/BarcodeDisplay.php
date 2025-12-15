@@ -32,7 +32,7 @@ class BarcodeDisplay extends Component
         $this->insumo->update(['codigo_barra' => $nuevoCodigo]);
         $barcodeService->generateBarcodeImage($nuevoCodigo);
         $this->loadBarcode();
-        session()->flash('message', 'Código de barras regenerado exitosamente');
+        session()->flash('message', 'Código QR regenerado exitosamente');
     }
 
     public function render()

@@ -49,7 +49,7 @@ class UserBarcodeDisplay extends Component
         $this->user->refresh();
         $this->loadBarcode();
         
-        session()->flash('message', 'Código de barras generado exitosamente');
+        session()->flash('message', 'Código QR generado exitosamente');
     }
 
     public function regenerateBarcode()
@@ -77,7 +77,7 @@ class UserBarcodeDisplay extends Component
         $this->user->refresh();
         $this->loadBarcode();
         
-        session()->flash('message', 'Código de barras regenerado exitosamente');
+        session()->flash('message', 'Código QR regenerado exitosamente');
     }
 
     public function render()

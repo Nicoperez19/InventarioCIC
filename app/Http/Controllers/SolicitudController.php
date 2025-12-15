@@ -84,7 +84,7 @@ class SolicitudController extends Controller
                 'fecha_solicitud' => now(),
             ]);
 
-            // Crear items y decrementar stock (dentro de la misma transacción)
+            // Crear items y reducir stock (reservar stock al crear la solicitud)
             foreach ($request->items as $item) {
                 $insumoId = $item['insumo_id'];
                 $cantidad = (int) $item['cantidad_solicitada'];
@@ -94,19 +94,24 @@ class SolicitudController extends Controller
                     'insumo_id' => $insumoId,
                     'cantidad_solicitada' => $cantidad,
                     'observaciones_item' => $item['observaciones_item'] ?? null,
+                    'estado_item' => 'pendiente'
                 ]);
 
-                // Decrementar stock usando lockForUpdate para evitar condiciones de carrera
+                // Reducir stock al crear la solicitud (reservar stock)
                 $insumo = Insumo::where('id_insumo', $insumoId)->lockForUpdate()->first();
                 if (!$insumo) {
-                    throw new \Exception("Insumo no encontrado al decrementar: {$insumoId}");
+                    throw new \Exception("Insumo no encontrado al reservar stock: {$insumoId}");
                 }
-                // Asumimos que la verificación previa garantiza disponibilidad, pero volvemos a validar
+                
+                // Verificar que hay suficiente stock
                 if (!$insumo->canReduceStock($cantidad)) {
-                    throw new \Exception("Stock insuficiente al decrementar para el insumo {$insumo->nombre_insumo}");
+                    throw new \Exception("Stock insuficiente para el insumo {$insumo->nombre_insumo} (solicitado: {$cantidad}, disponible: {$insumo->stock_actual})");
                 }
-                $insumo->stock_actual -= $cantidad;
-                $insumo->save();
+                
+                // Reducir el stock (reservar)
+                if (!$insumo->reduceStock($cantidad)) {
+                    throw new \Exception("Error al reservar stock para el insumo {$insumo->nombre_insumo}");
+                }
             }
 
             // Crear notificaciones para usuarios con permiso de administrar solicitudes

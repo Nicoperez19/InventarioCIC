@@ -119,13 +119,49 @@ class Solicitud extends Model
     }
     public function rechazar($userId): bool
     {
-        $this->update([
-            'estado' => 'rechazada',
-            'aprobado_por' => $userId,
-            'fecha_aprobacion' => now()
-        ]);
-        $this->items()->update(['estado_item' => 'rechazado']);
-        return true;
+        return DB::transaction(function () use ($userId) {
+            // Obtener los items con sus insumos para devolver el stock
+            $items = $this->items()->with('insumo')->get();
+
+            // Devolver el stock de cada insumo (solo si el item está pendiente o aprobado)
+            foreach ($items as $item) {
+                // Solo devolver stock si el item no ha sido entregado
+                if ($item->estado_item === 'entregado') {
+                    continue; // No devolver stock de items ya entregados
+                }
+
+                $insumo = $item->insumo;
+                if (!$insumo) {
+                    continue; // Si no existe el insumo, continuar
+                }
+
+                $cantidadADevolver = $item->cantidad_solicitada;
+                
+                if ($cantidadADevolver > 0) {
+                    // Bloquear el insumo para evitar condiciones de carrera
+                    $insumoLocked = Insumo::where('id_insumo', $insumo->id_insumo)
+                        ->lockForUpdate()
+                        ->first();
+                    
+                    if ($insumoLocked) {
+                        // Devolver el stock
+                        $insumoLocked->addStock($cantidadADevolver);
+                    }
+                }
+            }
+
+            // Actualizar el estado de la solicitud
+            $this->update([
+                'estado' => 'rechazada',
+                'aprobado_por' => $userId,
+                'fecha_aprobacion' => now()
+            ]);
+
+            // Actualizar los items
+            $this->items()->update(['estado_item' => 'rechazado']);
+
+            return true;
+        });
     }
     public function entregar($userId): bool
     {
@@ -140,30 +176,25 @@ class Solicitud extends Model
         }
 
         return DB::transaction(function () use ($userId) {
-            // Obtener los items con sus insumos
-            $items = $this->items()->with('insumo')->get();
+            // Obtener solo los items aprobados
+            $items = $this->items()
+                ->where('estado_item', 'aprobado')
+                ->get();
 
-            // Reducir el stock de cada insumo
+            if ($items->isEmpty()) {
+                throw new \Exception('No hay items aprobados para entregar.');
+            }
+
+            // El stock ya fue reducido al crear la solicitud, solo actualizar estados
             foreach ($items as $item) {
-                $insumo = $item->insumo;
-                if (!$insumo) {
-                    throw new \Exception("El insumo con ID {$item->insumo_id} no fue encontrado.");
-                }
-
+                // Usar cantidad aprobada (si existe) o cantidad solicitada
                 $cantidadEntregar = $item->cantidad_aprobada ?? $item->cantidad_solicitada;
                 
-                // Verificar que hay suficiente stock
-                if ($insumo->stock_actual < $cantidadEntregar) {
-                    throw new \Exception(
-                        "No hay suficiente stock para el insumo '{$insumo->nombre_insumo}'. " .
-                        "Stock disponible: {$insumo->stock_actual}, requerido: {$cantidadEntregar}"
-                    );
-                }
-
-                // Reducir el stock
-                if (!$insumo->reduceStock($cantidadEntregar)) {
-                    throw new \Exception("Error al reducir el stock del insumo '{$insumo->nombre_insumo}'.");
-                }
+                // Actualizar el item con la cantidad entregada
+                $item->update([
+                    'estado_item' => 'entregado',
+                    'cantidad_entregada' => $cantidadEntregar
+                ]);
             }
 
             // Actualizar el estado de la solicitud
@@ -171,12 +202,6 @@ class Solicitud extends Model
                 'estado' => 'entregada',
                 'entregado_por' => $userId,
                 'fecha_entrega' => now()
-            ]);
-
-            // Actualizar los items
-            $this->items()->update([
-                'estado_item' => 'entregado',
-                'cantidad_entregada' => DB::raw('cantidad_aprobada')
             ]);
 
             return true;

@@ -42,13 +42,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('users', [UserViewController::class, 'index'])->name('users');
     Route::get('/users/permissions', [UsersController::class, 'getPermissions'])->name('users.permissions');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
+    // Rutas específicas antes de las rutas con parámetros
+    Route::post('/users/generate-all-barcodes', [UsersController::class, 'generateAllBarcodes'])->name('users.generate-all-barcodes');
+    Route::get('/users/export-qr-codes-pdf', [UsersController::class, 'exportUsersQRCodesPdf'])->name('users.export-qr-codes-pdf');
+    // Rutas con parámetros después de las rutas específicas
     Route::get('/users/{user}', [UsersController::class, 'show'])->name('users.show');
     Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{user}/generate-barcode', [UsersController::class, 'generateBarcode'])->name('users.generate-barcode');
-    Route::post('/users/generate-all-barcodes', [UsersController::class, 'generateAllBarcodes'])->name('users.generate-all-barcodes');
-    Route::get('/users/{user}/barcode/image', [UsersController::class, 'downloadBarcodeImage'])->name('users.barcode.image');
-    Route::get('/users/{user}/barcode/svg', [UsersController::class, 'downloadBarcodeSvg'])->name('users.barcode.svg');
+    Route::post('/users/{user}/generate-qr', [UsersController::class, 'generateBarcode'])->name('users.generate-qr');
+    Route::get('/users/{user}/qr', [UsersController::class, 'getQRCode'])->name('users.qr');
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('departamentos', [DepartamentoViewController::class, 'index'])->name('departamentos');

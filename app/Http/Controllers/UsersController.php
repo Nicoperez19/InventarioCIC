@@ -4,6 +4,8 @@ use App\Models\Departamento;
 use App\Models\User;
 use App\Services\BarcodeService;
 use App\Services\UserService;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Http\BinaryFileResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -464,7 +466,7 @@ class UsersController extends Controller
     }
 
     /**
-     * Genera un código de barras para un usuario
+     * Genera un código QR para un usuario
      */
     public function generateBarcode(User $user): JsonResponse
     {
@@ -477,83 +479,67 @@ class UsersController extends Controller
             }
             $barcodeService->deleteAllUserBarcodeImages($user);
             
-            // Generar nuevo código de barras basado en el RUN
-            $codigoBarra = $barcodeService->generateUserBarcode($user->run);
+            // Generar nuevo código QR basado en el RUN (simplemente el RUN limpio)
+            $codigoQR = $barcodeService->generateUserBarcode($user->run);
             
             // Actualizar el usuario con el nuevo código
-            $user->codigo_barra = $codigoBarra;
+            $user->codigo_barra = $codigoQR;
             $user->save();
             
             // Generar las imágenes (PNG y SVG)
-            $barcodeService->generateUserBarcodeImage($codigoBarra);
-            $barcodeService->generateUserBarcodeSVG($codigoBarra);
+            $barcodeService->generateUserBarcodeImage($codigoQR);
+            $barcodeService->generateUserBarcodeSVG($codigoQR);
             
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'codigo_barra' => $codigoBarra,
-                    'url' => $barcodeService->getUserBarcodeUrl($codigoBarra)
+                    'codigo_barra' => $codigoQR,
+                    'url' => $barcodeService->getUserBarcodeUrl($codigoQR)
                 ],
-                'message' => 'Código de barras generado exitosamente'
+                'message' => 'Código QR generado exitosamente'
             ]);
         } catch (\Exception $e) {
+            \Log::error('Error al generar código QR: ' . $e->getMessage(), [
+                'user' => $user->run,
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Error al generar código de barras: ' . $e->getMessage()
+                'message' => 'Error al generar código QR: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Muestra la imagen PNG del código de barras de un usuario
+     * Obtiene el código QR de un usuario (siempre devuelve SVG)
      */
-    public function downloadBarcodeImage(User $user)
+    public function getQRCode(User $user)
     {
         if (!$user->codigo_barra) {
-            abort(404, 'El usuario no tiene código de barras asignado');
+            abort(404, 'El usuario no tiene código QR asignado');
         }
 
-        $barcodeService = new BarcodeService();
-        
-        // Asegurar que la imagen existe
-        $imagePath = $barcodeService->generateUserBarcodeImage($user->codigo_barra);
-        $fullPath = storage_path('app/public/' . $imagePath);
-
-        if (!file_exists($fullPath)) {
-            abort(404, 'No se pudo generar la imagen del código de barras');
+        try {
+            // Generar SVG directamente (no requiere ImageMagick)
+            $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                ->size(300)
+                ->margin(2)
+                ->generate($user->codigo_barra);
+            
+            return response($qrCodeSvg, 200)
+                ->header('Content-Type', 'image/svg+xml')
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
+        } catch (\Exception $e) {
+            \Log::error('Error al generar código QR: ' . $e->getMessage(), [
+                'user' => $user->run,
+                'trace' => $e->getTraceAsString()
+            ]);
+            abort(500, 'Error al generar el código QR');
         }
-
-        // Si es una petición AJAX o para mostrar, devolver la imagen
-        if (request()->wantsJson() || request()->has('preview')) {
-            return response()->file($fullPath, ['Content-Type' => 'image/png']);
-        }
-
-        // Si es para descargar, usar download
-        return response()->download($fullPath, "codigo_barras_{$user->run}.png");
     }
 
     /**
-     * Descarga la imagen SVG del código de barras de un usuario
-     */
-    public function downloadBarcodeSvg(User $user): BinaryFileResponse
-    {
-        if (!$user->codigo_barra) {
-            abort(404, 'El usuario no tiene código de barras asignado');
-        }
-
-        $barcodeService = new BarcodeService();
-        $imagePath = $barcodeService->generateUserBarcodeSVG($user->codigo_barra);
-        $fullPath = storage_path('app/public/' . $imagePath);
-
-        if (!file_exists($fullPath)) {
-            abort(404, 'No se pudo generar la imagen SVG del código de barras');
-        }
-
-        return response()->download($fullPath, "codigo_barras_{$user->run}.svg");
-    }
-
-    /**
-     * Genera códigos de barras para todos los usuarios
+     * Genera códigos QR para todos los usuarios
      * Elimina todas las imágenes existentes y genera nuevos códigos únicos
      */
     public function generateAllBarcodes(): JsonResponse
@@ -563,10 +549,19 @@ class UsersController extends Controller
             
             $barcodeService = new BarcodeService();
             
-            // Obtener todos los usuarios
-            $users = User::all();
+            // Obtener todos los usuarios con RUN válido
+            $users = User::whereNotNull('run')
+                ->where('run', '!=', '')
+                ->get();
             
-            // Eliminar todas las imágenes de códigos de barras de usuarios
+            if ($users->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay usuarios con RUN válido para generar códigos QR'
+                ], 400);
+            }
+            
+            // Eliminar todas las imágenes de códigos QR de usuarios
             $directory = "codigos_usuarios";
             if (Storage::disk('public')->exists($directory)) {
                 $files = Storage::disk('public')->files($directory);
@@ -575,45 +570,55 @@ class UsersController extends Controller
                 }
             }
             
-            // Generar códigos únicos para cada usuario
+            // Generar códigos QR para cada usuario
             $generated = 0;
             $errors = [];
             $usedBarcodes = [];
             
             foreach ($users as $user) {
                 try {
-                    // Generar código de barras basado en el RUN
-                    $codigoBarra = $barcodeService->generateUserBarcode($user->run);
+                    // Validar que el usuario tenga RUN
+                    if (empty($user->run) || trim($user->run) === '') {
+                        throw new \Exception("El usuario no tiene RUN válido");
+                    }
                     
-                    // Verificar que el código no esté duplicado
-                    $attempts = 0;
-                    while (in_array($codigoBarra, $usedBarcodes) || User::where('codigo_barra', $codigoBarra)->where('run', '!=', $user->run)->exists()) {
-                        // Si hay duplicado, agregar un sufijo único
-                        $codigoBarra = $barcodeService->generateUserBarcode($user->run . '-' . $attempts);
-                        $attempts++;
-                        
-                        // Prevenir bucle infinito
-                        if ($attempts > 100) {
-                            throw new \Exception("No se pudo generar un código único para el usuario {$user->run} después de 100 intentos");
-                        }
+                    // Generar código QR basado en el RUN (simplemente el RUN limpio)
+                    $codigoQR = $barcodeService->generateUserBarcode($user->run);
+                    
+                    // Validar que el código QR no esté vacío
+                    if (empty($codigoQR)) {
+                        throw new \Exception("No se pudo generar el código QR (RUN inválido)");
+                    }
+                    
+                    // Verificar que el código no esté duplicado (aunque no debería pasar si los RUNs son únicos)
+                    if (in_array($codigoQR, $usedBarcodes)) {
+                        \Log::warning("Código QR duplicado detectado para RUN: {$user->run}, código: {$codigoQR}");
+                        // Si hay duplicado, agregar un sufijo único basado en el ID del usuario
+                        $codigoQR = $codigoQR . '_' . $user->id;
                     }
                     
                     // Actualizar el usuario con el nuevo código
-                    $user->codigo_barra = $codigoBarra;
+                    $user->codigo_barra = $codigoQR;
                     $user->save();
                     
                     // Agregar a la lista de códigos usados
-                    $usedBarcodes[] = $codigoBarra;
+                    $usedBarcodes[] = $codigoQR;
                     
                     // Generar las imágenes (PNG y SVG)
-                    $barcodeService->generateUserBarcodeImage($codigoBarra);
-                    $barcodeService->generateUserBarcodeSVG($codigoBarra);
+                    try {
+                        $barcodeService->generateUserBarcodeImage($codigoQR);
+                        $barcodeService->generateUserBarcodeSVG($codigoQR);
+                    } catch (\Exception $imageError) {
+                        \Log::error("Error al generar imagen QR para usuario {$user->run}: " . $imageError->getMessage());
+                        // Continuar aunque falle la generación de imagen, el código QR ya está guardado
+                    }
                     
                     $generated++;
                 } catch (\Exception $e) {
+                    \Log::error("Error al generar código QR para usuario {$user->run} ({$user->nombre}): " . $e->getMessage());
                     $errors[] = [
-                        'user' => $user->run,
-                        'nombre' => $user->nombre,
+                        'user' => $user->run ?? 'N/A',
+                        'nombre' => $user->nombre ?? 'N/A',
                         'error' => $e->getMessage()
                     ];
                 }
@@ -621,9 +626,14 @@ class UsersController extends Controller
             
             DB::commit();
             
+            $message = "Se generaron códigos QR para {$generated} usuario(s)";
+            if (count($errors) > 0) {
+                $message .= ". Hubo " . count($errors) . " error(es).";
+            }
+            
             return response()->json([
                 'success' => true,
-                'message' => "Se generaron códigos de barras para {$generated} usuario(s)" . (count($errors) > 0 ? ". Hubo " . count($errors) . " error(es)." : ""),
+                'message' => $message,
                 'data' => [
                     'generated' => $generated,
                     'total' => $users->count(),
@@ -632,11 +642,94 @@ class UsersController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Error general al generar códigos QR: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Error al generar códigos de barras: ' . $e->getMessage()
+                'message' => 'Error al generar códigos QR: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Genera un PDF con tabla de usuarios y sus códigos QR
+     */
+    public function exportUsersQRCodesPdf()
+    {
+        try {
+            // Obtener todos los usuarios con sus códigos QR generados
+            $users = User::with('departamento')
+                ->whereNotNull('codigo_barra')
+                ->orderBy('nombre')
+                ->get();
+
+            // Asegurar que todos los usuarios tengan sus imágenes QR generadas
+            // Usar SVG directamente (no requiere ImageMagick)
+            foreach ($users as $user) {
+                try {
+                    // Verificar si existe imagen PNG en storage
+                    $filename = "user_qr_{$user->codigo_barra}.png";
+                    $imagePath = "codigos_usuarios/{$filename}";
+                    $fullPath = storage_path('app/public/' . $imagePath);
+                    
+                    if (file_exists($fullPath)) {
+                        // Si existe PNG, usarlo
+                        $imageData = base64_encode(file_get_contents($fullPath));
+                        $user->qr_image_base64 = 'data:image/png;base64,' . $imageData;
+                    } else {
+                        // Si no existe, generar SVG (no requiere ImageMagick)
+                        $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                            ->size(150)
+                            ->margin(1)
+                            ->generate($user->codigo_barra);
+                        
+                        // SVG es texto, convertir a base64
+                        $imageData = base64_encode($qrCodeSvg);
+                        $user->qr_image_base64 = 'data:image/svg+xml;base64,' . $imageData;
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning("Error al procesar imagen QR para usuario {$user->run}: " . $e->getMessage());
+                    // Continuar sin imagen para este usuario
+                }
+            }
+
+            // Configurar opciones de DomPDF (igual que en reportes)
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true);
+            $options->set('defaultFont', 'Arial');
+
+            // Crear instancia de DomPDF
+            $dompdf = new Dompdf($options);
+
+            // Renderizar la vista del PDF
+            $html = view('pdf.usuarios-codigos-qr', [
+                'users' => $users,
+                'fecha' => now()->format('d/m/Y H:i:s')
+            ])->render();
+
+            // Cargar HTML en DomPDF
+            $dompdf->loadHtml($html);
+
+            // Configurar el tamaño del papel
+            $dompdf->setPaper('A4', 'portrait');
+
+            // Renderizar el PDF
+            $dompdf->render();
+
+            // Generar nombre del archivo
+            $nombreArchivo = 'Usuarios_Codigos_QR_' . now()->format('Y-m-d') . '.pdf';
+
+            // Retornar el PDF como descarga
+            return $dompdf->stream($nombreArchivo);
+
+        } catch (\Exception $e) {
+            \Log::error('Error al generar PDF de códigos QR: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', 'Error al generar el PDF: ' . $e->getMessage());
         }
     }
 }

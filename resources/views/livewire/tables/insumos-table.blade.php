@@ -172,7 +172,7 @@
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
                             </svg>
-                            <span class="hidden sm:inline">Código Barras</span>
+                            <span class="hidden sm:inline">Código QR</span>
                         </div>
                     </th>
                     <th class="w-3/12 px-3 py-4 text-xs font-semibold tracking-wider text-gray-600 uppercase sm:px-6">
@@ -224,7 +224,7 @@
                             </div>
                         </td>
                         
-                        <!-- Código Barras -->
+                        <!-- Código QR -->
                         <td class="w-2/12 px-3 py-4 sm:px-6 whitespace-nowrap">
                             <div class="pl-6">
                                 @if($insumo->codigo_barra)
@@ -235,7 +235,7 @@
                                         <button type="button" 
                                                 class="p-1 ml-2 text-blue-600 rounded hover:text-blue-800 hover:bg-blue-50"
                                                 onclick="openBarcodeModal('{{ $insumo->id_insumo }}', '{{ $insumo->codigo_barra }}')"
-                                                title="Ver código de barras">
+                                                title="Ver código QR">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -251,7 +251,7 @@
                         <!-- Acciones -->
                         <td class="w-3/12 px-3 py-4 text-sm font-medium sm:px-6 whitespace-nowrap">
                             <div class="flex items-center justify-end space-x-1 sm:space-x-3">
-                                <!-- Botón Ver Código de Barras -->
+                                <!-- Botón Ver Código QR -->
                                 @if($insumo->codigo_barra)
                                     <a href="{{ route('barcode.generate', $insumo->id_insumo) }}" 
                                        target="_blank"
@@ -319,13 +319,13 @@
         {{ $insumos->links() }}
     </div>
 
-    <!-- Modal para mostrar código de barras -->
+    <!-- Modal para mostrar código QR -->
 <div id="barcodeModal" class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
     <div class="relative p-5 mx-auto bg-white border rounded-md shadow-lg top-20 w-96">
         <div class="mt-3">
             <!-- Header del modal -->
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Código de Barras</h3>
+                <h3 class="text-lg font-medium text-gray-900">Código QR</h3>
                 <button type="button" 
                         class="text-gray-400 hover:text-gray-600"
                         onclick="closeBarcodeModal()">
@@ -343,11 +343,11 @@
                     <p class="text-sm text-gray-600">Código: <span id="modalBarcode" class="font-mono font-medium text-blue-600"></span></p>
                 </div>
                 
-                <!-- Imagen del código de barras -->
+                <!-- Imagen del código QR -->
                 <div class="p-4 mb-4 bg-white border rounded-lg shadow-sm">
                     <img id="modalBarcodeImage"
                          src=""
-                         alt="Código de barras"
+                         alt="Código QR"
                          class="h-auto max-w-full mx-auto"
                          style="max-height: 120px;"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">

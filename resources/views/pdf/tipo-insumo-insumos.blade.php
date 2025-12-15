@@ -192,7 +192,7 @@
                     <th style="width: 35%;">Nombre</th>
                     <th style="width: 15%;" class="text-center">Stock Actual</th>
                     <th style="width: 15%;" class="text-center">Unidad</th>
-                    <th style="width: 20%;">Código de Barras</th>
+                    <th style="width: 20%;">Código QR</th>
                 </tr>
             </thead>
             <tbody>
