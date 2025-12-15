@@ -2,7 +2,7 @@
 namespace App\Http\Controllers;
 use App\Models\Insumo;
 use App\Models\UnidadMedida;
-use App\Services\BarcodeService;
+use App\Services\QrService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -235,14 +235,14 @@ class InsumoController extends Controller
         }
     }
 
-    public function generateBarcode(Insumo $insumo): BinaryFileResponse
+    public function generateQr(Insumo $insumo): BinaryFileResponse
     {
         if (!$insumo->codigo_barra) {
             abort(404, 'El insumo no tiene código QR asignado');
         }
 
-        $barcodeService = new BarcodeService();
-        $imagePath = $barcodeService->generateBarcodeImage($insumo->codigo_barra);
+        $qrService = new QrService();
+        $imagePath = $qrService->generateQrImage($insumo->codigo_barra);
         $fullPath = storage_path('app/public/' . $imagePath);
 
         if (!file_exists($fullPath)) {
@@ -252,14 +252,14 @@ class InsumoController extends Controller
         return response()->download($fullPath, "codigo_qr_{$insumo->id_insumo}.png");
     }
 
-    public function generateBarcodeSvg(Insumo $insumo): BinaryFileResponse
+    public function generateQrSvg(Insumo $insumo): BinaryFileResponse
     {
         if (!$insumo->codigo_barra) {
             abort(404, 'El insumo no tiene código QR asignado');
         }
 
-        $barcodeService = new BarcodeService();
-        $imagePath = $barcodeService->generateBarcodeSVG($insumo->codigo_barra);
+        $qrService = new QrService();
+        $imagePath = $qrService->generateQrSVG($insumo->codigo_barra);
         $fullPath = storage_path('app/public/' . $imagePath);
 
         if (!file_exists($fullPath)) {

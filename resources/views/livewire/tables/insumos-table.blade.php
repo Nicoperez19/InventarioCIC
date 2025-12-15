@@ -234,7 +234,7 @@
                                         </span>
                                         <button type="button" 
                                                 class="p-1 ml-2 text-blue-600 rounded hover:text-blue-800 hover:bg-blue-50"
-                                                onclick="openBarcodeModal('{{ $insumo->id_insumo }}', '{{ $insumo->codigo_barra }}')"
+                                                onclick="openQrModal('{{ $insumo->id_insumo }}', '{{ $insumo->codigo_barra }}')"
                                                 title="Ver código QR">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -253,7 +253,7 @@
                             <div class="flex items-center justify-end space-x-1 sm:space-x-3">
                                 <!-- Botón Ver Código QR -->
                                 @if($insumo->codigo_barra)
-                                    <a href="{{ route('barcode.generate', $insumo->id_insumo) }}" 
+                                    <a href="{{ route('qr.generate', $insumo->id_insumo) }}" 
                                        target="_blank"
                                        class="inline-flex items-center px-2 py-1 text-xs font-medium transition-all duration-150 border border-transparent rounded-md sm:px-3 sm:py-2 text-success-600 bg-success-50 hover:bg-success-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success-400"
                                        title="Ver código de barras">
@@ -320,7 +320,7 @@
     </div>
 
     <!-- Modal para mostrar código QR -->
-<div id="barcodeModal" class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
+<div id="qrModal" class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
     <div class="relative p-5 mx-auto bg-white border rounded-md shadow-lg top-20 w-96">
         <div class="mt-3">
             <!-- Header del modal -->
@@ -328,7 +328,7 @@
                 <h3 class="text-lg font-medium text-gray-900">Código QR</h3>
                 <button type="button" 
                         class="text-gray-400 hover:text-gray-600"
-                        onclick="closeBarcodeModal()">
+                        onclick="closeQrModal()">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -340,18 +340,18 @@
                 <!-- Información del insumo -->
                 <div class="mb-4">
                     <p class="mb-2 text-sm text-gray-600">Insumo: <span id="modalProductName" class="font-medium"></span></p>
-                    <p class="text-sm text-gray-600">Código: <span id="modalBarcode" class="font-mono font-medium text-blue-600"></span></p>
+                    <p class="text-sm text-gray-600">Código: <span id="modalQr" class="font-mono font-medium text-blue-600"></span></p>
                 </div>
                 
                 <!-- Imagen del código QR -->
                 <div class="p-4 mb-4 bg-white border rounded-lg shadow-sm">
-                    <img id="modalBarcodeImage"
+                    <img id="modalQrImage"
                          src=""
                          alt="Código QR"
                          class="h-auto max-w-full mx-auto"
                          style="max-height: 120px;"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div id="modalBarcodeFallback" class="text-center text-gray-500" style="display: none;">
+                    <div id="modalQrFallback" class="text-center text-gray-500" style="display: none;">
                         <div class="flex items-center justify-center w-32 h-16 mx-auto bg-gray-100 border-2 border-gray-300 border-dashed rounded">
                             <span class="text-xs">Error cargando imagen</span>
                         </div>
@@ -383,43 +383,43 @@
 </div>
 
 <script>
-function openBarcodeModal(insumoId, codigoBarra) {
+function openQrModal(insumoId, codigoBarra) {
     // Mostrar el modal
-    document.getElementById('barcodeModal').classList.remove('hidden');
+    document.getElementById('qrModal').classList.remove('hidden');
     
     // Actualizar contenido
-    document.getElementById('modalBarcode').textContent = codigoBarra;
+    document.getElementById('modalQr').textContent = codigoBarra;
     document.getElementById('modalProductName').textContent = 'Insumo ' + insumoId;
     
-    // Cargar imagen del código de barras
-    const imageUrl = `/barcode/${insumoId}/small`;
-    document.getElementById('modalBarcodeImage').src = imageUrl;
+    // Cargar imagen del código QR
+    const imageUrl = `/qr/${insumoId}/small`;
+    document.getElementById('modalQrImage').src = imageUrl;
     
     // Configurar botones de descarga
     document.getElementById('modalDownloadBtn').onclick = function() {
-        window.open(`/barcode/${insumoId}/generate`, '_blank');
+        window.open(`/qr/${insumoId}/generate`, '_blank');
     };
     
     document.getElementById('modalSvgBtn').onclick = function() {
-        window.open(`/barcode/${insumoId}/svg`, '_blank');
+        window.open(`/qr/${insumoId}/svg`, '_blank');
     };
 }
 
-function closeBarcodeModal() {
-    document.getElementById('barcodeModal').classList.add('hidden');
+function closeQrModal() {
+    document.getElementById('qrModal').classList.add('hidden');
 }
 
 // Cerrar modal al hacer clic fuera de él
-document.getElementById('barcodeModal').addEventListener('click', function(e) {
+document.getElementById('qrModal').addEventListener('click', function(e) {
     if (e.target === this) {
-        closeBarcodeModal();
+        closeQrModal();
     }
 });
 
 // Cerrar modal con tecla Escape
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        closeBarcodeModal();
+        closeQrModal();
     }
 });
 

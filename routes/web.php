@@ -43,13 +43,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/permissions', [UsersController::class, 'getPermissions'])->name('users.permissions');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
     // Rutas específicas antes de las rutas con parámetros
-    Route::post('/users/generate-all-barcodes', [UsersController::class, 'generateAllBarcodes'])->name('users.generate-all-barcodes');
+    Route::post('/users/generate-all-qrs', [UsersController::class, 'generateAllQrs'])->name('users.generate-all-qrs');
     Route::get('/users/export-qr-codes-pdf', [UsersController::class, 'exportUsersQRCodesPdf'])->name('users.export-qr-codes-pdf');
     // Rutas con parámetros después de las rutas específicas
     Route::get('/users/{user}', [UsersController::class, 'show'])->name('users.show');
     Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{user}/generate-qr', [UsersController::class, 'generateBarcode'])->name('users.generate-qr');
+    Route::post('/users/{user}/generate-qr', [UsersController::class, 'generateQr'])->name('users.generate-qr');
     Route::get('/users/{user}/qr', [UsersController::class, 'getQRCode'])->name('users.qr');
 });
 Route::middleware(['auth'])->group(function () {
@@ -82,8 +82,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/insumos/{insumo}/edit', [InsumoController::class, 'edit'])->name('insumos.edit');
     Route::put('/insumos/{insumo}', [InsumoController::class, 'update'])->name('insumos.update');
     Route::delete('/insumos/{insumo}', [InsumoController::class, 'destroy'])->name('insumos.destroy');
-    Route::get('/barcode/{insumo}/generate', [InsumoController::class, 'generateBarcode'])->name('barcode.generate');
-    Route::get('/barcode/{insumo}/svg', [InsumoController::class, 'generateBarcodeSvg'])->name('barcode.svg');
+    Route::get('/qr/{insumo}/generate', [InsumoController::class, 'generateQr'])->name('qr.generate');
+    Route::get('/qr/{insumo}/svg', [InsumoController::class, 'generateQrSvg'])->name('qr.svg');
     Route::get('/carga-masiva', [CargaMasivaController::class, 'index'])->name('carga-masiva.index');
     Route::post('/carga-masiva/upload', [CargaMasivaController::class, 'upload'])->name('carga-masiva.upload');
     Route::get('/carga-masiva/template', [CargaMasivaController::class, 'downloadTemplate'])->name('carga-masiva.template');

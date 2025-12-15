@@ -135,7 +135,7 @@ echo "\n=== VALIDANDO HELPERS Y SERVICIOS ===\n\n";
 
 $helpers = [
     'App\Helpers\RunFormatter' => 'format',
-    'App\Services\BarcodeService' => 'generate',
+    'App\Services\QrService' => 'generate',
 ];
 
 foreach ($helpers as $class => $method) {

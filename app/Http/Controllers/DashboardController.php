@@ -56,9 +56,6 @@ class DashboardController extends Controller
         $totalStockActual = Insumo::sum('stock_actual') ?? 0;
         $totalStockMinimo = Insumo::sum('stock_minimo') ?? 0;
         
-        // Insumos más solicitados (últimos 30 días) - Simplificado para no usarse en la vista actual
-        $insumosMasSolicitados = collect([]);
-
         // ========== ESTADÍSTICAS DE SOLICITUDES ==========
         $totalSolicitudes = Solicitud::count();
         $solicitudesPendientes = Solicitud::where('estado', 'pendiente')->count();

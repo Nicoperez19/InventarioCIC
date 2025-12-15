@@ -169,7 +169,7 @@
                             <div class="flex items-center justify-end space-x-1 sm:space-x-2 lg:space-x-3">
                                 <!-- Botón Código QR -->
                                 <button type="button" 
-                                        onclick="openUserBarcodeModal('{{ $user->run }}', '{{ $user->codigo_barra ?? '' }}', '{{ $user->nombre }}')"
+                                        onclick="openUserQrModal('{{ $user->run }}', '{{ $user->codigo_barra ?? '' }}', '{{ $user->nombre }}')"
                                         class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-2 border border-transparent text-xs font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400 transition-all duration-150"
                                         title="Código QR">
                                     <svg class="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +241,7 @@
 </div>
 
 <!-- Modal de Código QR -->
-<div id="userBarcodeModal" class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
+<div id="userQrModal" class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
              onclick="event.stopPropagation()">
@@ -250,28 +250,28 @@
                     <h3 class="text-lg font-semibold text-gray-900">Código QR</h3>
                     <button type="button" 
                             class="text-gray-400 hover:text-gray-500"
-                            onclick="closeUserBarcodeModal()">
+                            onclick="closeUserQrModal()">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
                 
-                <div id="userBarcodeContent">
+                <div id="userQrContent">
                     <p class="text-sm text-gray-600">Usuario: <span id="modalUserName" class="font-medium text-blue-600"></span></p>
-                    <p class="text-sm text-gray-600 mt-2">Código: <span id="modalUserBarcode" class="font-mono font-medium text-blue-600"></span></p>
+                    <p class="text-sm text-gray-600 mt-2">Código: <span id="modalUserQr" class="font-mono font-medium text-blue-600"></span></p>
                     
                     <div class="mt-4 text-center">
-                        <div id="modalUserBarcodeImageContainer" style="display: none;">
-                            <img id="modalUserBarcodeImage"
+                        <div id="modalUserQrImageContainer" style="display: none;">
+                            <img id="modalUserQrImage"
                                  src=""
                                  alt="Código QR"
                                  class="mx-auto border-2 border-gray-200 rounded-lg shadow-md"
                                  style="max-width: 250px; max-height: 250px; width: auto; height: auto;">
                         </div>
-                        <div id="modalUserBarcodeFallback" class="text-center text-gray-500">
+                        <div id="modalUserQrFallback" class="text-center text-gray-500">
                             <p class="mb-4">No hay código QR generado</p>
-                            <button onclick="generateUserBarcode()" 
+                            <button onclick="generateUserQr()" 
                                     class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                                 Generar Código QR
                             </button>
@@ -286,22 +286,22 @@
 <script>
 let currentUserRun = '';
 
-function openUserBarcodeModal(userRun, codigoBarra, userName) {
+function openUserQrModal(userRun, codigoBarra, userName) {
     currentUserRun = userRun;
-    document.getElementById('userBarcodeModal').classList.remove('hidden');
+    document.getElementById('userQrModal').classList.remove('hidden');
     document.getElementById('modalUserName').textContent = userName;
     
     if (codigoBarra) {
-        document.getElementById('modalUserBarcode').textContent = codigoBarra;
+        document.getElementById('modalUserQr').textContent = codigoBarra;
         
         // Mostrar contenedor de imagen y ocultar fallback
-        document.getElementById('modalUserBarcodeImageContainer').style.display = 'block';
-        document.getElementById('modalUserBarcodeFallback').style.display = 'none';
+        document.getElementById('modalUserQrImageContainer').style.display = 'block';
+        document.getElementById('modalUserQrFallback').style.display = 'none';
         
         // Cargar imagen QR (siempre SVG, no requiere ImageMagick)
         const timestamp = new Date().getTime();
         const imageUrl = `/users/${userRun}/qr?t=${timestamp}`;
-        const imgElement = document.getElementById('modalUserBarcodeImage');
+        const imgElement = document.getElementById('modalUserQrImage');
         
         // Configurar la imagen
         imgElement.src = imageUrl;
@@ -311,22 +311,22 @@ function openUserBarcodeModal(userRun, codigoBarra, userName) {
         };
         imgElement.onerror = function() {
             // Si falla, mostrar mensaje
-            document.getElementById('modalUserBarcodeImageContainer').style.display = 'none';
-            document.getElementById('modalUserBarcodeFallback').style.display = 'block';
-            document.getElementById('modalUserBarcodeFallback').innerHTML = '<p class="text-red-500">Error al cargar la imagen del código QR</p>';
+            document.getElementById('modalUserQrImageContainer').style.display = 'none';
+            document.getElementById('modalUserQrFallback').style.display = 'block';
+            document.getElementById('modalUserQrFallback').innerHTML = '<p class="text-red-500">Error al cargar la imagen del código QR</p>';
         };
     } else {
-        document.getElementById('modalUserBarcode').textContent = 'No generado';
-        document.getElementById('modalUserBarcodeImageContainer').style.display = 'none';
-        document.getElementById('modalUserBarcodeFallback').style.display = 'block';
+        document.getElementById('modalUserQr').textContent = 'No generado';
+        document.getElementById('modalUserQrImageContainer').style.display = 'none';
+        document.getElementById('modalUserQrFallback').style.display = 'block';
     }
 }
 
-function closeUserBarcodeModal() {
-    document.getElementById('userBarcodeModal').classList.add('hidden');
+function closeUserQrModal() {
+    document.getElementById('userQrModal').classList.add('hidden');
 }
 
-function generateUserBarcode() {
+function generateUserQr() {
     if (!currentUserRun) return;
     
     fetch(`/users/${currentUserRun}/generate-qr`, {
@@ -352,16 +352,16 @@ function generateUserBarcode() {
 }
 
 // Cerrar modal al hacer clic fuera
-document.getElementById('userBarcodeModal').addEventListener('click', function(e) {
+document.getElementById('userQrModal').addEventListener('click', function(e) {
     if (e.target === this) {
-        closeUserBarcodeModal();
+        closeUserQrModal();
     }
 });
 
 // Cerrar con ESC
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        closeUserBarcodeModal();
+        closeUserQrModal();
     }
 });
 </script>

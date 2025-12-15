@@ -22,8 +22,8 @@
                 </div>
             </div>
             <div class="flex-shrink-0 w-full sm:w-auto flex gap-2">
-                <button onclick="generateAllBarcodes()" 
-                   id="generate-all-barcodes-btn"
+                <button onclick="generateAllQrs()" 
+                   id="generate-all-qrs-btn"
                    class="inline-flex items-center justify-center w-full px-3 py-2 text-xs font-medium text-white transition-all duration-150 rounded-lg shadow-sm sm:w-auto sm:px-4 sm:text-sm bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400">
                     <svg class="w-3 h-3 mr-1 sm:w-4 sm:h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -1104,8 +1104,8 @@
         }
 
         // Función para generar códigos QR para todos los usuarios
-        function generateAllBarcodes() {
-            const btn = document.getElementById('generate-all-barcodes-btn');
+        function generateAllQrs() {
+            const btn = document.getElementById('generate-all-qrs-btn');
             const originalText = btn.innerHTML;
             
             if (!confirm('¿Estás seguro de generar códigos QR para todos los usuarios?\n\nEsto eliminará todas las imágenes de códigos existentes y generará nuevos códigos únicos para cada usuario.')) {
@@ -1119,7 +1119,7 @@
             // Obtener token CSRF
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             
-            fetch('/users/generate-all-barcodes', {
+            fetch('/users/generate-all-qrs', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,

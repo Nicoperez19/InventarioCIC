@@ -1,18 +1,18 @@
 <div class="bg-white rounded-lg shadow p-6">
     <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-900">Código QR del Usuario</h3>
+        <h3 class="text-lg font-semibold text-gray-900">Código QR</h3>
         <div class="flex space-x-2">
             @if($user->codigo_barra)
-                <button wire:click="regenerateBarcode" 
+                <button wire:click="regenerateQr" 
                         class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
                         onclick="return confirm('¿Regenerar código QR?')">
                     Regenerar
                 </button>
-                <a href="{{ route('users.barcode.image', $user->run) }}" 
-                   target="_blank"
-                   class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                    Ver Imagen
-                </a>
+            @else
+                <button wire:click="generateQr" 
+                        class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                    Generar
+                </button>
             @endif
         </div>
     </div>
@@ -32,37 +32,23 @@
             </div>
 
             <!-- Imagen del código QR -->
-            @if($showBarcode && $barcodeUrl)
+            @if($showQr && $qrUrl)
                 <div class="text-center">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Imagen:</label>
                     <div class="inline-block p-4 bg-white border rounded-lg">
-                        <img src="{{ $barcodeUrl }}" 
+                        <img src="{{ $qrUrl }}" 
                              alt="Código QR {{ $user->codigo_barra }}"
                              class="max-w-full h-auto"
                              style="max-width: 300px; max-height: 300px;">
                     </div>
                 </div>
             @endif
-
-            <!-- Enlaces de descarga -->
-            <div class="flex justify-center space-x-2">
-                <a href="{{ route('users.barcode.image', $user->run) }}" 
-                   target="_blank"
-                   class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
-                    📥 Descargar PNG
-                </a>
-                <a href="{{ route('users.barcode.svg', $user->run) }}" 
-                   target="_blank"
-                   class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm">
-                    📥 Descargar SVG
-                </a>
-            </div>
         </div>
     @else
         <div class="text-center py-8 text-gray-500">
             <div class="text-4xl mb-2">📱</div>
             <p>Este usuario no tiene código QR asignado.</p>
-            <button wire:click="generateBarcode" 
+            <button wire:click="generateQr" 
                     class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                 Generar Código QR
             </button>
@@ -75,3 +61,4 @@
         </div>
     @endif
 </div>
+

@@ -2,11 +2,10 @@
 namespace App\Http\Controllers;
 use App\Models\Departamento;
 use App\Models\User;
-use App\Services\BarcodeService;
+use App\Services\QrService;
 use App\Services\UserService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Illuminate\Http\BinaryFileResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -468,33 +467,33 @@ class UsersController extends Controller
     /**
      * Genera un código QR para un usuario
      */
-    public function generateBarcode(User $user): JsonResponse
+    public function generateQr(User $user): JsonResponse
     {
         try {
-            $barcodeService = new BarcodeService();
+            $qrService = new QrService();
             
             // Eliminar todas las imágenes anteriores del usuario si existen
             if ($user->codigo_barra) {
-                $barcodeService->deleteUserBarcodeImage($user->codigo_barra);
+                $qrService->deleteUserQrImage($user->codigo_barra);
             }
-            $barcodeService->deleteAllUserBarcodeImages($user);
+            $qrService->deleteAllUserQrImages($user);
             
             // Generar nuevo código QR basado en el RUN (simplemente el RUN limpio)
-            $codigoQR = $barcodeService->generateUserBarcode($user->run);
+            $codigoQR = $qrService->generateUserQr($user->run);
             
             // Actualizar el usuario con el nuevo código
             $user->codigo_barra = $codigoQR;
             $user->save();
             
             // Generar las imágenes (PNG y SVG)
-            $barcodeService->generateUserBarcodeImage($codigoQR);
-            $barcodeService->generateUserBarcodeSVG($codigoQR);
+            $qrService->generateUserQrImage($codigoQR);
+            $qrService->generateUserQrSVG($codigoQR);
             
             return response()->json([
                 'success' => true,
                 'data' => [
                     'codigo_barra' => $codigoQR,
-                    'url' => $barcodeService->getUserBarcodeUrl($codigoQR)
+                    'url' => $qrService->getUserQrUrl($codigoQR)
                 ],
                 'message' => 'Código QR generado exitosamente'
             ]);
@@ -542,12 +541,12 @@ class UsersController extends Controller
      * Genera códigos QR para todos los usuarios
      * Elimina todas las imágenes existentes y genera nuevos códigos únicos
      */
-    public function generateAllBarcodes(): JsonResponse
+    public function generateAllQrs(): JsonResponse
     {
         try {
             DB::beginTransaction();
             
-            $barcodeService = new BarcodeService();
+            $qrService = new QrService();
             
             // Obtener todos los usuarios con RUN válido
             $users = User::whereNotNull('run')
@@ -573,7 +572,7 @@ class UsersController extends Controller
             // Generar códigos QR para cada usuario
             $generated = 0;
             $errors = [];
-            $usedBarcodes = [];
+            $usedQrs = [];
             
             foreach ($users as $user) {
                 try {
@@ -583,7 +582,7 @@ class UsersController extends Controller
                     }
                     
                     // Generar código QR basado en el RUN (simplemente el RUN limpio)
-                    $codigoQR = $barcodeService->generateUserBarcode($user->run);
+                    $codigoQR = $qrService->generateUserQr($user->run);
                     
                     // Validar que el código QR no esté vacío
                     if (empty($codigoQR)) {
@@ -591,7 +590,7 @@ class UsersController extends Controller
                     }
                     
                     // Verificar que el código no esté duplicado (aunque no debería pasar si los RUNs son únicos)
-                    if (in_array($codigoQR, $usedBarcodes)) {
+                    if (in_array($codigoQR, $usedQrs)) {
                         \Log::warning("Código QR duplicado detectado para RUN: {$user->run}, código: {$codigoQR}");
                         // Si hay duplicado, agregar un sufijo único basado en el ID del usuario
                         $codigoQR = $codigoQR . '_' . $user->id;
@@ -602,12 +601,12 @@ class UsersController extends Controller
                     $user->save();
                     
                     // Agregar a la lista de códigos usados
-                    $usedBarcodes[] = $codigoQR;
+                    $usedQrs[] = $codigoQR;
                     
                     // Generar las imágenes (PNG y SVG)
                     try {
-                        $barcodeService->generateUserBarcodeImage($codigoQR);
-                        $barcodeService->generateUserBarcodeSVG($codigoQR);
+                        $qrService->generateUserQrImage($codigoQR);
+                        $qrService->generateUserQrSVG($codigoQR);
                     } catch (\Exception $imageError) {
                         \Log::error("Error al generar imagen QR para usuario {$user->run}: " . $imageError->getMessage());
                         // Continuar aunque falle la generación de imagen, el código QR ya está guardado

@@ -5,23 +5,23 @@ use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
-class BarcodeService
+class QrService
 {
     /**
      * Genera un código QR único para un insumo
      * El código será generado automáticamente por el sistema
      */
-    public function generateUniqueBarcode(string $unidadId = null): string
+    public function generateUniqueQr(string $unidadId = null): string
     {
         do {
             // Generar código único basado en timestamp y unidad
             $timestamp = time();
             $random = rand(1000, 9999);
             $prefix = $this->getUnitPrefix($unidadId);
-            $barcode = "INS-{$prefix}-{$timestamp}-{$random}";
-        } while ($this->barcodeExists($barcode));
+            $qr = "INS-{$prefix}-{$timestamp}-{$random}";
+        } while ($this->qrExists($qr));
         
-        return $barcode;
+        return $qr;
     }
 
     private function getUnitPrefix(string $unidadId): string
@@ -38,19 +38,19 @@ class BarcodeService
         return $unitPrefixes[$unidadId] ?? 'GEN';
     }
 
-    private function barcodeExists(string $barcode): bool
+    private function qrExists(string $qr): bool
     {
-        return Insumo::where('codigo_barra', $barcode)->exists() || 
-               User::where('codigo_barra', $barcode)->exists();
+        return Insumo::where('codigo_barra', $qr)->exists() || 
+               User::where('codigo_barra', $qr)->exists();
     }
 
     /**
      * Genera imagen de código QR para insumo
      */
-    public function generateBarcodeImage(string $barcode, string $filename = null): string
+    public function generateQrImage(string $qr, string $filename = null): string
     {
         if (!$filename) {
-            $filename = "qr_{$barcode}.png";
+            $filename = "qr_{$qr}.png";
         }
         
         $path = "codigos_insumos/{$filename}";
@@ -65,7 +65,7 @@ class BarcodeService
         $qrCode = QrCode::format('png')
             ->size(300)
             ->margin(2)
-            ->generate($barcode);
+            ->generate($qr);
         
         Storage::disk('public')->put($path, $qrCode);
         return $path;
@@ -74,10 +74,10 @@ class BarcodeService
     /**
      * Genera SVG de código QR para insumo
      */
-    public function generateBarcodeSVG(string $barcode, string $filename = null): string
+    public function generateQrSVG(string $qr, string $filename = null): string
     {
         if (!$filename) {
-            $filename = "qr_{$barcode}.svg";
+            $filename = "qr_{$qr}.svg";
         }
         
         $path = "codigos_insumos/{$filename}";
@@ -92,7 +92,7 @@ class BarcodeService
         $qrCode = QrCode::format('svg')
             ->size(300)
             ->margin(2)
-            ->generate($barcode);
+            ->generate($qr);
         
         Storage::disk('public')->put($path, $qrCode);
         return $path;
@@ -101,23 +101,23 @@ class BarcodeService
     /**
      * Valida el formato del código QR (ahora acepta cualquier formato)
      */
-    public function validateBarcode(string $barcode): bool
+    public function validateQr(string $qr): bool
     {
         // Los códigos QR pueden tener cualquier formato, solo verificamos que no esté vacío
-        return !empty($barcode) && strlen($barcode) > 0;
+        return !empty($qr) && strlen($qr) > 0;
     }
 
     /**
      * Obtiene información del código QR
      */
-    public function getBarcodeInfo(string $barcode): array
+    public function getQrInfo(string $qr): array
     {
-        if (!$this->validateBarcode($barcode)) {
+        if (!$this->validateQr($qr)) {
             return ['valid' => false, 'message' => 'Código QR inválido'];
         }
         
         // Extraer información del código si tiene formato INS-PREFIX-...
-        $parts = explode('-', $barcode);
+        $parts = explode('-', $qr);
         $unitInfo = ['id' => 'Unknown', 'name' => 'Unidad desconocida'];
         
         if (count($parts) >= 2 && $parts[0] === 'INS') {
@@ -136,7 +136,7 @@ class BarcodeService
         
         return [
             'valid' => true,
-            'barcode' => $barcode,
+            'qr' => $qr,
             'unit' => $unitInfo,
             'type' => 'QR'
         ];
@@ -145,14 +145,14 @@ class BarcodeService
     /**
      * Obtiene la URL del código QR de un insumo
      */
-    public function getBarcodeUrl(string $barcode): string
+    public function getQrUrl(string $qr): string
     {
-        $filename = "qr_{$barcode}.png";
+        $filename = "qr_{$qr}.png";
         $path = "codigos_insumos/{$filename}";
         
         // Si la imagen no existe, generarla
         if (!Storage::disk('public')->exists($path)) {
-            $this->generateBarcodeImage($barcode, $filename);
+            $this->generateQrImage($qr, $filename);
         }
         
         return asset('storage/' . $path);
@@ -161,9 +161,9 @@ class BarcodeService
     /**
      * Elimina la imagen del código QR
      */
-    public function deleteBarcodeImage(string $barcode): void
+    public function deleteQrImage(string $qr): void
     {
-        $filename = "qr_{$barcode}.png";
+        $filename = "qr_{$qr}.png";
         $path = "codigos_insumos/{$filename}";
         
         if (Storage::disk('public')->exists($path)) {
@@ -171,7 +171,7 @@ class BarcodeService
         }
         
         // También eliminar SVG si existe
-        $svgFilename = "qr_{$barcode}.svg";
+        $svgFilename = "qr_{$qr}.svg";
         $svgPath = "codigos_insumos/{$svgFilename}";
         if (Storage::disk('public')->exists($svgPath)) {
             Storage::disk('public')->delete($svgPath);
@@ -182,7 +182,7 @@ class BarcodeService
      * Genera un código QR para un usuario usando su RUN
      * El código QR simplemente contiene el RUN formateado
      */
-    public function generateUserBarcode(string $run): string
+    public function generateUserQr(string $run): string
     {
         // Limpiar el RUN (remover puntos y guiones) y normalizar
         $runClean = str_replace(['.', '-'], '', $run);
@@ -196,20 +196,12 @@ class BarcodeService
     }
 
     /**
-     * Verifica si un código QR existe para usuarios
-     */
-    private function userBarcodeExists(string $barcode): bool
-    {
-        return User::where('codigo_barra', $barcode)->exists();
-    }
-
-    /**
      * Genera imagen de código QR para usuario
      */
-    public function generateUserBarcodeImage(string $barcode, string $filename = null): string
+    public function generateUserQrImage(string $qr, string $filename = null): string
     {
         if (!$filename) {
-            $filename = "user_qr_{$barcode}.png";
+            $filename = "user_qr_{$qr}.png";
         }
         
         // Asegurar que el directorio existe
@@ -222,7 +214,7 @@ class BarcodeService
         $qrCode = QrCode::format('png')
             ->size(300)
             ->margin(2)
-            ->generate($barcode);
+            ->generate($qr);
         
         $path = "{$directory}/{$filename}";
         
@@ -238,10 +230,10 @@ class BarcodeService
     /**
      * Genera SVG de código QR para usuario
      */
-    public function generateUserBarcodeSVG(string $barcode, string $filename = null): string
+    public function generateUserQrSVG(string $qr, string $filename = null): string
     {
         if (!$filename) {
-            $filename = "user_qr_{$barcode}.svg";
+            $filename = "user_qr_{$qr}.svg";
         }
         
         // Asegurar que el directorio existe
@@ -254,7 +246,7 @@ class BarcodeService
         $qrCode = QrCode::format('svg')
             ->size(300)
             ->margin(2)
-            ->generate($barcode);
+            ->generate($qr);
         
         $path = "{$directory}/{$filename}";
         
@@ -270,9 +262,9 @@ class BarcodeService
     /**
      * Obtiene la URL del código QR de un usuario
      */
-    public function getUserBarcodeUrl(string $barcode): string
+    public function getUserQrUrl(string $qr): string
     {
-        $filename = "user_qr_{$barcode}.png";
+        $filename = "user_qr_{$qr}.png";
         $path = "codigos_usuarios/{$filename}";
         
         // Asegurar que el directorio existe
@@ -283,7 +275,7 @@ class BarcodeService
         
         // Si la imagen no existe, generarla
         if (!Storage::disk('public')->exists($path)) {
-            $this->generateUserBarcodeImage($barcode, $filename);
+            $this->generateUserQrImage($qr, $filename);
         }
         
         // Usar Storage::url() para obtener la URL correcta con timestamp para evitar caché
@@ -294,9 +286,9 @@ class BarcodeService
     /**
      * Elimina todas las imágenes del código QR de un usuario
      */
-    public function deleteUserBarcodeImage(string $barcode): void
+    public function deleteUserQrImage(string $qr): void
     {
-        $filename = "user_qr_{$barcode}.png";
+        $filename = "user_qr_{$qr}.png";
         $path = "codigos_usuarios/{$filename}";
         
         if (Storage::disk('public')->exists($path)) {
@@ -304,7 +296,7 @@ class BarcodeService
         }
         
         // También eliminar SVG si existe
-        $svgFilename = "user_qr_{$barcode}.svg";
+        $svgFilename = "user_qr_{$qr}.svg";
         $svgPath = "codigos_usuarios/{$svgFilename}";
         if (Storage::disk('public')->exists($svgPath)) {
             Storage::disk('public')->delete($svgPath);
@@ -315,7 +307,7 @@ class BarcodeService
      * Elimina todas las imágenes de códigos QR de un usuario (por código)
      * Útil cuando se regenera el código QR
      */
-    public function deleteAllUserBarcodeImages(User $user): void
+    public function deleteAllUserQrImages(User $user): void
     {
         if (!$user->codigo_barra) {
             return;
@@ -339,3 +331,4 @@ class BarcodeService
         }
     }
 }
+
