@@ -80,5 +80,7 @@ jobs:
           app-name: 'InventarioCIC'
           slot-name: 'Production'
           package: .
+          clean: true
 
           
+
