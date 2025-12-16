@@ -55,6 +55,22 @@ class DashboardController extends Controller
         
         $totalStockActual = Insumo::sum('stock_actual') ?? 0;
         $totalStockMinimo = Insumo::sum('stock_minimo') ?? 0;
+
+        // Insumos más solicitados (últimos 30 días)
+        $insumosMasSolicitados = SolicitudItem::select(
+                'insumos.id_insumo',
+                'insumos.nombre_insumo',
+                DB::raw('SUM(solicitud_items.cantidad_solicitada) as total_solicitada'),
+                DB::raw('SUM(solicitud_items.cantidad_entregada) as total_entregada')
+            )
+            ->join('insumos', 'solicitud_items.insumo_id', '=', 'insumos.id_insumo')
+            ->join('solicitudes', 'solicitud_items.solicitud_id', '=', 'solicitudes.id')
+            ->whereIn('solicitudes.estado', ['aprobada', 'entregada'])
+            ->where('solicitudes.fecha_solicitud', '>=', now()->subDays(30))
+            ->groupBy('insumos.id_insumo', 'insumos.nombre_insumo')
+            ->orderByDesc('total_solicitada')
+            ->limit(10)
+            ->get();
         
         // ========== ESTADÍSTICAS DE SOLICITUDES ==========
         $totalSolicitudes = Solicitud::count();
