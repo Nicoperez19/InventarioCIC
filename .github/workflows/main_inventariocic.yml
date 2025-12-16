@@ -45,15 +45,25 @@ jobs:
           php artisan config:cache
           php artisan route:cache
 
-      # --- Build artifact ZIP ---
+      # --- Create optimized deployment ZIP ---
       - name: Create deployment ZIP
-        run: zip -r deploy.zip . -x "node_modules/*" -x ".git/*" -x ".github/*"
+        run: |
+          zip -r deploy.zip . \
+            -x "node_modules/*" \
+            -x "vendor/*" \
+            -x "storage/*" \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x ".env*" \
+            -x "*.log"
 
+      # --- Upload artifact (auto-delete) ---
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: deploy-artifact
           path: deploy.zip
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -76,7 +86,7 @@ jobs:
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           slot-name: Production
-          package: "deploy.zip"
+          package: deploy.zip
 
       - name: Deployment status
         if: always()
