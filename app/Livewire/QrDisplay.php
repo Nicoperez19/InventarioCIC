@@ -41,3 +41,4 @@ class QrDisplay extends Component
     }
 }
 
+

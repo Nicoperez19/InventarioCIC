@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --- PHP ---
+      # ---------- PHP ----------
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -25,7 +25,7 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # --- NODE + VITE ---
+      # ---------- NODE + VITE ----------
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -33,10 +33,10 @@ jobs:
 
       - name: Install frontend dependencies and build
         run: |
-          npm install
+          npm ci
           npm run build
 
-      # --- Laravel production optimizations ---
+      # ---------- Laravel optimizations ----------
       - name: Optimize Laravel
         run: |
           php artisan config:clear
@@ -45,15 +45,25 @@ jobs:
           php artisan config:cache
           php artisan route:cache
 
-      # --- Build artifact ZIP ---
+      # ---------- Create deployment ZIP ----------
       - name: Create deployment ZIP
-        run: zip -r deploy.zip . -x "node_modules/*" -x ".git/*" -x ".github/*"
+        run: |
+          zip -r deploy.zip . \
+            -x "node_modules/*" \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "storage/logs/*" \
+            -x "storage/framework/cache/*" \
+            -x "storage/framework/sessions/*" \
+            -x "storage/framework/views/*"
 
+      # ---------- Upload artifact (LIMITED RETENTION) ----------
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: deploy-artifact
           path: deploy.zip
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -76,8 +86,8 @@ jobs:
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           slot-name: Production
-          package: "deploy.zip"
+          package: deploy.zip
 
       - name: Deployment status
         if: always()
-        run: echo "Deployment completed"
+        run: echo "Deployment completed successfully"

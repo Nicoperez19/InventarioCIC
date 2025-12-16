@@ -86,3 +86,4 @@ class UserQrDisplay extends Component
     }
 }
 
+
