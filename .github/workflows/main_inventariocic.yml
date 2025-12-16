@@ -25,7 +25,6 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # --- NODE + VITE ---
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
